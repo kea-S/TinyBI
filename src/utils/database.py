@@ -2,15 +2,17 @@ import duckdb
 from pathlib import Path
 
 # ...existing code...
-_conn = None
+_CONN = None
 
 
 def get_connection():
     """Return a singleton in-memory DuckDB connection for this kernel."""
-    global _conn
-    if _conn is None:
-        _conn = duckdb.connect(database=":memory:")
-    return _conn
+    global _CONN
+
+    if _CONN is None:
+        _CONN = duckdb.connect(database=":memory:")
+
+    return _CONN
 
 
 def register_csv_as_view(csv_path, view_name=None, conn=None, auto_detect=True, **read_opts):
@@ -20,8 +22,10 @@ def register_csv_as_view(csv_path, view_name=None, conn=None, auto_detect=True, 
     """
     conn = conn or get_connection()
     csv_path = Path(csv_path).expanduser().resolve()
+
     if not csv_path.exists():
         raise FileNotFoundError(csv_path)
+
     view_name = view_name or csv_path.stem.replace("-", "_")
     read_fn = "read_csv_auto" if auto_detect else "read_csv"
 
@@ -50,7 +54,8 @@ def query(sql, conn=None):
 
 def close_connection():
     """Close the shared connection (optional)."""
-    global _conn
-    if _conn is not None:
-        _conn.close()
-        _conn = None
+    global _CONN
+
+    if _CONN is not None:
+        _CONN.close()
+        _CONN = None
