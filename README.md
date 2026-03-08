@@ -3,8 +3,10 @@
 ## Project Setup and Execution Guide
 
 This project is optimised for reproducibility using the `uv` package manager, but also supports standard Python virtual environments using `pip`.
+
 For maximum compatibility, use python 3.13.5>=
-The projects main entrypoint is notebooks/submission.ipynb
+
+**The projects main entrypoint is notebooks/submission.ipynb**
 
 ---
 
@@ -14,12 +16,12 @@ If you have `uv` installed, this is the most efficient method to ensure environm
 
 1. Unzip the project folder.
 2. Open a terminal in the project root directory.
-3. Launch the notebook server using the `uv run` command:
+3. Launch the notebook server using the following commands:
 ```bash
+uv venv
+uv pip install -r requirements.txt
 uv run jupyter lab
 ```
-
-> **Note:** This command automatically creates a virtual environment, synchronizes all dependencies listed in `requirements.txt` or `pyproject.toml`, and starts the Jupyter server in one step.
 
 ---
 
