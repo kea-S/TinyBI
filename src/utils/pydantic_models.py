@@ -9,7 +9,7 @@ DEFAULT_END = date(2025, 6, 30)
 
 class QuerySchema(BaseModel):
     # if the query should include valid/invalid rows
-    validity_filter: Literal["Valid Only", "ANomalies Only", "All Data"] = Field(
+    validity_filter: Literal["Valid Only", "Anomalies Only", "All Data"] = Field(
         "Valid Only",
         description="""
         'Valid Only' filters for records where is_valid_pdt is True.
@@ -22,10 +22,11 @@ class QuerySchema(BaseModel):
         ..., description="The primary dimension for grouping (e.g., 'route' for seller->buyer)."
     )
 
-    metric: Literal["avg_bwt", "avg_apt", "total_parcel_qty", "avg_parcel_qty", "All"] = Field(
+    metric: Literal["avg_bwt", "avg_apt", "total_parcel_qty", "avg_parcel_qty"] = Field(
         ..., description="""
-       The KPI requested. 'All' will trigger avg_bwt (buyer waiting time),
-       avg_apt (average preparation time), total parcel quantity and average parcel quantity.
+       The KPI requested. avg_bwt (buyer waiting time),
+       avg_apt (average preparation time), total parcel quantity and
+       average parcel quantity.
        """
     )
 
@@ -70,6 +71,23 @@ class QuerySchema(BaseModel):
     start_date: Optional[date] = Field(DEFAULT_START, description="ISO format start date.")
     end_date: Optional[date] = Field(DEFAULT_END, description="ISO format end date.")
     time_granularity: Literal["day", "week", "month"] = Field("month", description="How specific metrics should be grouped by")
+
+    # order by logic
+    sort_on: Literal["subject", "metric"] = \
+        Field("subject", description="""
+        The column to rank results by.
+        Use 'subject' to sort by the grouping (e.g., provider names, dates).
+        Use 'metric_value' to sort by the calculated performance score (e.g., speed, volume).
+        """)
+    ordering: Literal["asc", "desc"] = \
+        Field("desc", description="'desc' for 'slowest/highest', 'asc' for 'fastest/lowest'.")
+
+    # limit logic
+    limit: Optional[int] = Field(
+        None,
+        description="The number of rows to return (e.g., 'top 5' -> 5).",
+        ge=1, le=100  # Guardrail: prevent massive data dumps to the LLM
+    )
 
     # final insights
     persona: Literal["Operational", "Management", "BI"] = Field(..., description="The stakeholder audience for this query.")

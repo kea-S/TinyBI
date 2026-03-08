@@ -32,7 +32,8 @@ UNDERPERFORMING_LOGISTICS_BY_AVG_BWT = lambda view_name: \
 # and dt between {date_start} and {date_end}
 # {extra_conditions}
 # group by {subject}
-# order by {sort_on} {order}
+# order by {sort_on} {ordering}
+# limit 
 # """
 
 AVG_BWT_OVER_MONTHS = lambda view_name: \
