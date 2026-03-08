@@ -58,10 +58,10 @@ def test_query_tool_returns_df_and_includes_order_by_and_limit(monkeypatch):
         persona="Operational",
     )
 
-    out = qt.query_tool(schema)
-    assert out is fake_df
+    df, sql = qt.query_tool(schema)
+    assert df is fake_df
 
-    sql = captured["sql"]
+    # use returned sql for assertions
     assert "FROM mock_view" in sql
     assert "SELECT" in sql
     assert "logistics_provider" in sql  # subject present in SELECT
@@ -93,8 +93,7 @@ def test_query_tool_orders_by_subject_alias_and_group_by(monkeypatch):
         persona="Operational",
     )
 
-    _ = qt.query_tool(schema)
-    sql = captured["sql"]
+    _, sql = qt.query_tool(schema)
 
     # SELECT has aliased subject and metric
     assert "buyer_country AS country" in sql
@@ -122,10 +121,9 @@ def test_query_tool_extra_filters_providers_only(monkeypatch):
         logistics_providers=["SPX", "DB Schenker"],
     )
 
-    out = qt.query_tool(schema)
-    assert out is fake_df
+    df, sql = qt.query_tool(schema)
+    assert df is fake_df
 
-    sql = captured["sql"]
     assert "AND logistics_provider IN ('SPX', 'DB Schenker')" in sql
 
 
@@ -153,10 +151,9 @@ def test_query_tool_extra_filters_multi_dimension(monkeypatch):
         logistics_providers=["SPX"],  # providers come from schema, others from resolver
     )
 
-    out = qt.query_tool(schema)
-    assert out is fake_df
+    df, sql = qt.query_tool(schema)
+    assert df is fake_df
 
-    sql = captured["sql"]
     # Providers
     assert "AND logistics_provider IN ('SPX')" in sql
     # Countries
@@ -179,8 +176,7 @@ def test_query_tool_extra_filters_escaping_providers(monkeypatch):
         logistics_providers=["O'Reilly Logistics"],
     )
 
-    _ = qt.query_tool(schema)
-    sql = captured["sql"]
+    _, sql = qt.query_tool(schema)
     assert "AND logistics_provider IN ('O''Reilly Logistics')" in sql
 
 
@@ -196,8 +192,7 @@ def test_query_tool_no_extra_filters_emits_no_in_blocks(monkeypatch):
         # no providers/countries/regions
     )
 
-    _ = qt.query_tool(schema)
-    sql = captured["sql"]
+    _, sql = qt.query_tool(schema)
     assert "logistics_provider IN (" not in sql
     assert "buyer_country IN (" not in sql
     assert "seller_country IN (" not in sql
@@ -217,8 +212,7 @@ def test_query_tool_global_subject_fallback_orders_by_metric(monkeypatch):
         limit=7,
     )
 
-    _ = qt.query_tool(schema)
-    sql = captured["sql"]
+    _, sql = qt.query_tool(schema)
 
     # No GROUP BY for global
     assert "GROUP BY" not in sql
@@ -243,8 +237,7 @@ def test_query_tool_time_series_month(monkeypatch):
         limit=12,
     )
 
-    _ = qt.query_tool(schema)
-    sql = captured["sql"]
+    _, sql = qt.query_tool(schema)
 
     # SELECT has time bucket and metric
     assert "month(dt)" in sql
@@ -299,7 +292,7 @@ def test_global_avg_bwt_executes_and_computes_correctly(tmp_path, monkeypatch):
         persona="Operational",
     )
 
-    df = qt.query_tool(schema)
+    df, _ = qt.query_tool(schema)
 
     # One row, no GROUP BY for global
     assert len(df) == 1
@@ -326,7 +319,7 @@ def test_filters_providers_and_buyer_country_executes(tmp_path, monkeypatch):
         seller_countries=["Germany"],   # prevents mirroring; resolver drops it -> no seller filter
     )
 
-    df = qt.query_tool(schema)
+    df, _ = qt.query_tool(schema)
 
     # Should aggregate only SPX + buyer_country MY, valid rows, within dates
     assert len(df) == 1
@@ -375,7 +368,7 @@ def test_full_real_db_end_to_end(monkeypatch):
         persona="Operational",
     )
 
-    df = qt.query_tool(schema)
+    df, sql = qt.query_tool(schema)
 
     # It executed against the real DB and returned a DataFrame-like object
     assert hasattr(df, "columns")
@@ -386,7 +379,7 @@ def test_full_real_db_end_to_end(monkeypatch):
     assert len(df) <= 3
 
     # Validate key SQL parts for completeness
-    sql = captured["sql"]
+    # use returned sql for assertions
     assert "SELECT" in sql and "FROM" in sql
 
     # Subject + Metric

@@ -1,12 +1,32 @@
-from src.utils.models import REMOTE_OPENAI
-from src.utils.models import get_remote_llm
+from src.llms.main_pipeline import run_pipeline
 
-from src.utils.pydantic_models import QuerySchema
 
-model = get_remote_llm(REMOTE_OPENAI)
+def main():
+    print("Chatbot ready. Type a question and press Enter. Type 'exit', 'quit', or Ctrl+D to quit.")
+    try:
+        while True:
+            try:
+                question = input("\nYou: ").strip()
+            except EOFError:
+                print("\nEOF received. Exiting.")
+                break
 
-model_with_structure = model.with_structured_output(QuerySchema)
+            if not question:
+                continue
 
-response = model_with_structure.invoke("What is the average BWT amongst the logistics providers in Malaysia?")
+            if question.lower() in {"exit", "quit", "q"}:
+                print("Goodbye.")
+                break
 
-print(response)
+            try:
+                run_pipeline(question)
+            except Exception as e:
+                # Keep the loop alive on errors so the user can continue asking questions
+                print(f"Error running pipeline: {e}")
+
+    except KeyboardInterrupt:
+        print("\nInterrupted. Exiting.")
+
+
+if __name__ == "__main__":
+    main()

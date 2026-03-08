@@ -104,5 +104,4 @@ def query_tool(extracted_object: QuerySchema):
     """.strip()
 
     df = query(sql, conn=conn)
-    return df
-
+    return df, sql
