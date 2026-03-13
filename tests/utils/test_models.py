@@ -1,9 +1,9 @@
 import pytest
 
 from src.utils.models import (
-    REMOTE_QWEN,
-    REMOTE_LLAMA3,
-    REMOTE_OPENAI,
+    REMOTE_GPT_OSS_SMALL,
+    REMOTE_GPT_5,
+    REMOTE_GPT_4o,
     LOCAL_LLAMA3,
 )
 
@@ -16,9 +16,9 @@ load_dotenv()
 
 
 @pytest.mark.parametrize("model_name, local", [
-    (REMOTE_LLAMA3, False),
-    (REMOTE_QWEN, False),
-    (REMOTE_OPENAI, False),
+    (REMOTE_GPT_5, False),
+    (REMOTE_GPT_4o, False),
+    (REMOTE_GPT_OSS_SMALL, False),
     (LOCAL_LLAMA3, True),
 ])
 def test_langchain_llm_call(model_name, local: bool):

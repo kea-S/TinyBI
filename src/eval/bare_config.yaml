@@ -1,0 +1,58 @@
+prompts:
+  - "{{query}}"
+
+providers:
+  - id: python:./provider.py
+    label: 'Agent: GPT-5'
+    config:
+      model_name: 'gpt-5'
+      local: false
+
+  - id: python:./provider.py
+    label: 'Agent: GPT-4o'
+    config:
+      model_name: 'gpt-4o'
+      local: false
+
+  # - id: python:../provider.py
+  #   label: 'Agent: Llama3.3 70b remote'
+  #   config:
+  #     model_name: 'llama-3.3-70b-versatile'
+  #     local: false
+
+  # - id: python:../provider.py
+  #   label: 'Agent: qwen3 32b remote'
+  #   config:
+  #     model_name: 'qwen/qwen3-32b'
+  #     local: false
+
+  # - id: python:../provider.py
+  #   label: 'Agent: gpt-oss 120b remote'
+  #   config:
+  #     model_name: 'openai/gpt-oss-120b'
+  #     local: false
+
+  - id: python:./provider.py
+    label: 'Agent: gpt-oss 20b remote'
+    config:
+      model_name: 'openai/gpt-oss-20b'
+      local: false
+
+  - id: python:./provider.py
+    label: 'Agent: llama3.1 8b local'
+    config:
+      model_name: 'llama3.1:latest'
+      local: true
+
+tests:
+  - vars:
+      id: example-001
+      description: "Time series test case"
+      query: "Time series by month of total_parcels"
+      ground_truth: "0104.10.10"
+
+  - vars:
+      id: example-002
+      description: "Underperforming providers test case"
+      query: "List the top 5 underperforming logistics providers by average bwt in jan"
+      ground_truth: "90.25"

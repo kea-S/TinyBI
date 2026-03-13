@@ -11,25 +11,19 @@ load_dotenv()
 LANGCHAIN = "langchain"
 
 # models to be experimented with
-REMOTE_LLAMA3 = "llama-3.3-70b-versatile"
-REMOTE_QWEN = "qwen/qwen3-32b"   # mixtral is deprecated
 REMOTE_GPT_OSS_SMALL = "openai/gpt-oss-20b"
-REMOTE_GPT_OSS_LARGE = "openai/gpt-oss-120b"
-
-REMOTE_JUDGE = "gpt-5"
-
-REMOTE_OPENAI = "gpt-5"
-
+REMOTE_GPT_5 = "gpt-5"
+REMOTE_GPT_4o = "gpt-4o"
 LOCAL_LLAMA3 = "llama3.1:latest"
 
 
 def get_remote_llm(name: str):
-    if name == REMOTE_OPENAI:
-        return ChatOpenAI(model=REMOTE_OPENAI)
-    if name == REMOTE_JUDGE:
-        return ChatOpenAI(model=REMOTE_JUDGE)
+    if name == REMOTE_GPT_5:
+        return ChatOpenAI(model=REMOTE_GPT_5)
+    if name == REMOTE_GPT_4o:
+        return ChatOpenAI(model=REMOTE_GPT_4o)
     else:
-        return ChatGroq(model=name)
+        return ChatGroq(model=REMOTE_GPT_OSS_SMALL)
 
 
 def get_local_llm(name: str):
