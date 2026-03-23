@@ -1,4 +1,4 @@
-# Spx-Automation-Technical
+# Logistic text-to-sql
 
 ## Project Setup and Execution Guide
 
