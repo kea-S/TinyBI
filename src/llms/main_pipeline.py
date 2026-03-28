@@ -6,6 +6,11 @@ from src.tools.query_tool import query_tool
 
 
 async def run_pipeline(question, model, local):
+    result = await run_pipeline_with_details(question, model, local)
+    return result["dataframe"], result["explanation"]
+
+
+async def run_pipeline_with_details(question, model, local):
     extractor = get_extractor(model, local)
     extractor_results: QuerySchema = await extractor.ainvoke(question)
 
@@ -22,4 +27,9 @@ async def run_pipeline(question, model, local):
 
     explainer_results = await explainer.ainvoke(explainer_input)
 
-    return resulting_df, explainer_results
+    return {
+        "dataframe": resulting_df,
+        "sql": resulting_sql_query,
+        "explanation": explainer_results,
+        "query_schema": extractor_results,
+    }
