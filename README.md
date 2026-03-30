@@ -1,5 +1,7 @@
 # Logistic text-to-sql
 
+https://github.com/user-attachments/assets/cb99aeeb-8042-45b4-b035-0dec7fbd5d59
+
 ## Project Setup and Execution Guide
 
 This project is optimised for reproducibility using the `uv` package manager, but also supports standard Python virtual environments using `pip`.
