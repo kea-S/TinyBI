@@ -1,0 +1,132 @@
+name,price,original_price,on_sale,quantity_g,supermarket
+Indomie Mi Goreng Instant Noodles - Special,2.62,,False,425,FairPrice
+Maggi 2-Minute Instant Noodles - Curry,2.67,,False,395,FairPrice
+Nongshim Shin Ramyun Instant Noodle - Spicy,5.5,,False,600,FairPrice
+Nissin Instant Cup Noodles - Tom Yam Seafood,1.66,,False,75,FairPrice
+Myojo Instant Noodles - Chicken Abalone,2.45,2.67,True,400,FairPrice
+Indomie Mi Goreng Instant Noodles - Original,2.62,,False,400,FairPrice
+Maggi 2-Minute Instant Noodles - Chicken,2.67,,False,385,FairPrice
+Myojo Instant Noodles - Ramen Char Mee,2.45,2.67,True,375,FairPrice
+Ibumie Mi Goreng Instant Noodles - Original,2.37,,False,400,FairPrice
+Myojo Instant Noodles - Chicken Tanmen,2.45,2.67,True,405,FairPrice
+Nissin Instant Cup Noodles - Seafood,1.66,,False,75,FairPrice
+Nissin Instant Cup Noodles - Chicken,1.66,,False,72,FairPrice
+Maggi Big 2-Minute Instant Noodles - Curry,3.63,,False,,FairPrice
+Nongshim Kimchi Ramyun Instant Noodle,5.5,,False,600,FairPrice
+Nongshim Instant Cup Noodle - Spicy,1.53,,False,72,FairPrice
+Unif Tung-1 Instant Noodles - Chicken & Abalone,2.9,,False,425,FairPrice
+Indomie Instant Noodles - Soto,2.65,,False,390,FairPrice
+Nissin Instant Cup Noodles - Laksa,1.66,,False,75,FairPrice
+Maggi 2-Minute Instant Noodles - Asam Laksa,2.67,,False,390,FairPrice
+Nissin Instant Cup Noodles - Tom Yam Seafood,2.42,,False,108,FairPrice
+Nongshim Instant Noodle - Korean Clay Pot,5.5,,False,600,FairPrice
+Myojo Instant Noodles - Mee Poh Dry,2.45,2.67,True,400,FairPrice
+Mi Sedaap Fried Instant Noodles - Original,2.6,2.82,True,455,FairPrice
+Maggi 2-Minute Instant Noodles - Kari Letup,2.67,,False,395,FairPrice
+Nongshim Instant Cup Noodle - Kimchi,1.53,,False,70,FairPrice
+Samyang Hot Chicken Instant Ramen - Carbo,8.98,,False,650,FairPrice
+Nongshim Instant Bowl Noodle - Spicy,1.79,,False,117,FairPrice
+Indomie Mi Goreng Instant Noodles - Hot & Spicy,2.62,,False,400,FairPrice
+Nissin Instant Cup Noodles - Mushroom Chicken,1.66,,False,73,FairPrice
+Myojo Instant Bowl Noodles - Chicken Abalone,1.37,,False,80,FairPrice
+Samyang Hot Chicken Instant Ramen,8.27,,False,700,FairPrice
+Maggi Big 2-Minute Instant Noodles - Chicken,3.63,,False,,FairPrice
+Nissin Instant Cup Noodles - Chili Crab,1.66,,False,75,FairPrice
+Prima Taste La Mian Premium Instant Noodles - Laksa,9.95,10.8,True,576,FairPrice
+Indomie Mi Goreng Instant Cup Noodles - Fried,1.22,,False,75,FairPrice
+Myojo Instant Bowl Noodles - Thai Tom Yam,1.37,,False,79,FairPrice
+Myojo Instant Bowl Noodles - Chicken,1.37,,False,79,FairPrice
+Maggi 2-Minute Instant Noodles - Tom Yum,2.67,,False,400,FairPrice
+Nissin Instant Bowl Noodles - Sesame Oil,1.64,,False,110,FairPrice
+Nongshim Shin Ramyun Instant Noodle - Spicy Mushroom (Halal),5.5,,False,600,FairPrice
+"Nissin Kyushu White Cup Noodles, 75g",1.85,,False,75,Cold Storage
+Nissin 328 Katong Laksa 5 x 113g,6,7.25,True,565,Cold Storage
+Nissin Jumbo Seafood Chilli Crab 5x116g,6,7.25,True,580,Cold Storage
+"Nissin Cup Ippudo Akamaru Hakata Ramen, 75g",2.55,,False,75,Cold Storage
+"Nissin Cup Ippudo Shiromaru Hakata Ramen, 75g",2.55,,False,75,Cold Storage
+"Nissin Bowl 328 Katong Laksa, 120g",2.75,3.2,True,120,Cold Storage
+"Nissin Jumbo Seafood Chilli Crab, 121g",2.75,3.2,True,121,Cold Storage
+"Nissin Irvins Mala Salted Egg Bowl, 97g",2.75,3.2,True,97,Cold Storage
+Nissin Big Cup Seafood 105 G,2.55,,False,105,Cold Storage
+Nissin Big Cup Spicy Tonkotsu 115 G,2.55,,False,115,Cold Storage
+Nissin Ufo Truffle Carbonara 105G,1.5,1.95,True,105,Cold Storage
+Nissin Spicy Salted Egg Noodles 5X113G,6,7.25,True,565,Cold Storage
+Nissin Irvins Salted Egg Noodles 5x113g,6,7.25,True,565,Cold Storage
+Nissin Cup Noodles Fish Head Curry 73G,1.85,,False,73,Cold Storage
+Nissin Irvins Salted Egg Flavour Bowl 100g,2.75,3.2,True,100,Cold Storage
+Nissin Irvins Spicy Salted Egg 102g,2.75,3.2,True,102,Cold Storage
+Nissin Ufo Black Pepper Crab 94G,1.5,1.95,True,94,Cold Storage
+Nissin Kyushu Red Ramen Bowl 111g,2.55,,False,111,Cold Storage
+Nissin Hokkaido Miso Ramen Bowl 113g,2.55,,False,113,Cold Storage
+Nissin Chu Qian Yi Ding Packet Tom Yam 5 x 85g,3.25,,False,425,Cold Storage
+Nissin Tokyo Shoyu Ramen Bowl 110g,2.55,,False,110,Cold Storage
+Nissin Ramen Uma Kara Spicy Instant Noodles 5s x 106g,4.6,,False,530,Cold Storage
+Nissin Tokyo Shoyu 5s X 116g,4.6,,False,580,Cold Storage
+Nissin Kyushu Black 5s X 115g,4.6,,False,575,Cold Storage
+"Nissin Cup Noodle Black Pepper Crab, 80g",1.85,,False,80,Cold Storage
+"Nissin Spicy Seafood Cup Noodles, 75g",1.85,,False,75,Cold Storage
+Nissin CQYD Packet Chicken Soup 5 x 82g,3.25,,False,410,Cold Storage
+Maggi Kari Letup 5s X 79g,2.7,,False,395,Cold Storage
+"Maggi Syiok Aglio Olio, 5sx77g",4.1,,False,385,Cold Storage
+"Maggi Syiok Kari Kaw, 5sx83g",4.1,,False,415,Cold Storage
+Maggi Mi Goreng Chilli Kampung 5s 390g,3.7,,False,390,Cold Storage
+Maggi BIG Instant Noodle Tom Yam 5s X 112g,3.7,,False,560,Cold Storage
+Maggi Tom Yam Flavour 5s X 80g,2.7,,False,400,Cold Storage
+Maggi Curry Flavour 5s X 79g,2.7,,False,395,Cold Storage
+Maggi Chicken Flavour 5s X 77g,2.7,,False,385,Cold Storage
+Maggi Assam Laksa Flavour 5s X 78g,2.7,,False,390,Cold Storage
+Maggi Hot Meals Kari Kari Kaw Noodle Bowl 89g,1.95,,False,89,Cold Storage
+Maggi Hot Mealz Chicken Curry Noodle Bowl 99g,1.95,,False,99,Cold Storage
+Maggi Hot Mealz Tom Yum Kaw Noodle Bowl 91g,1.95,,False,91,Cold Storage
+Maggi 5-Min Instant Mushroom Cream Fettuccine 58g,2.95,,False,58,Cold Storage
+Maggi Extra Spicy Goreng Cup Noodles 64g,1.65,,False,64,Cold Storage
+Maggi BIG Curry Flavour 5s X 101g,3.7,,False,505,Cold Storage
+Maggi Extra Spicy Fiery Curry Cup Noodles 64g,1.65,,False,64,Cold Storage
+Maggi BIG Chicken Flavour 5s X 98g,3.7,,False,490,Cold Storage
+Maggi Hot Heads Roast Chicken Mee Goreng Bowl 98g,2.4,,False,98,Cold Storage
+Maggi Hot Heads Tom Yum Mee Goreng Bowl 97g,2.4,,False,97,Cold Storage
+Mi Sedaap Mi Goreng Spicy'licious,2.5,2.82,True,430,Sheng Siong
+Prego Quick Cook Mushroom Carbonara Mac,2.3,2.59,True,71,Sheng Siong
+Prego Quick Cook Mac & Cheese,2.3,2.59,True,70,Sheng Siong
+A1 Abalone Instant Noodle,4.1,4.99,True,150,Sheng Siong
+A1 Brand Bak Kut Teh Noodles,4.15,4.54,True,360,Sheng Siong
+Cintan Curry Instant Noodle,2.15,2.34,True,375,Sheng Siong
+Cintan Non-Fried Original Mi Tampa Goreng,1.5,1.62,True,330,Sheng Siong
+Happy Family Easi-Cook Instant Noodles,2.3,2.95,True,700,Sheng Siong
+Happy Family Vegetable Instant Noodle,1.95,2.35,True,390,Sheng Siong
+Happy Family Chicken Instant Noodle,1.95,2.35,True,400,Sheng Siong
+Happy Family Curry Instant Noodle,1.95,2.35,True,390,Sheng Siong
+Ibumie Mi Goreng Asli Original Flavour,2.05,2.37,True,400,Sheng Siong
+Indomie Mi Goreng Fried Noodles - Hot & Spicy,2.15,2.62,True,400,Sheng Siong
+Indomie Mi Goreng Fried Noodles Original,2.15,2.62,True,400,Sheng Siong
+Indomie Soto Soup Noodle,2.15,2.62,True,390,Sheng Siong
+Indomie Mi Goreng Rendang Spicy Beef,2.15,2.62,True,400,Sheng Siong
+Indomie Mi Goreng Special,2.15,2.62,True,425,Sheng Siong
+Koka Multigrain Baked Noodles - Laksa Singapore,6.3,,False,375,Sheng Siong
+Koka Multigrain Baked Noodles - Spicy Black Pepper,5.14,,False,350,Sheng Siong
+Koka Multigrain Baked Noodles - Truffle Mushroom,5.14,,False,350,Sheng Siong
+LJMX Sarawak Kolo Mee,3.6,3.96,True,400,Sheng Siong
+Maggi Hot Heads Tom Yam Mee Goreng,3.8,4.01,True,380,Sheng Siong
+Maggi 2-MIN Asam Laksa Noodle,2.5,2.67,True,390,Sheng Siong
+Maggi Hot Heads Roast Chicken Mee Goreng,3.8,4.01,True,380,Sheng Siong
+Maggi Big Tom Yam Noodles,3.5,3.63,True,535,Sheng Siong
+Maggi Syiok Kari Kaw,3.75,4.01,True,415,Sheng Siong
+Maggi 2-MIN Chicken Noodle,2.67,,False,385,Sheng Siong
+Maggi Syiok Aglio Olio,3.75,4.01,True,385,Sheng Siong
+Maggi Big Curry Noodle,3.5,3.63,True,530,Sheng Siong
+Maggi Big Chicken Noodle,3.5,3.63,True,515,Sheng Siong
+Maggi Hot Heads Spicy Curry Noodle,3.8,4.01,True,395,Sheng Siong
+Maggi Tom Yam Noodle,2.5,2.67,True,400,Sheng Siong
+Maggi 2-Min Curry Noodle,2.67,,False,395,Sheng Siong
+Mama Shrimp Tom Yum Noodle,2.8,3.51,True,360,Sheng Siong
+Mama Shrimp Tom Yam,5.8,,False,550,Sheng Siong
+Mama Instant Rice Vermicelli Clear Soup,3.24,,False,275,Sheng Siong
+Mama Creamy Tom Yam Noodle,2.8,3.51,True,360,Sheng Siong
+Mamee Vegetarian Instant Noodle,2,2.29,True,375,Sheng Siong
+Megah Mee Instant Noodle,2.69,,False,600,Sheng Siong
+Mi Sedaap Soto Soup Flavour,2.5,2.82,True,375,Sheng Siong
+Mi Sedaap Mi Goreng,2.5,2.82,True,455,Sheng Siong
+Mi Sedaap Perisa Asli Jumbo,2.95,3.22,True,556,Sheng Siong
+Myojo Instant Noodle - Ramen Char Mee,2.45,2.67,True,375,Sheng Siong
+Myojo Spicy Hot Chicken,2.98,3.36,True,400,Sheng Siong
+Myojo Instant Noodle - Chicken Abalone,2.45,2.67,True,395,Sheng Siong

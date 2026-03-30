@@ -66,3 +66,33 @@ there's a script inside notebooks/submission.ipynb that you can edit to set easi
 ├── data/            # Directory for raw and processed dataset storage
 └── requirements.txt # List of project dependencies
 ```
+
+## TODO
+
+## Phase 1 — Schema profiling
+- [ ] Pick one BIRD database to develop against
+- [ ] Implement automatic schema profiler (column stats, distinct value counts, top-k samples, FK detection)
+- [ ] LLM-summarise each column from profile output (short description for schema linking, long for SQL generation)
+- [ ] Build LSH index for literal matching
+
+## Phase 2 — Template / deterministic path
+- [ ] Analyse query distribution on chosen database — cluster by structural intent, identify top N query shapes
+- [ ] Build SQL template layer for top N intents (parametric, not hardcoded — schema attributes injected at runtime)
+- [ ] Build intent classifier to route queries to a template or fallback (fine-tune small open-source model here)
+- [ ] Tune classifier confidence threshold
+
+## Phase 3 — Fallback / free-generation path
+- [ ] Implement free SQL generation using open-source model with schema-linked columns + long column descriptions
+- [ ] Build query bank for RAG few-shot retrieval (seed with BIRD training pairs + SQL-to-text generated questions)
+- [ ] Implement semantic retrieval for few-shot examples
+- [ ] Add post-generation SQL validation with one retry on failure
+
+## Phase 4 — Eval harness
+- [ ] Set up execution accuracy on BIRD mini-dev (500 questions)
+- [ ] Instrument latency per query, measured separately for template path vs fallback path
+- [ ] Run ablations: template-only vs fallback-only vs hybrid; RAG vs no-RAG; classifier model size comparisons
+- [ ] Document failure modes honestly
+
+## Phase 5 — Production layer
+- [ ] Wrap pipeline in a FastAPI endpoint (POST /query — input: question + db connection, output: SQL + result + latency)
+- [ ] Dockerise — must run fully locally with no external API calls

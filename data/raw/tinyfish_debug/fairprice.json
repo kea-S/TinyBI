@@ -1,0 +1,289 @@
+{
+  "supermarket": "FairPrice",
+  "status": "COMPLETED",
+  "error": null,
+  "result": {
+    "products": [
+      {
+        "name": "Indomie Mi Goreng Instant Noodles - Special",
+        "price": 2.62,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 425
+      },
+      {
+        "name": "Maggi 2-Minute Instant Noodles - Curry",
+        "price": 2.67,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 395
+      },
+      {
+        "name": "Nongshim Shin Ramyun Instant Noodle - Spicy",
+        "price": 5.5,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 600
+      },
+      {
+        "name": "Nissin Instant Cup Noodles - Tom Yam Seafood",
+        "price": 1.66,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 75
+      },
+      {
+        "name": "Myojo Instant Noodles - Chicken Abalone",
+        "price": 2.45,
+        "original_price": 2.67,
+        "on_sale": true,
+        "quantity_g": 400
+      },
+      {
+        "name": "Indomie Mi Goreng Instant Noodles - Original",
+        "price": 2.62,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 400
+      },
+      {
+        "name": "Maggi 2-Minute Instant Noodles - Chicken",
+        "price": 2.67,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 385
+      },
+      {
+        "name": "Myojo Instant Noodles - Ramen Char Mee",
+        "price": 2.45,
+        "original_price": 2.67,
+        "on_sale": true,
+        "quantity_g": 375
+      },
+      {
+        "name": "Ibumie Mi Goreng Instant Noodles - Original",
+        "price": 2.37,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 400
+      },
+      {
+        "name": "Myojo Instant Noodles - Chicken Tanmen",
+        "price": 2.45,
+        "original_price": 2.67,
+        "on_sale": true,
+        "quantity_g": 405
+      },
+      {
+        "name": "Nissin Instant Cup Noodles - Seafood",
+        "price": 1.66,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 75
+      },
+      {
+        "name": "Nissin Instant Cup Noodles - Chicken",
+        "price": 1.66,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 72
+      },
+      {
+        "name": "Maggi Big 2-Minute Instant Noodles - Curry",
+        "price": 3.63,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": null
+      },
+      {
+        "name": "Nongshim Kimchi Ramyun Instant Noodle",
+        "price": 5.5,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 600
+      },
+      {
+        "name": "Nongshim Instant Cup Noodle - Spicy",
+        "price": 1.53,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 72
+      },
+      {
+        "name": "Unif Tung-1 Instant Noodles - Chicken & Abalone",
+        "price": 2.9,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 425
+      },
+      {
+        "name": "Indomie Instant Noodles - Soto",
+        "price": 2.65,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 390
+      },
+      {
+        "name": "Nissin Instant Cup Noodles - Laksa",
+        "price": 1.66,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 75
+      },
+      {
+        "name": "Maggi 2-Minute Instant Noodles - Asam Laksa",
+        "price": 2.67,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 390
+      },
+      {
+        "name": "Nissin Instant Cup Noodles -\u00a0Tom Yam Seafood",
+        "price": 2.42,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 108
+      },
+      {
+        "name": "Nongshim Instant Noodle - Korean Clay Pot",
+        "price": 5.5,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 600
+      },
+      {
+        "name": "Myojo Instant Noodles - Mee Poh Dry",
+        "price": 2.45,
+        "original_price": 2.67,
+        "on_sale": true,
+        "quantity_g": 400
+      },
+      {
+        "name": "Mi Sedaap Fried Instant Noodles - Original",
+        "price": 2.6,
+        "original_price": 2.82,
+        "on_sale": true,
+        "quantity_g": 455
+      },
+      {
+        "name": "Maggi 2-Minute Instant Noodles - Kari Letup",
+        "price": 2.67,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 395
+      },
+      {
+        "name": "Nongshim Instant Cup Noodle - Kimchi",
+        "price": 1.53,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 70
+      },
+      {
+        "name": "Samyang Hot Chicken Instant Ramen - Carbo",
+        "price": 8.98,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 650
+      },
+      {
+        "name": "Nongshim Instant Bowl Noodle - Spicy",
+        "price": 1.79,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 117
+      },
+      {
+        "name": "Indomie Mi Goreng Instant Noodles - Hot & Spicy",
+        "price": 2.62,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 400
+      },
+      {
+        "name": "Nissin Instant Cup Noodles - Mushroom Chicken",
+        "price": 1.66,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 73
+      },
+      {
+        "name": "Myojo Instant Bowl Noodles - Chicken Abalone",
+        "price": 1.37,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 80
+      },
+      {
+        "name": "Samyang Hot Chicken Instant Ramen",
+        "price": 8.27,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 700
+      },
+      {
+        "name": "Maggi Big 2-Minute Instant Noodles - Chicken",
+        "price": 3.63,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": null
+      },
+      {
+        "name": "Nissin Instant Cup Noodles - Chili Crab",
+        "price": 1.66,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 75
+      },
+      {
+        "name": "Prima Taste La Mian Premium Instant Noodles - Laksa",
+        "price": 9.95,
+        "original_price": 10.8,
+        "on_sale": true,
+        "quantity_g": 576
+      },
+      {
+        "name": "Indomie Mi Goreng Instant Cup Noodles - Fried",
+        "price": 1.22,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 75
+      },
+      {
+        "name": "Myojo Instant Bowl Noodles - Thai Tom Yam",
+        "price": 1.37,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 79
+      },
+      {
+        "name": "Myojo Instant Bowl Noodles - Chicken",
+        "price": 1.37,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 79
+      },
+      {
+        "name": "Maggi 2-Minute Instant Noodles - Tom Yum",
+        "price": 2.67,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 400
+      },
+      {
+        "name": "Nissin Instant Bowl Noodles - Sesame Oil",
+        "price": 1.64,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 110
+      },
+      {
+        "name": "Nongshim Shin Ramyun Instant Noodle - Spicy Mushroom (Halal)",
+        "price": 5.5,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 600
+      }
+    ]
+  }
+}

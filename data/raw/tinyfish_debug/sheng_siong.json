@@ -1,0 +1,324 @@
+{
+  "supermarket": "Sheng Siong",
+  "status": "COMPLETED",
+  "error": null,
+  "result": {
+    "products": [
+      {
+        "name": "Mi Sedaap Mi Goreng Spicy'licious",
+        "price": 2.5,
+        "original_price": 2.82,
+        "on_sale": true,
+        "quantity_g": 430
+      },
+      {
+        "name": "Prego Quick Cook Mushroom Carbonara Mac",
+        "price": 2.3,
+        "original_price": 2.59,
+        "on_sale": true,
+        "quantity_g": 71
+      },
+      {
+        "name": "Prego Quick Cook Mac & Cheese",
+        "price": 2.3,
+        "original_price": 2.59,
+        "on_sale": true,
+        "quantity_g": 70
+      },
+      {
+        "name": "A1 Abalone Instant Noodle",
+        "price": 4.1,
+        "original_price": 4.99,
+        "on_sale": true,
+        "quantity_g": 150
+      },
+      {
+        "name": "A1 Brand Bak Kut Teh Noodles",
+        "price": 4.15,
+        "original_price": 4.54,
+        "on_sale": true,
+        "quantity_g": 360
+      },
+      {
+        "name": "Cintan Curry Instant Noodle",
+        "price": 2.15,
+        "original_price": 2.34,
+        "on_sale": true,
+        "quantity_g": 375
+      },
+      {
+        "name": "Cintan Non-Fried Original Mi Tampa Goreng",
+        "price": 1.5,
+        "original_price": 1.62,
+        "on_sale": true,
+        "quantity_g": 330
+      },
+      {
+        "name": "Happy Family Easi-Cook Instant Noodles",
+        "price": 2.3,
+        "original_price": 2.95,
+        "on_sale": true,
+        "quantity_g": 700
+      },
+      {
+        "name": "Happy Family Vegetable Instant Noodle",
+        "price": 1.95,
+        "original_price": 2.35,
+        "on_sale": true,
+        "quantity_g": 390
+      },
+      {
+        "name": "Happy Family Chicken Instant Noodle",
+        "price": 1.95,
+        "original_price": 2.35,
+        "on_sale": true,
+        "quantity_g": 400
+      },
+      {
+        "name": "Happy Family Curry Instant Noodle",
+        "price": 1.95,
+        "original_price": 2.35,
+        "on_sale": true,
+        "quantity_g": 390
+      },
+      {
+        "name": "Ibumie Mi Goreng Asli Original Flavour",
+        "price": 2.05,
+        "original_price": 2.37,
+        "on_sale": true,
+        "quantity_g": 400
+      },
+      {
+        "name": "Indomie Mi Goreng Fried Noodles - Hot & Spicy",
+        "price": 2.15,
+        "original_price": 2.62,
+        "on_sale": true,
+        "quantity_g": 400
+      },
+      {
+        "name": "Indomie Mi Goreng Fried Noodles Original",
+        "price": 2.15,
+        "original_price": 2.62,
+        "on_sale": true,
+        "quantity_g": 400
+      },
+      {
+        "name": "Indomie Soto Soup Noodle",
+        "price": 2.15,
+        "original_price": 2.62,
+        "on_sale": true,
+        "quantity_g": 390
+      },
+      {
+        "name": "Indomie Mi Goreng Rendang Spicy Beef",
+        "price": 2.15,
+        "original_price": 2.62,
+        "on_sale": true,
+        "quantity_g": 400
+      },
+      {
+        "name": "Indomie Mi Goreng Special",
+        "price": 2.15,
+        "original_price": 2.62,
+        "on_sale": true,
+        "quantity_g": 425
+      },
+      {
+        "name": "Koka Multigrain Baked Noodles - Laksa Singapore",
+        "price": 6.3,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 375
+      },
+      {
+        "name": "Koka Multigrain Baked Noodles - Spicy Black Pepper",
+        "price": 5.14,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 350
+      },
+      {
+        "name": "Koka Multigrain Baked Noodles - Truffle Mushroom",
+        "price": 5.14,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 350
+      },
+      {
+        "name": "LJMX Sarawak Kolo Mee",
+        "price": 3.6,
+        "original_price": 3.96,
+        "on_sale": true,
+        "quantity_g": 400
+      },
+      {
+        "name": "Maggi Hot Heads Tom Yam Mee Goreng",
+        "price": 3.8,
+        "original_price": 4.01,
+        "on_sale": true,
+        "quantity_g": 380
+      },
+      {
+        "name": "Maggi 2-MIN Asam Laksa Noodle",
+        "price": 2.5,
+        "original_price": 2.67,
+        "on_sale": true,
+        "quantity_g": 390
+      },
+      {
+        "name": "Maggi Hot Heads Roast Chicken Mee Goreng",
+        "price": 3.8,
+        "original_price": 4.01,
+        "on_sale": true,
+        "quantity_g": 380
+      },
+      {
+        "name": "Maggi Big Tom Yam Noodles",
+        "price": 3.5,
+        "original_price": 3.63,
+        "on_sale": true,
+        "quantity_g": 535
+      },
+      {
+        "name": "Maggi Syiok Kari Kaw",
+        "price": 3.75,
+        "original_price": 4.01,
+        "on_sale": true,
+        "quantity_g": 415
+      },
+      {
+        "name": "Maggi 2-MIN Chicken Noodle",
+        "price": 2.67,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 385
+      },
+      {
+        "name": "Maggi Syiok Aglio Olio",
+        "price": 3.75,
+        "original_price": 4.01,
+        "on_sale": true,
+        "quantity_g": 385
+      },
+      {
+        "name": "Maggi Big Curry Noodle",
+        "price": 3.5,
+        "original_price": 3.63,
+        "on_sale": true,
+        "quantity_g": 530
+      },
+      {
+        "name": "Maggi Big Chicken Noodle",
+        "price": 3.5,
+        "original_price": 3.63,
+        "on_sale": true,
+        "quantity_g": 515
+      },
+      {
+        "name": "Maggi Hot Heads Spicy Curry Noodle",
+        "price": 3.8,
+        "original_price": 4.01,
+        "on_sale": true,
+        "quantity_g": 395
+      },
+      {
+        "name": "Maggi Tom Yam Noodle",
+        "price": 2.5,
+        "original_price": 2.67,
+        "on_sale": true,
+        "quantity_g": 400
+      },
+      {
+        "name": "Maggi 2-Min Curry Noodle",
+        "price": 2.67,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 395
+      },
+      {
+        "name": "Mama Shrimp Tom Yum Noodle",
+        "price": 2.8,
+        "original_price": 3.51,
+        "on_sale": true,
+        "quantity_g": 360
+      },
+      {
+        "name": "Mama Shrimp Tom Yam",
+        "price": 5.8,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 550
+      },
+      {
+        "name": "Mama Instant Rice Vermicelli Clear Soup",
+        "price": 3.24,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 275
+      },
+      {
+        "name": "Mama Creamy Tom Yam Noodle",
+        "price": 2.8,
+        "original_price": 3.51,
+        "on_sale": true,
+        "quantity_g": 360
+      },
+      {
+        "name": "Mamee Vegetarian Instant Noodle",
+        "price": 2,
+        "original_price": 2.29,
+        "on_sale": true,
+        "quantity_g": 375
+      },
+      {
+        "name": "Megah Mee Instant Noodle",
+        "price": 2.69,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 600
+      },
+      {
+        "name": "Mi Sedaap Soto Soup Flavour",
+        "price": 2.5,
+        "original_price": 2.82,
+        "on_sale": true,
+        "quantity_g": 375
+      },
+      {
+        "name": "Mi Sedaap Mi Goreng",
+        "price": 2.5,
+        "original_price": 2.82,
+        "on_sale": true,
+        "quantity_g": 455
+      },
+      {
+        "name": "Mi Sedaap Perisa Asli Jumbo",
+        "price": 2.95,
+        "original_price": 3.22,
+        "on_sale": true,
+        "quantity_g": 556
+      },
+      {
+        "name": "Myojo Instant Noodle - Ramen Char Mee",
+        "price": 2.45,
+        "original_price": 2.67,
+        "on_sale": true,
+        "quantity_g": 375
+      },
+      {
+        "name": "Myojo Spicy Hot Chicken",
+        "price": 2.98,
+        "original_price": 3.36,
+        "on_sale": true,
+        "quantity_g": 400
+      },
+      {
+        "name": "Myojo Instant Noodle - Chicken Abalone",
+        "price": 2.45,
+        "original_price": 2.67,
+        "on_sale": true,
+        "quantity_g": 395
+      }
+    ]
+  }
+}

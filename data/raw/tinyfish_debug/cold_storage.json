@@ -1,0 +1,331 @@
+{
+  "supermarket": "Cold Storage",
+  "status": "COMPLETED",
+  "error": null,
+  "result": {
+    "products": [
+      {
+        "name": "Nissin Kyushu White Cup Noodles, 75g",
+        "price": 1.85,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 75
+      },
+      {
+        "name": "Nissin 328 Katong Laksa 5 x 113g",
+        "price": 6,
+        "original_price": 7.25,
+        "on_sale": true,
+        "quantity_g": 565
+      },
+      {
+        "name": "Nissin Jumbo Seafood Chilli Crab 5x116g",
+        "price": 6,
+        "original_price": 7.25,
+        "on_sale": true,
+        "quantity_g": 580
+      },
+      {
+        "name": "Nissin Cup Ippudo Akamaru Hakata Ramen, 75g",
+        "price": 2.55,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 75
+      },
+      {
+        "name": "Nissin Cup Ippudo Shiromaru Hakata Ramen, 75g",
+        "price": 2.55,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 75
+      },
+      {
+        "name": "Nissin Bowl 328 Katong Laksa, 120g",
+        "price": 2.75,
+        "original_price": 3.2,
+        "on_sale": true,
+        "quantity_g": 120
+      },
+      {
+        "name": "Nissin Jumbo Seafood Chilli Crab, 121g",
+        "price": 2.75,
+        "original_price": 3.2,
+        "on_sale": true,
+        "quantity_g": 121
+      },
+      {
+        "name": "Nissin Irvins Mala Salted Egg Bowl, 97g",
+        "price": 2.75,
+        "original_price": 3.2,
+        "on_sale": true,
+        "quantity_g": 97
+      },
+      {
+        "name": "Nissin Big Cup Seafood 105 G",
+        "price": 2.55,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 105
+      },
+      {
+        "name": "Nissin Big Cup Spicy Tonkotsu 115 G",
+        "price": 2.55,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 115
+      },
+      {
+        "name": "Nissin Ufo Truffle Carbonara 105G",
+        "price": 1.5,
+        "original_price": 1.95,
+        "on_sale": true,
+        "quantity_g": 105
+      },
+      {
+        "name": "Nissin Spicy Salted Egg Noodles 5X113G",
+        "price": 6,
+        "original_price": 7.25,
+        "on_sale": true,
+        "quantity_g": 565
+      },
+      {
+        "name": "Nissin Irvins Salted Egg Noodles 5x113g",
+        "price": 6,
+        "original_price": 7.25,
+        "on_sale": true,
+        "quantity_g": 565
+      },
+      {
+        "name": "Nissin Cup Noodles Fish Head Curry 73G",
+        "price": 1.85,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 73
+      },
+      {
+        "name": "Nissin Irvins Salted Egg Flavour Bowl 100g",
+        "price": 2.75,
+        "original_price": 3.2,
+        "on_sale": true,
+        "quantity_g": 100
+      },
+      {
+        "name": "Nissin Irvins Spicy Salted Egg 102g",
+        "price": 2.75,
+        "original_price": 3.2,
+        "on_sale": true,
+        "quantity_g": 102
+      },
+      {
+        "name": "Nissin Ufo Black Pepper Crab 94G",
+        "price": 1.5,
+        "original_price": 1.95,
+        "on_sale": true,
+        "quantity_g": 94
+      },
+      {
+        "name": "Nissin Kyushu Red Ramen Bowl 111g",
+        "price": 2.55,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 111
+      },
+      {
+        "name": "Nissin Hokkaido Miso Ramen Bowl 113g",
+        "price": 2.55,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 113
+      },
+      {
+        "name": "Nissin Chu Qian Yi Ding Packet Tom Yam 5 x 85g",
+        "price": 3.25,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 425
+      },
+      {
+        "name": "Nissin Tokyo Shoyu Ramen Bowl 110g",
+        "price": 2.55,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 110
+      },
+      {
+        "name": "Nissin Ramen Uma Kara Spicy Instant Noodles 5s x 106g",
+        "price": 4.6,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 530
+      },
+      {
+        "name": "Nissin Tokyo Shoyu 5s X 116g",
+        "price": 4.6,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 580
+      },
+      {
+        "name": "Nissin Kyushu Black 5s X 115g",
+        "price": 4.6,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 575
+      },
+      {
+        "name": "Nissin Cup Noodle Black Pepper Crab, 80g",
+        "price": 1.85,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 80
+      },
+      {
+        "name": "Nissin Spicy Seafood Cup Noodles, 75g",
+        "price": 1.85,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 75
+      },
+      {
+        "name": "Nissin CQYD Packet Chicken Soup 5 x 82g",
+        "price": 3.25,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 410
+      },
+      {
+        "name": "Maggi Kari Letup 5s X 79g",
+        "price": 2.7,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 395
+      },
+      {
+        "name": "Maggi Syiok Aglio Olio, 5sx77g",
+        "price": 4.1,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 385
+      },
+      {
+        "name": "Maggi Syiok Kari Kaw, 5sx83g",
+        "price": 4.1,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 415
+      },
+      {
+        "name": "Maggi Mi Goreng Chilli Kampung 5s 390g",
+        "price": 3.7,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 390
+      },
+      {
+        "name": "Maggi BIG Instant Noodle Tom Yam 5s X 112g",
+        "price": 3.7,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 560
+      },
+      {
+        "name": "Maggi Tom Yam Flavour 5s X 80g",
+        "price": 2.7,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 400
+      },
+      {
+        "name": "Maggi Curry Flavour 5s X 79g",
+        "price": 2.7,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 395
+      },
+      {
+        "name": "Maggi Chicken Flavour 5s X 77g",
+        "price": 2.7,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 385
+      },
+      {
+        "name": "Maggi Assam Laksa Flavour 5s X 78g",
+        "price": 2.7,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 390
+      },
+      {
+        "name": "Maggi Hot Meals Kari Kari Kaw Noodle Bowl 89g",
+        "price": 1.95,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 89
+      },
+      {
+        "name": "Maggi Hot Mealz Chicken Curry Noodle Bowl 99g",
+        "price": 1.95,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 99
+      },
+      {
+        "name": "Maggi Hot Mealz Tom Yum Kaw Noodle Bowl 91g",
+        "price": 1.95,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 91
+      },
+      {
+        "name": "Maggi 5-Min Instant Mushroom Cream Fettuccine 58g",
+        "price": 2.95,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 58
+      },
+      {
+        "name": "Maggi Extra Spicy Goreng Cup Noodles 64g",
+        "price": 1.65,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 64
+      },
+      {
+        "name": "Maggi BIG Curry Flavour 5s X 101g",
+        "price": 3.7,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 505
+      },
+      {
+        "name": "Maggi Extra Spicy Fiery Curry Cup Noodles 64g",
+        "price": 1.65,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 64
+      },
+      {
+        "name": "Maggi BIG Chicken Flavour 5s X 98g",
+        "price": 3.7,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 490
+      },
+      {
+        "name": "Maggi Hot Heads Roast Chicken Mee Goreng Bowl 98g",
+        "price": 2.4,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 98
+      },
+      {
+        "name": "Maggi Hot Heads Tom Yum Mee Goreng Bowl 97g",
+        "price": 2.4,
+        "original_price": null,
+        "on_sale": false,
+        "quantity_g": 97
+      }
+    ]
+  }
+}
