@@ -19,7 +19,9 @@ def main():
                 break
 
             try:
-                run_pipeline(question)
+                _, resulting_df, explainer_results = run_pipeline(question)
+                print(resulting_df)
+                print(explainer_results)
             except Exception as e:
                 # Keep the loop alive on errors so the user can continue asking questions
                 print(f"Error running pipeline: {e}")

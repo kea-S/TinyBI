@@ -22,4 +22,4 @@ async def run_pipeline(question, model, local):
 
     explainer_results = await explainer.ainvoke(explainer_input)
 
-    return resulting_df, explainer_results
+    return resulting_sql_query, resulting_df, explainer_results
