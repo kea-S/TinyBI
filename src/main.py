@@ -1,4 +1,19 @@
+import asyncio
+import os
+
 from src.llms.main_pipeline import run_pipeline
+from src.utils.models import REMOTE_GPT_4o
+
+
+def _env_flag(name: str, default: bool = False) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+DEFAULT_MODEL = os.getenv("TINYBI_MODEL", REMOTE_GPT_4o)
+DEFAULT_LOCAL = _env_flag("TINYBI_LOCAL", default=False)
 
 
 def main():
@@ -19,9 +34,13 @@ def main():
                 break
 
             try:
-                run_pipeline(question)
+                resulting_df, explanation = asyncio.run(
+                    run_pipeline(question, DEFAULT_MODEL, DEFAULT_LOCAL)
+                )
+                print(resulting_df)
+                print(explanation)
             except Exception as e:
-                # Keep the loop alive on errors so the user can continue asking questions
+                # Keep the loop alive on errors so the user can continue asking questions.
                 print(f"Error running pipeline: {e}")
 
     except KeyboardInterrupt:

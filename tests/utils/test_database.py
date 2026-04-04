@@ -1,13 +1,51 @@
-from src.utils.database import get_connection, register_csv_as_view, query
-from src.config import CLEANED_DATASET
+import sqlite3
+
+from src.utils.database import Database
 
 
-def test_query_csv_via_inmemory_connection():
-    conn = get_connection()  # shared in-memory connection for the test process
+def test_register_sqlitedb_as_table_converts_sqlite_to_duckdb(tmp_path):
+    sqlite_database_dir = tmp_path / "sample_database"
+    sqlite_database_dir.mkdir()
+    sqlite_path = sqlite_database_dir / "sample.sqlite"
+    duckdb_path = tmp_path / "sample.duckdb"
+    description_path = sqlite_database_dir / "database_description"
+    description_path.mkdir()
+    (description_path / "metrics.csv").write_text(
+        "original_column_name,column_name,column_description,data_format\n"
+        "id,id,metric identifier,integer\n"
+        "name,name,metric name,text\n"
+        "value,value,metric value,integer\n",
+        encoding="utf-8",
+    )
 
-    view_name = register_csv_as_view(CLEANED_DATASET, view_name="test_csv", conn=conn)
+    sqlite_conn = sqlite3.connect(sqlite_path)
+    sqlite_conn.execute(
+        """
+        CREATE TABLE metrics (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL,
+            value INTEGER NOT NULL
+        )
+        """
+    )
+    sqlite_conn.executemany(
+        "INSERT INTO metrics (name, value) VALUES (?, ?)",
+        [("alpha", 10), ("beta", 20)],
+    )
+    sqlite_conn.commit()
+    sqlite_conn.close()
 
-    df = query(f"SELECT * FROM {view_name} LIMIT 5", conn=conn)
-    # Expect 1..5 rows (adjust if empty file is possible)
+    database = Database()
+    database._get_database_path = lambda _: duckdb_path.resolve()
+    database.get_connection("ignored.duckdb")
+    output_path = database.register_sqlitedb_as_table(sqlite_database_dir)
 
-    assert 0 < df.shape[0] <= 5
+    rows = database._CONN.execute(
+        "SELECT id, name, value FROM metrics ORDER BY id"
+    ).fetchall()
+
+    assert output_path == duckdb_path.resolve()
+    assert duckdb_path.exists()
+    assert rows == [(1, "alpha", 10), (2, "beta", 20)]
+
+    database.close_connection()
