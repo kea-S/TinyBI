@@ -1,7 +1,7 @@
-from typing import List, Literal, Optional
+from typing import Any, List, Literal, Optional
 from typing_extensions import Self
 from datetime import date, datetime
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 DEFAULT_START = date(2025, 1, 1)
 DEFAULT_END = date(2025, 6, 30)
@@ -216,3 +216,48 @@ class QuerySchema(BaseModel):
             object.__setattr__(self, "seller_regions", list(self.buyer_regions))
 
         return self
+
+
+class ColumnVectorIndexEntry(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    entry_id: int = Field(..., ge=0, description="Stable FAISS id used to hydrate search results.")
+    table_name: str
+    column_name: str
+    source_key: str = Field(..., description="Stable unique identifier, typically table.column.")
+    description: Optional[str] = None
+    aliases: List[str] = Field(default_factory=list)
+    sample_values: List[str] = Field(default_factory=list)
+    payload: dict[str, Any] = Field(default_factory=dict)
+
+    def to_embedding_text(self) -> str:
+        lines = [
+            f"Table: {self.table_name}",
+            f"Column: {self.column_name}",
+        ]
+
+        if self.description:
+            lines.append(f"Description: {self.description}")
+        if self.aliases:
+            lines.append(f"Aliases: {', '.join(self.aliases)}")
+        if self.sample_values:
+            lines.append(f"Sample values: {', '.join(self.sample_values)}")
+
+        for key, value in self.payload.items():
+            if value is None:
+                continue
+
+            if isinstance(value, list):
+                rendered_value = ", ".join(str(item) for item in value)
+            else:
+                rendered_value = str(value)
+
+            lines.append(f"{key.replace('_', ' ').title()}: {rendered_value}")
+
+        return "\n".join(lines)
+
+
+class VectorSearchResult(BaseModel):
+    entry: ColumnVectorIndexEntry
+    score: float
+
