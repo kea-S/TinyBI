@@ -261,3 +261,23 @@ class VectorSearchResult(BaseModel):
     entry: ColumnVectorIndexEntry
     score: float
 
+
+class BatchColumnVectorIndexEntriesRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    entries: List[ColumnVectorIndexEntry] = Field(
+        ...,
+        min_length=1,
+        description="Complete batch of column metadata entries to embed and persist as the active index.",
+    )
+
+
+class BatchColumnVectorIndexResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    embedding_model: str
+    entry_count: int = Field(..., ge=1)
+    table_names: List[str] = Field(default_factory=list)
+    vector_index_path: str
+    metadata_path: str
+

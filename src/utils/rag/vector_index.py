@@ -62,6 +62,10 @@ class VectorIndex:
 
         return index_path, metadata_path
 
+    @classmethod
+    def resolve_paths(cls, vector_index_path: str | Path) -> tuple[Path, Path]:
+        return cls._resolve_paths(vector_index_path)
+
     @staticmethod
     def _ensure_parent_exists(path: Path) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
