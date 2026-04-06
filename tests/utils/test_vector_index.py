@@ -14,18 +14,19 @@ def test_column_vector_index_entry_renders_embedding_text():
         column_name="customer_city",
         source_key="orders.customer_city",
         description="City where the order was placed",
+        data_format="city_name",
         aliases=["city", "customer city"],
         sample_values=["Berlin", "Munich"],
-        payload={"data_type": "text", "is_groupable": True},
+        payload={"is_groupable": True},
     )
 
     text = entry.to_embedding_text()
 
     assert "Table: orders" in text
     assert "Column: customer_city" in text
+    assert "Data format: city_name" in text
     assert "Aliases: city, customer city" in text
     assert "Sample values: Berlin, Munich" in text
-    assert "Data Type: text" in text
     assert "Is Groupable: True" in text
 
 
@@ -103,3 +104,4 @@ def test_vector_index_can_filter_results_by_table_name(tmp_path):
 
     assert len(results) == 1
     assert results[0].entry.table_name == "customers"
+

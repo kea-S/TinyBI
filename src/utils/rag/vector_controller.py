@@ -44,6 +44,14 @@ class VectorController:
             metadata_path=str(metadata_path),
         )
 
+    def get_current_index_entries(self) -> list[ColumnVectorIndexEntry]:
+        index_path, metadata_path = VectorIndex.resolve_paths(self._vector_index_path)
+        if not index_path.exists() and not metadata_path.exists():
+            return []
+
+        self._vector_index.get_connection(self._vector_index_path)
+        return self._vector_index.list_entries()
+
     def run(self, structured_query):
         if self._vector_index._index is None:
             self._vector_index.get_connection(self._vector_index_path)
@@ -63,3 +71,4 @@ class VectorController:
         }
 
         return post_processed
+

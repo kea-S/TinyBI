@@ -101,6 +101,9 @@ class VectorIndex:
 
         return self
 
+    def list_entries(self) -> list[ColumnVectorIndexEntry]:
+        return [self._entries[entry_id] for entry_id in sorted(self._entries)]
+
     def build_index(
         self,
         entries: list[ColumnVectorIndexEntry],
@@ -183,3 +186,4 @@ class VectorIndex:
         self._index_path = None
         self._metadata_path = None
         self._dimension = None
+

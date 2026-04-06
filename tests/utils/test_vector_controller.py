@@ -70,3 +70,50 @@ def test_batch_insert_index_entries_requires_non_empty_entries(monkeypatch, tmp_
         assert "At least one ColumnVectorIndexEntry is required" in str(exc)
     else:
         raise AssertionError("Expected batch_insert_index_entries to reject an empty batch")
+
+
+def test_get_current_index_entries_returns_persisted_entries(monkeypatch, tmp_path):
+    fake_embedding_model = FakeEmbeddingModel()
+    monkeypatch.setattr(
+        vector_controller_module,
+        "get_embedding_model",
+        lambda _: fake_embedding_model,
+    )
+
+    entries = [
+        ColumnVectorIndexEntry(
+            entry_id=1,
+            table_name="orders",
+            column_name="customer_city",
+            source_key="orders.customer_city",
+        ),
+        ColumnVectorIndexEntry(
+            entry_id=2,
+            table_name="orders",
+            column_name="order_total",
+            source_key="orders.order_total",
+        ),
+    ]
+
+    controller = VectorController("fake-embedding-model", vector_index_path=tmp_path / "columns")
+    controller.batch_insert_index_entries(entries)
+
+    loaded_entries = controller.get_current_index_entries()
+
+    assert [entry.source_key for entry in loaded_entries] == [
+        "orders.customer_city",
+        "orders.order_total",
+    ]
+
+
+def test_get_current_index_entries_returns_empty_list_when_index_is_missing(monkeypatch, tmp_path):
+    monkeypatch.setattr(
+        vector_controller_module,
+        "get_embedding_model",
+        lambda _: FakeEmbeddingModel(),
+    )
+
+    controller = VectorController("fake-embedding-model", vector_index_path=tmp_path / "missing")
+
+    assert controller.get_current_index_entries() == []
+

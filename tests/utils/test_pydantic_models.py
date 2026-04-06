@@ -2,7 +2,12 @@ from datetime import date
 from pydantic import ValidationError
 import pytest
 
-from src.utils.pydantic_models import QuerySchema, DEFAULT_START, DEFAULT_END
+from src.utils.pydantic_models import (
+    ColumnVectorIndexEntry,
+    QuerySchema,
+    DEFAULT_START,
+    DEFAULT_END,
+)
 
 
 def _base_kwargs():
@@ -102,3 +107,30 @@ def test_start_after_end_raises():
     """Start date after end date should raise a ValueError from model validation."""
     with pytest.raises(ValueError):
         QuerySchema(**_base_kwargs(), start_date="2025-07-01", end_date="2025-06-30")
+
+
+def test_column_vector_entry_moves_legacy_data_type_to_data_format():
+    entry = ColumnVectorIndexEntry(
+        entry_id=1,
+        table_name="orders",
+        column_name="customer_city",
+        source_key="orders.customer_city",
+        payload={"data_type": "text", "is_groupable": True},
+    )
+
+    assert entry.data_format == "text"
+    assert entry.payload == {"is_groupable": True}
+
+
+def test_column_vector_entry_preserves_explicit_data_format_over_legacy_payload_value():
+    entry = ColumnVectorIndexEntry(
+        entry_id=1,
+        table_name="orders",
+        column_name="customer_city",
+        source_key="orders.customer_city",
+        data_format="city_name",
+        payload={"data_type": "text", "is_groupable": True},
+    )
+
+    assert entry.data_format == "city_name"
+    assert entry.payload == {"is_groupable": True}

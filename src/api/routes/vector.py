@@ -7,6 +7,7 @@ from src.utils.models import (
 from src.utils.pydantic_models import (
     BatchColumnVectorIndexEntriesRequest,
     BatchColumnVectorIndexResponse,
+    ColumnVectorIndexEntry,
 )
 from src.utils.rag.vector_controller import VectorController
 
@@ -22,6 +23,21 @@ def _build_index(
         return controller.batch_insert_index_entries(entries_request.entries)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+
+
+def _get_controller() -> VectorController:
+    return VectorController(DEFAULT_EMBEDDING_MODEL)
+
+
+@router.get(
+    "/index-entries/current",
+    response_model=list[ColumnVectorIndexEntry],
+    status_code=status.HTTP_200_OK,
+    summary="Load the currently persisted vector index entries",
+)
+def get_current_index_entries() -> list[ColumnVectorIndexEntry]:
+    controller = _get_controller()
+    return controller.get_current_index_entries()
 
 
 @router.post(

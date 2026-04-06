@@ -226,9 +226,22 @@ class ColumnVectorIndexEntry(BaseModel):
     column_name: str
     source_key: str = Field(..., description="Stable unique identifier, typically table.column.")
     description: Optional[str] = None
+    data_format: Optional[str] = Field(
+        default=None,
+        description="Semantic format descriptor such as date, currency, percentage, or iso_country_code.",
+    )
     aliases: List[str] = Field(default_factory=list)
     sample_values: List[str] = Field(default_factory=list)
     payload: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _normalise_legacy_data_type(self) -> Self:
+        legacy_data_type = self.payload.pop("data_type", None)
+        if self.data_format is None and isinstance(legacy_data_type, str):
+            trimmed_legacy_data_type = legacy_data_type.strip()
+            if trimmed_legacy_data_type:
+                self.data_format = trimmed_legacy_data_type
+        return self
 
     def to_embedding_text(self) -> str:
         lines = [
@@ -238,6 +251,8 @@ class ColumnVectorIndexEntry(BaseModel):
 
         if self.description:
             lines.append(f"Description: {self.description}")
+        if self.data_format:
+            lines.append(f"Data format: {self.data_format}")
         if self.aliases:
             lines.append(f"Aliases: {', '.join(self.aliases)}")
         if self.sample_values:
