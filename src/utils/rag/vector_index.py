@@ -179,7 +179,3 @@ class VectorIndex:
         self._index_path = None
         self._metadata_path = None
         self._dimension = None
-
-
-schema_index = VectorIndex()
-
