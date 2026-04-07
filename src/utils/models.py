@@ -11,9 +11,11 @@ load_dotenv()
 LANGCHAIN = "langchain"
 
 # models to be experimented with
-REMOTE_GPT_OSS_SMALL = "openai/gpt-oss-20b"
-REMOTE_GPT_5 = "gpt-5"
 REMOTE_GPT_4o = "gpt-4o"
+REMOTE_GPT_OSS_LARGE = "openai/gpt-oss-120b"
+LOCAL_QWEN3_5 = "qwen2.5-coder:3b"
+LOCAL_GEMMA3 = "gemma3:4b"
+LOCAL_LLAMA = "llama3.2:3b"
 
 NOMIC_EMBED_TEXT = "nomic-embed-text"
 QWEN3_EMBEDDING = "qwen3-embedding:0.6b"
@@ -30,12 +32,10 @@ EMBEDDING_MODELS_BY_KEY = {
 
 
 def get_remote_llm(name: str):
-    if name == REMOTE_GPT_5:
-        return ChatOpenAI(model=REMOTE_GPT_5)
     if name == REMOTE_GPT_4o:
         return ChatOpenAI(model=REMOTE_GPT_4o)
     else:
-        return ChatGroq(model=REMOTE_GPT_OSS_SMALL)
+        return ChatGroq(model=REMOTE_GPT_OSS_LARGE)
 
 
 def get_local_llm(name: str):
@@ -67,4 +67,3 @@ def get_embedding_model_name_from_key(key: str) -> str:
         raise ValueError(
             f"Unsupported embedding model key '{key}'. Supported keys: {supported_keys}"
         ) from exc
-

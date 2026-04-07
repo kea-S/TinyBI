@@ -3,45 +3,27 @@ prompts:
 
 providers:
   - id: python:./provider.py
-    label: 'Agent: GPT-5'
-    config:
-      model_name: 'gpt-5'
-      local: false
-
-  - id: python:./provider.py
-    label: 'Agent: GPT-4o'
+    label: 'Agent: gpt-4o'
     config:
       model_name: 'gpt-4o'
       local: false
 
-  # - id: python:../provider.py
-  #   label: 'Agent: Llama3.3 70b remote'
-  #   config:
-  #     model_name: 'llama-3.3-70b-versatile'
-  #     local: false
-
-  # - id: python:../provider.py
-  #   label: 'Agent: qwen3 32b remote'
-  #   config:
-  #     model_name: 'qwen/qwen3-32b'
-  #     local: false
-
-  # - id: python:../provider.py
-  #   label: 'Agent: gpt-oss 120b remote'
-  #   config:
-  #     model_name: 'openai/gpt-oss-120b'
-  #     local: false
+  - id: python:./provider.py
+    label: 'Agent: gemma-4b'
+    config:
+      model_name: "gemma3:4b"
+      local: true
 
   - id: python:./provider.py
-    label: 'Agent: gpt-oss 20b remote'
+    label: 'Agent: llama3.2'
     config:
-      model_name: 'openai/gpt-oss-20b'
-      local: false
+      model_name: "llama3.2:3b"
+      local: true
 
   - id: python:./provider.py
-    label: 'Agent: llama3.1 8b local'
+    label: 'Agent: Qwen2.5-coder'
     config:
-      model_name: 'llama3.1:latest'
+      model_name: "qwen2.5-coder:3b"
       local: true
 
 tests:

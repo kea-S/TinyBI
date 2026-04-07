@@ -10,8 +10,7 @@ from src.utils.models import (
     BGE_M3,
     NOMIC_EMBED_TEXT,
     OPENAI_TEXT_EMBEDDING_3_SMALL,
-    REMOTE_GPT_OSS_SMALL,
-    REMOTE_GPT_5,
+    REMOTE_GPT_OSS_LARGE,
     REMOTE_GPT_4o,
     QWEN3_EMBEDDING,
 )
@@ -25,15 +24,13 @@ load_dotenv()
 
 
 REMOTE_MODEL_ENV_VARS = {
-    REMOTE_GPT_5: "OPENAI_API_KEY",
     REMOTE_GPT_4o: "OPENAI_API_KEY",
-    REMOTE_GPT_OSS_SMALL: "GROQ_API_KEY",
+    REMOTE_GPT_OSS_LARGE: "GROQ_API_KEY",
 }
 
 REMOTE_MODEL_HOSTS = {
-    REMOTE_GPT_5: ("api.openai.com", 443),
     REMOTE_GPT_4o: ("api.openai.com", 443),
-    REMOTE_GPT_OSS_SMALL: ("api.groq.com", 443),
+    REMOTE_GPT_OSS_LARGE: ("api.groq.com", 443),
 }
 
 
@@ -105,7 +102,7 @@ def test_get_embedding_model_rejects_unknown_model():
     ],
 )
 def test_langchain_embedding_call(model_name: str, local: bool):
-    _skip_if_runtime_unavailable(REMOTE_GPT_5 if not local else model_name, local)
+    _skip_if_runtime_unavailable(REMOTE_GPT_4o if not local else model_name, local)
 
     embedding_model = get_embedding_model(model_name)
 
@@ -119,9 +116,8 @@ def test_langchain_embedding_call(model_name: str, local: bool):
 
 @pytest.mark.integration
 @pytest.mark.parametrize("model_name, local", [
-    (REMOTE_GPT_5, False),
     (REMOTE_GPT_4o, False),
-    (REMOTE_GPT_OSS_SMALL, False),
+    (REMOTE_GPT_OSS_LARGE, False),
 ])
 def test_langchain_llm_call(model_name, local: bool):
     _skip_if_runtime_unavailable(model_name, local)

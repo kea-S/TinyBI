@@ -78,7 +78,24 @@ If the user asks for "routes" or "A to B": route (Note: Route is defined as sell
 
 If the user asks for a high-level summary: global
 
-#### Filtering (In-Clause Logic)
+#### Filtering
+
+You MUST populate the `filters` list with coarse unresolved filter intents when the user specifies conditions.
+
+Each filter intent should contain:
+- `attribute_hint`: what concept the filter seems to target, such as country, provider, seller region, buyer region, date, or route
+- `operator`: one of `=`, `IN`, `<`, `<=`, `>`, `>=`, `BETWEEN`, `CONTAINS`
+- `raw_value_text`: the literal user value span before normalization
+- `negated`: true when the user excludes something, such as "except SPX"
+
+Keep filter extraction coarse and semantic. Do not try to guess exact database column names.
+
+Examples:
+- "in Singapore" -> `{"attribute_hint": "country", "operator": "=", "raw_value_text": "Singapore"}`
+- "except DB Schenker" -> `{"attribute_hint": "provider", "operator": "=", "raw_value_text": "DB Schenker", "negated": true}`
+- "last month" -> `{"attribute_hint": "date", "operator": "BETWEEN", "raw_value_text": "last month"}`
+
+#### Legacy Deterministic Filters
 
 Collect all mentioned countries into the countries list using the mapping above.
 

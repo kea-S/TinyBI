@@ -2,11 +2,45 @@ import re
 from datetime import date
 import pytest
 from src.tools import query_tool as qt
-from src.utils.pydantic_models import QuerySchema, DEFAULT_START, DEFAULT_END
 from pathlib import Path
 import pandas as pd
 
 import src.utils.database as database
+
+
+DEFAULT_START = date(2025, 1, 1)
+DEFAULT_END = date(2025, 6, 30)
+
+
+class ExtractedObjectStub:
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+    def model_dump(self):
+        return dict(self.__dict__)
+
+
+def make_extracted_object(**overrides):
+    defaults = {
+        "validity_filter": "Valid Only",
+        "subject": "logistics_provider",
+        "metric": "total_parcel_qty",
+        "buyer_countries": [],
+        "seller_countries": [],
+        "buyer_regions": [],
+        "seller_regions": [],
+        "logistics_providers": [],
+        "start_date": DEFAULT_START,
+        "end_date": DEFAULT_END,
+        "time_granularity": "month",
+        "sort_on": "subject",
+        "ordering": "desc",
+        "limit": None,
+        "persona": "Operational",
+        "plot_type": "none",
+    }
+    defaults.update(overrides)
+    return ExtractedObjectStub(**defaults)
 
 
 def _patch_db_and_resolver(monkeypatch):
@@ -49,13 +83,12 @@ def _patch_db_and_resolver(monkeypatch):
 def test_query_tool_returns_df_and_includes_order_by_and_limit(monkeypatch):
     captured, fake_df = _patch_db_and_resolver(monkeypatch)
 
-    schema = QuerySchema(
+    schema = make_extracted_object(
         subject="logistics_provider",
         metric="total_parcel_qty",
         sort_on="metric",
         ordering="desc",
         limit=5,
-        persona="Operational",
     )
 
     df, sql = qt.query_tool(schema)
@@ -84,13 +117,12 @@ def test_query_tool_returns_df_and_includes_order_by_and_limit(monkeypatch):
 def test_query_tool_orders_by_subject_alias_and_group_by(monkeypatch):
     captured, _ = _patch_db_and_resolver(monkeypatch)
 
-    schema = QuerySchema(
+    schema = make_extracted_object(
         subject="country",
         metric="avg_bwt",
         sort_on="subject",
         ordering="asc",
         limit=10,
-        persona="Operational",
     )
 
     _, sql = qt.query_tool(schema)
@@ -112,12 +144,11 @@ def test_query_tool_orders_by_subject_alias_and_group_by(monkeypatch):
 def test_query_tool_extra_filters_providers_only(monkeypatch):
     captured, fake_df = _patch_db_and_resolver(monkeypatch)
 
-    schema = QuerySchema(
+    schema = make_extracted_object(
         subject="logistics_provider",
         metric="total_parcel_qty",
         sort_on="metric",
         ordering="desc",
-        persona="Operational",
         logistics_providers=["SPX", "DB Schenker"],
     )
 
@@ -142,12 +173,11 @@ def test_query_tool_extra_filters_multi_dimension(monkeypatch):
 
     monkeypatch.setattr(qt, "resolve_locations_postvalidated", resolver_override)
 
-    schema = QuerySchema(
+    schema = make_extracted_object(
         subject="logistics_provider",
         metric="avg_bwt",
         sort_on="subject",
         ordering="asc",
-        persona="Operational",
         logistics_providers=["SPX"],  # providers come from schema, others from resolver
     )
 
@@ -167,12 +197,11 @@ def test_query_tool_extra_filters_multi_dimension(monkeypatch):
 def test_query_tool_extra_filters_escaping_providers(monkeypatch):
     captured, _ = _patch_db_and_resolver(monkeypatch)
 
-    schema = QuerySchema(
+    schema = make_extracted_object(
         subject="logistics_provider",
         metric="total_parcel_qty",
         sort_on="metric",
         ordering="desc",
-        persona="Operational",
         logistics_providers=["O'Reilly Logistics"],
     )
 
@@ -183,12 +212,11 @@ def test_query_tool_extra_filters_escaping_providers(monkeypatch):
 def test_query_tool_no_extra_filters_emits_no_in_blocks(monkeypatch):
     captured, _ = _patch_db_and_resolver(monkeypatch)
 
-    schema = QuerySchema(
+    schema = make_extracted_object(
         subject="logistics_provider",
         metric="total_parcel_qty",
         sort_on="metric",
         ordering="desc",
-        persona="Operational",
         # no providers/countries/regions
     )
 
@@ -203,12 +231,11 @@ def test_query_tool_no_extra_filters_emits_no_in_blocks(monkeypatch):
 def test_query_tool_global_subject_fallback_orders_by_metric(monkeypatch):
     captured, _ = _patch_db_and_resolver(monkeypatch)
 
-    schema = QuerySchema(
+    schema = make_extracted_object(
         subject="global",
         metric="avg_bwt",
         sort_on="subject",   # subject not sortable -> fallback to metric
         ordering="asc",
-        persona="Operational",
         limit=7,
     )
 
@@ -227,13 +254,12 @@ def test_query_tool_global_subject_fallback_orders_by_metric(monkeypatch):
 def test_query_tool_time_series_month(monkeypatch):
     captured, _ = _patch_db_and_resolver(monkeypatch)
 
-    schema = QuerySchema(
+    schema = make_extracted_object(
         subject="time_series",
         time_granularity="month",
         metric="total_parcel_qty",
         sort_on="subject",
         ordering="asc",
-        persona="Operational",
         limit=12,
     )
 
@@ -284,12 +310,11 @@ def test_global_avg_bwt_executes_and_computes_correctly(tmp_path, monkeypatch):
     _write_fixture_csv(csv_path)
     monkeypatch.setattr(qt, "CLEANED_DATASET", str(csv_path))
 
-    schema = QuerySchema(
+    schema = make_extracted_object(
         subject="global",
         metric="avg_bwt",
         sort_on="subject",  # falls back to metric
         ordering="asc",
-        persona="Operational",
     )
 
     df, _ = qt.query_tool(schema)
@@ -308,12 +333,11 @@ def test_filters_providers_and_buyer_country_executes(tmp_path, monkeypatch):
     _write_fixture_csv(csv_path)
     monkeypatch.setattr(qt, "CLEANED_DATASET", str(csv_path))
 
-    schema = QuerySchema(
+    schema = make_extracted_object(
         subject="logistics_provider",
         metric="total_parcel_qty",
         sort_on="metric",
         ordering="desc",
-        persona="Operational",
         logistics_providers=["SPX"],
         buyer_countries=["Malaysia"],   # resolves to 'MY'
         seller_countries=["Germany"],   # prevents mirroring; resolver drops it -> no seller filter
@@ -350,7 +374,7 @@ def test_full_real_db_end_to_end(monkeypatch):
     # - start/end dates
     # - providers + buyer/seller countries + regions
     # - sort_on metric + ordering + limit
-    schema = QuerySchema(
+    schema = make_extracted_object(
         validity_filter="Valid Only",
         subject="time_series",
         time_granularity="month",
@@ -365,7 +389,6 @@ def test_full_real_db_end_to_end(monkeypatch):
         sort_on="metric",
         ordering="desc",
         limit=3,
-        persona="Operational",
     )
 
     df, sql = qt.query_tool(schema)
