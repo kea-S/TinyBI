@@ -73,6 +73,7 @@ def _skip_if_runtime_unavailable(model_name: str, local: bool) -> None:
         pytest.skip(f"{host}:{port} is not reachable")
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize(
     "model_name, expected_type, expected_model",
     [

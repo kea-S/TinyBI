@@ -295,4 +295,3 @@ class BatchColumnVectorIndexResponse(BaseModel):
     table_names: List[str] = Field(default_factory=list)
     vector_index_path: str
     metadata_path: str
-
