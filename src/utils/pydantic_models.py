@@ -4,24 +4,47 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 
 class FilterIntent(BaseModel):
+    """
+    Representations of the user's constraints in the natural language question.
+    To be mapped into actual SQL WHERE clauses.
+
+    IMPORTANT: constraints regarding the number of rows to return shouldn't be
+    included as a filter intent. It should instead be included under the limit
+    attribute
+    """
     model_config = ConfigDict(extra="forbid")
 
     attribute_hint: str = Field(
         ...,
-        description="Coarse semantic hint for the filter target, such as country, provider, date, or route.",
+        description="""
+            Hint for what the target column name in a SQL table the natural
+            language query intends to filter on
+        """,
         min_length=1,
     )
+
     operator: Optional[Literal["=", "IN", "<", "<=", ">", ">=", "BETWEEN", "CONTAINS"]] = Field(
         default=None,
-        description="Coarse filter operator classification. Leave null when the user intent is unclear.",
+        description="""
+            Coarse filter operator classification. Leave null when the user
+            intent is unclear
+        """,
     )
+
     raw_value_text: str | List[str] = Field(
         ...,
-        description="Literal value span copied from the user request before canonicalization or database grounding.",
+        description="""
+            Literal values copied from the user request detailing what the user
+            intends to filter for in the target column name in a SQL table
+        """,
     )
+
     negated: bool = Field(
         default=False,
-        description="Whether the user intended this filter as an exclusion, such as 'except gold'.",
+        description="""
+            Whether the user intended this filter as an exclusion, such as
+            'except gold', 'other than january', 'without males'
+        """,
     )
 
     @field_validator("attribute_hint", mode="before")
@@ -75,8 +98,14 @@ class FilterIntent(BaseModel):
 
 class QuerySchema(BaseModel):
     subject: str = Field(
-        ..., description="""
-        The primary dimension the user asks for
+        ...,
+        min_length=1,
+        description="""
+        The best guess intended SQL table column name the user query wants
+        analysis on, and usually the thing results are grouped by on
+
+        To be mapped into actual sql SELECT clauses and potentially GROUP BY
+
         (e.g., 'account_id' for user accounts).
         """
     )
@@ -85,7 +114,13 @@ class QuerySchema(BaseModel):
         ...,
         min_length=1,
         description="""
-            Measure the user wants to analyse e.g. number of accounts.
+        The best guess measure or outcome in the form of a SQL table column name
+        the user wants to analyze for each subject
+
+        To be mapped into actual sql SELECT clauses and potentially aggregation
+        functions
+
+        (e.g., 'money' for money peruser account).
         """
     )
 
@@ -93,8 +128,10 @@ class QuerySchema(BaseModel):
         Field(
             default=None,
             description="""
-                The analytic transformation requested for the metric.
-                Use null when the user does not clearly specify an aggregation.
+            The analytic transformation requested for the metric_hint.
+            Use null when not confident on an existing aggregation.
+
+            To be mapped into actual SQL aggregate functions
             """
     )
 
@@ -102,30 +139,44 @@ class QuerySchema(BaseModel):
         default_factory=list,
         description=(
             """
-            Coarse unresolved filter intents extracted from the user request.
-            These are later grounded to concrete columns, tables, and canonical
-            values.
+            List of FilterIntents, representations of the user's constraints
+            in the natural language question.
+
+            To be mapped into actual SQL WHERE clauses.
+
+            IMPORTANT: constraints regarding the number of rows to return
+            shouldn't be included as a filter intent. It should instead be
+            included under the limit attribute
             """
         ),
     )
 
-    sort_on: Literal["subject", "metric"] = \
+    sort_on: Literal["subject", "metric_hint"] = \
         Field("subject", description="""
-        The column to rank results by.
-        Use 'subject' to sort by the grouping (e.g., region, dates).
-        Use 'metric' to sort by the calculated result (count, sum, max).
+        The dimension to sort the final output table by.
+        Use 'subject' to sort the main subject of analysis (e.g. region, dates).
+        Use 'metric_hint' to sort the analysed measure (e.g. count, sum).
+
+        To be mapped to the SQL SORT BY clause
         """
               )
 
     ordering: Literal["asc", "desc"] = \
         Field(
-        "desc",
-        description="'desc' for 'slowest/highest', 'asc' for 'fastest/lowest'."
-             )
+        "asc",
+        description="""
+        Which direction to sort_on. Default to ascending, but questions with
+        'top' generally would fall under desc.
+        """
+            )
 
     limit: Optional[int] = Field(
         None,
-        description="The number of rows to return (e.g., 'top 5' -> 5).",
+        description="""
+        The number of rows to return (e.g., 'top 5' -> 5).
+
+        To be mapped to the SQL LIMIT clause
+        """,
         ge=1, le=100
     )
 

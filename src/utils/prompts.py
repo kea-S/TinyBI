@@ -1,137 +1,61 @@
 EXTRACTOR_PROMPT = """
-### Role
+You extract a user's natural-language analytics question into `QuerySchema`.
 
-You are an expert Data Analyst and SQL Translation Engine. Your task is to analyze a user's natural language request about logistics performance and extract the structured parameters required to generate a high-quality SQL query.
+Return the best semantic interpretation of the request. Be faithful to the
+user's wording. Do not invent facts, filters, aggregations, or dimensions.
 
-### Mapping Reference (CRITICAL)
-
-You MUST map user-mentioned entities to these exact database values:
-
-1. Countries (ISO-2)
-
-Thailand -> TH
-Malaysia -> MY
-Singapore -> SG
-Indonesia -> ID
-Philippines -> PH
-
-2. Regions:
-
-West Java
-Johor
-Selangor
-Songkhla
-Sarawak
-Banten
-Ilocos Region
-Chiang Mai
-Korat
-Kedah
-East Java
-Central Java
-Unknown
-Nonthaburi
-Nakhon Sawan
-SOCCSKSARGEN
-West Visayas
-North Sumatra
-BKK
-Jakarta
-NCR
-Surat Thani
-Bicol Region
-Kuala Lumpur
-Sabah
-Central Visayas
-South Sulawesi
-Khon Kaen
-Negeri Sembilan
-Pahang
-Penang
-Bali
-Calabarzon
-Phuket
-Central Luzon
-Northern Mindanao
-Chonburi
-Riau
-SG
-Perak
-
-3. Metrics
-
-"BWT" or "Business Wait Time" -> avg_BWT
-
-"APT" or "Average Process Time" -> avg_APT
-
-"Parcels", "Quantity", "Volume" -> total_parcel_qty, avg_parcel_qty
-
-### Field Extraction Logic
-
-#### Subject (Grouping)
-
-If the user asks for a comparison of providers: logistics_provider
-
-If the user asks for a performance over time: time_series
-
-If the user asks for "routes" or "A to B": route (Note: Route is defined as seller_region || ' -> ' || buyer_region)
-
-If the user asks for a high-level summary: global
-
-#### Filtering
-
-You MUST populate the `filters` list with coarse unresolved filter intents when the user specifies conditions.
-
-Each filter intent should contain:
-- `attribute_hint`: what concept the filter seems to target, such as country, provider, seller region, buyer region, date, or route
-- `operator`: one of `=`, `IN`, `<`, `<=`, `>`, `>=`, `BETWEEN`, `CONTAINS`
-- `raw_value_text`: the literal user value span before normalization
-- `negated`: true when the user excludes something, such as "except SPX"
-
-Keep filter extraction coarse and semantic. Do not try to guess exact database column names.
+Rules:
+- `subject` = what each result row is about. Usually the grouping dimension.
+- `metric_hint` = what numeric measure or outcome should be analyzed for each
+  subject.
+- Keep `subject` and `metric_hint` different whenever possible.
+- `aggregation` is only for avg, sum, count, min, or max when explicit or
+  strongly implied.
+- Put constraints into `filters`.
+- Put row-count requests like "top 5" or "show 10" into `limit`, not filters.
+- Use `sort_on = "metric_hint"` for ranking requests like top, highest, lowest,
+  slowest, fastest, most, least, best, worst.
+- Use `sort_on = "subject"` for alphabetical, chronological, or default
+  subject-based ordering.
+- Use `ordering = "desc"` for top, highest, most, slowest, worst.
+- Use `ordering = "asc"` for lowest, least, fastest, earliest, alphabetical,
+  chronological.
+- If a filter exists but the operator is unclear, keep the filter and set
+  `operator` to null.
+- Use `negated = true` for excluding words like except, excluding, without,
+  other than.
+- Copy filter values from the user's wording as literally as possible.
+- If multiple values belong to one filter, use a list in `raw_value_text`.
+- If the request asks for a single overall value with no grouping, use a broad
+  subject like "overall".
 
 Examples:
-- "in Singapore" -> `{"attribute_hint": "country", "operator": "=", "raw_value_text": "Singapore"}`
-- "except DB Schenker" -> `{"attribute_hint": "provider", "operator": "=", "raw_value_text": "DB Schenker", "negated": true}`
-- "last month" -> `{"attribute_hint": "date", "operator": "BETWEEN", "raw_value_text": "last month"}`
+User: average buyer waiting time by provider in Singapore
+subject: provider
+metric_hint: buyer waiting time
+aggregation: avg
+filters: country = Singapore
+sort_on: subject
+ordering: asc
+limit: null
 
-#### Legacy Deterministic Filters
+User: top 5 slowest routes excluding DB Schenker
+subject: route
+metric_hint: waiting time
+aggregation: null
+filters: provider = DB Schenker, negated true
+sort_on: metric_hint
+ordering: desc
+limit: 5
 
-Collect all mentioned countries into the countries list using the mapping above.
-
-Collect all mentioned logistics providers into the logistics_providers list.
-
-If a user says "except X," do NOT include X in the list.
-
-#### Sorting Logic (sort_on & order)
-
-If the user asks for "Top," "Best," or "Highest": order="desc"
-
-If the user asks for "Worst," "Slowest," or "Bottom": order="asc" (for speed metrics like BWT/APT, higher is slower/worse, so adjust intent accordingly).
-
-sort_on: Set to "metric" if they want to see who is the best/worst. Set to "subject" if they want alphabetical/chronological ordering.
-
-#### Temporal Logic
-
-Current Year: 2025 (unless specified otherwise).
-
-If no date is mentioned, default to start_date: "2025-01-01" and end_date: "2025-06-30".
-
-If the user asks for "Monthly" or "per month", set time_granularity: "month". Other granularities exist like "year" and "day"
-
-#### Persona
-
-Operational: Focus on granular details, specific providers, and routes.
-
-Management: Focus on high-level  trends and volume.
-
-BI: Focus on complex correlations and data validity (is_valid_pdt).
-
-Constraints
-
-Value Normalization: Never output the full country name e.g. "Singapore" in the countries list; always output shortened "SG".
-
-Handle Unknowns: If the user asks for a region or provider not in the mapping, omit it from the filters rather than guessing.
+User: parcel volume for Malaysia and Singapore by month
+subject: month
+metric_hint: parcel volume
+aggregation: sum
+filters: country IN [Malaysia, Singapore]
+sort_on: subject
+ordering: asc
+limit: null
 """
 
 EXPLAINER_PROMPT = """
@@ -233,3 +157,4 @@ Recommended Action: One clear next step.
 
 TH: Thailand | MY: Malaysia | SG: Singapore | ID: Indonesia | PH: Philippines
 """
+

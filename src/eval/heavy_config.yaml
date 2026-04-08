@@ -12,29 +12,29 @@ providers:
       local: false
 
   - id: python:./provider.py
-    label: 'Agent: gemma3'
+    label: 'Agent: qwen2.5'
     config:
-      model_name: "gemma3:4b"
+      model_name: "qwen2.5:7b"
       local: true
 
   - id: python:./provider.py
-    label: 'Agent: llama3.2'
+    label: 'Agent: granite3.1-dense'
     config:
-      model_name: "llama3.2:3b"
+      model_name: "granite3.1-dense:8b"
       local: true
 
   - id: python:./provider.py
-    label: 'Agent: granite4'
+    label: 'Agent: granite3.3'
     config:
-      model_name: "granite4:3b"
+      model_name: "granite3.3:8b"
       local: true
 
   - id: python:./provider.py
-    label: 'Agent: phi4-mini'
+    label: 'Agent: llama3.1'
     config:
-      model_name: "phi4-mini:3.8b"
+      model_name: "llama3.1:8b"
       local: true
-  
+
 tests:
   - vars:
       id: example-001

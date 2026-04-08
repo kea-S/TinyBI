@@ -13,9 +13,16 @@ LANGCHAIN = "langchain"
 # models to be experimented with
 REMOTE_GPT_4o = "gpt-4o"
 REMOTE_GPT_OSS_LARGE = "openai/gpt-oss-120b"
-LOCAL_QWEN3_5 = "qwen2.5-coder:3b"
 LOCAL_GEMMA3 = "gemma3:4b"
 LOCAL_LLAMA = "llama3.2:3b"
+LOCAL_PHI4 = "phi4-mini:3.8b"
+LOCAL_GRANITE4 = "granite4:3b"
+
+LOCAL_BIG_LLAMA = "llama3.1:8b"
+LOCAL_BIG_GRANITE = "granite3.1-dense:8b"
+LOCAL_BIG_GRANITE_NEW = "granite3.3:8b"
+LOCAL_BIG_QWEN = "qwen2.5:7b"
+
 
 NOMIC_EMBED_TEXT = "nomic-embed-text"
 QWEN3_EMBEDDING = "qwen3-embedding:0.6b"
