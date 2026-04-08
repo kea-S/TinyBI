@@ -23,7 +23,7 @@ def test_query_schema_accepts_minimal_shape():
     assert q.aggregation is None
     assert q.filters == []
     assert q.sort_on == "subject"
-    assert q.ordering == "desc"
+    assert q.ordering == "asc"
     assert q.limit is None
 
 
@@ -31,7 +31,7 @@ def test_query_schema_accepts_metric_aggregation_and_filters():
     q = QuerySchema(
         **_base_kwargs(),
         aggregation="avg",
-        sort_on="metric",
+        sort_on="metric_hint",
         ordering="asc",
         limit=5,
         filters=[
@@ -50,7 +50,7 @@ def test_query_schema_accepts_metric_aggregation_and_filters():
     )
 
     assert q.aggregation == "avg"
-    assert q.sort_on == "metric"
+    assert q.sort_on == "metric_hint"
     assert q.ordering == "asc"
     assert q.limit == 5
     assert len(q.filters) == 2
