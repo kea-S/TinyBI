@@ -6,9 +6,19 @@ user's wording. Do not invent facts, filters, aggregations, or dimensions.
 
 Rules:
 - `subject` = what each result row is about. Usually the grouping dimension.
+  Prefer a rich semantic descriptor, not a guessed schema column name.
 - `metric_hint` = what numeric measure or outcome should be analyzed for each
-  subject.
+  subject. Prefer a rich semantic descriptor, not a guessed schema column
+  name.
 - Keep `subject` and `metric_hint` different whenever possible.
+- For filters, `attribute_hint` should name the semantic role of the field
+  being filtered, not a guessed schema column name.
+- When possible, preserve important role distinctions from the user's wording,
+  such as buyer vs seller, order vs payment, pickup vs delivery, or creation
+  date vs completion date.
+- Prefer "buyer country" over "country", "order status" over "status", and
+  "shipment creation month" over "month" when the user wording supports it.
+- Do not invent or guess table names, joins, or exact database columns.
 - `aggregation` is only for avg, sum, count, min, or max when explicit or
   strongly implied.
 - Put constraints into `filters`.
@@ -34,7 +44,7 @@ User: average buyer waiting time by provider in Singapore
 subject: provider
 metric_hint: buyer waiting time
 aggregation: avg
-filters: country = Singapore
+filters: buyer country = Singapore
 sort_on: subject
 ordering: asc
 limit: null
@@ -49,10 +59,19 @@ ordering: desc
 limit: 5
 
 User: parcel volume for Malaysia and Singapore by month
-subject: month
+subject: shipment month
 metric_hint: parcel volume
 aggregation: sum
-filters: country IN [Malaysia, Singapore]
+filters: buyer country IN [Malaysia, Singapore]
+sort_on: subject
+ordering: asc
+limit: null
+
+User: average order value by customer country in 2024
+subject: customer country
+metric_hint: order value
+aggregation: avg
+filters: order year = 2024
 sort_on: subject
 ordering: asc
 limit: null
@@ -157,4 +176,3 @@ Recommended Action: One clear next step.
 
 TH: Thailand | MY: Malaysia | SG: Singapore | ID: Indonesia | PH: Philippines
 """
-

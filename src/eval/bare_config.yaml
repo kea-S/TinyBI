@@ -2,7 +2,7 @@ prompts:
   - "{{query}}"
 
 evaluateOptions:
-  maxConcurrency: 5
+  maxConcurrency: 6
 
 providers:
   - id: python:./provider.py
@@ -11,17 +11,24 @@ providers:
       model_name: 'gpt-4o'
       local: false
 
-  - id: python:./provider.py
-    label: 'Agent: gemma3'
-    config:
-      model_name: "gemma3:4b"
-      local: true
+  # - id: python:./provider.py
+  #   label: 'Agent: gemma3'
+  #   config:
+  #     model_name: "gemma3:4b"
+  #     local: true
 
-  - id: python:./provider.py
-    label: 'Agent: llama3.2'
-    config:
-      model_name: "llama3.2:3b"
-      local: true
+  #   reasoning models when you turn them off are really really q bad
+  # - id: python:./provider.py
+  #   label: 'Agent: gemma4'
+  #   config:
+  #     model_name: "gemma4:e4b"
+  #     local: true
+
+  # - id: python:./provider.py
+  #   label: 'Agent: llama3.2'
+  #   config:
+  #     model_name: "llama3.2:3b"
+  #     local: true
 
   - id: python:./provider.py
     label: 'Agent: granite4'
@@ -29,18 +36,18 @@ providers:
       model_name: "granite4:3b"
       local: true
 
-  - id: python:./provider.py
-    label: 'Agent: phi4-mini'
-    config:
-      model_name: "phi4-mini:3.8b"
-      local: true
+  # - id: python:./provider.py
+  #   label: 'Agent: phi4-mini'
+  #   config:
+  #     model_name: "phi4-mini:3.8b"
+  #     local: true
   
 tests:
-  - vars:
-      id: example-001
-      description: "Time series test case"
-      query: "Time series by month of total_parcels"
-      ground_truth: "0104.10.10"
+  # - vars:
+  #     id: example-001
+  #     description: "Time series test case"
+  #     query: "Time series by month of total_parcels"
+  #     ground_truth: "0104.10.10"
 
   - vars:
       id: example-002

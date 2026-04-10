@@ -14,6 +14,7 @@ LANGCHAIN = "langchain"
 REMOTE_GPT_4o = "gpt-4o"
 REMOTE_GPT_OSS_LARGE = "openai/gpt-oss-120b"
 LOCAL_GEMMA3 = "gemma3:4b"
+LOCAL_GEMMA4 = "gemma4:e4b"
 LOCAL_LLAMA = "llama3.2:3b"
 LOCAL_PHI4 = "phi4-mini:3.8b"
 LOCAL_GRANITE4 = "granite4:3b"
@@ -47,7 +48,8 @@ def get_remote_llm(name: str):
 
 def get_local_llm(name: str):
     return ChatOllama(
-        model=name
+        model=name,
+        reasoning=False
     )
 
 

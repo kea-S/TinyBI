@@ -17,8 +17,18 @@ class FilterIntent(BaseModel):
     attribute_hint: str = Field(
         ...,
         description="""
-            Hint for what the target column name in a SQL table the natural
-            language query intends to filter on
+            Semantic hint for the kind of field the natural language query
+            intends to filter on. Prefer a richer business-facing descriptor
+            over a guessed schema column name.
+
+            Good examples:
+            - "buyer country"
+            - "order status"
+            - "shipment creation month"
+
+            Avoid under-specified labels like "country" when the user wording
+            supports a clearer role distinction such as buyer vs seller, order
+            vs payment, creation date vs delivery date.
         """,
         min_length=1,
     )
@@ -35,7 +45,7 @@ class FilterIntent(BaseModel):
         ...,
         description="""
             Literal values copied from the user request detailing what the user
-            intends to filter for in the target column name in a SQL table
+            intends to filter for in the target field
         """,
     )
 
@@ -101,12 +111,20 @@ class QuerySchema(BaseModel):
         ...,
         min_length=1,
         description="""
-        The best guess intended SQL table column name the user query wants
-        analysis on, and usually the thing results are grouped by on
+        Semantic descriptor for what each result row is about, and usually the
+        thing results are grouped by.
+
+        Prefer a richer business-facing descriptor over a guessed schema
+        column name. The goal is to preserve meaning for downstream schema
+        linking, not to predict the exact database field name.
 
         To be mapped into actual sql SELECT clauses and potentially GROUP BY
 
-        (e.g., 'account_id' for user accounts).
+        Good examples:
+        - 'buyer country'
+        - 'provider'
+        - 'shipment creation month'
+        - 'overall'
         """
     )
 
@@ -114,13 +132,19 @@ class QuerySchema(BaseModel):
         ...,
         min_length=1,
         description="""
-        The best guess measure or outcome in the form of a SQL table column name
-        the user wants to analyze for each subject
+        Semantic descriptor for the measure or outcome the user wants to
+        analyze for each subject.
+
+        Prefer the business meaning of the requested measure over a guessed
+        schema column name so downstream retrieval can resolve the best field.
 
         To be mapped into actual sql SELECT clauses and potentially aggregation
         functions
 
-        (e.g., 'money' for money peruser account).
+        Good examples:
+        - 'order value'
+        - 'buyer waiting time'
+        - 'parcel volume'
         """
     )
 
