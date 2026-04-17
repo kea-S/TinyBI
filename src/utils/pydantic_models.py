@@ -122,9 +122,8 @@ class QuerySchema(BaseModel):
 
         Good examples:
         - 'buyer country'
-        - 'provider'
+        - 'logistical provider'
         - 'shipment creation month'
-        - 'overall'
         """
     )
 
@@ -193,6 +192,16 @@ class QuerySchema(BaseModel):
         'top' generally would fall under desc.
         """
             )
+
+    limit: Optional[int] = Field(
+        None,
+        description="""
+        The number of rows to return (e.g., 'top 5' -> 5).
+
+        To be mapped to the SQL LIMIT clause
+        """,
+        ge=1, le=100
+    )
 
     limit: Optional[int] = Field(
         None,
@@ -282,3 +291,19 @@ class BatchColumnVectorIndexResponse(BaseModel):
     table_names: List[str] = Field(default_factory=list)
     vector_index_path: str
     metadata_path: str
+
+
+class CandidateAttributes(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    subject_entries: List[VectorSearchResult]
+    metric_entries: List[VectorSearchResult]
+    filter_entries: List[List[VectorSearchResult]]
+
+
+class FinalAttributes(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    subject_entries: List[ColumnVectorIndexEntry]
+    metric_entries: ColumnVectorIndexEntry
+    filter_entries: List[ColumnVectorIndexEntry]

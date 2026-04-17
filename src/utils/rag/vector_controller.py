@@ -10,6 +10,7 @@ from src.utils.pydantic_models import (
     QuerySchema,
     FilterIntent,
     VectorSearchResult,
+    CandidateTables,
 )
 from src.config import APP_DATA_PATH
 
@@ -60,50 +61,59 @@ class VectorController:
         if self._vector_index._index is None:
             self._vector_index.get_connection(self._vector_index_path)
 
-        # maps filters to the ground truth columns
+        # map subject to potential ColumnVectorIndexEntry entities
+        subject = structured_query.subject
+        subject_embedding = self._embedding_model.embed_query(subject)
+
+        subject_results: list[VectorSearchResult] = \
+            self._vector_index.search(subject_embedding, k=3)
+
+        # map metric to potential ColumnVectorIndexEntry entities
+        metric = structured_query.metric_hint
+        metric_embedding = self._embedding_model.embed_query(metric)
+
+        metric_results: list[VectorSearchResult] = \
+            self._vector_index.search(metric_embedding, k=3)
+
+        # map filters to the ground truth columns
         filters: list[FilterIntent] = structured_query.filters
-        filter_index_entries: ColumnVectorIndexEntry = []
+        filter_candidates: list[list[VectorSearchResult]] = []
 
         for filter in filters:
+
             # search just using column hint for now, can make better
             # using raw_value_text?
             attribute_hint = filter.attribute_hint
+            raw_value_text = filter.raw_value_text
 
-            embedding = self._embedding_model.embed_query(attribute_hint)
+            filter_query = f"""Attribute {attribute_hint} with
+                            value {raw_value_text}"""
 
-            search_result = self._vector_index.search(embedding, k=1)
+            filter_embedding = self._embedding_model.embed_query(filter_query)
 
-            if not search_result:
+            attribute_results: list[VectorSearchResult] = \
+                self._vector_index.search(filter_embedding, k=3)
+
+            if not attribute_results:
                 raise ValueError("No relevant columns found")
 
-            search_result: VectorSearchResult = search_result[0]
+            # ideally handle confidence/ logprops cut off inside search
+            # select relevant candidates
+            filter_group: list[ColumnVectorIndexEntry] = []
+            for result in attribute_results:
+                index_entry: ColumnVectorIndexEntry = result.entry
 
-            index_entry = search_result.entry
+                if resolve_filter_literals(filter, index_entry):
+                    # if inside the thing
+                    filter_group.append(result)
 
-            filter_index_entries.append(index_entry)
+                filter_candidates.append(filter_group)
 
-        # entity match canonical entries in the filters
-        resolved_filters: list[FilterIntent] = []
-        for filter, index_entry in zip(filters, filter_index_entries):
-            resolved_filters.append(
-                resolve_filter_literals(filter, index_entry)
-            )
+        # once we've received all the tables that we might need to build
+        # the query, we pass responsibility to the query builder tool
 
-        # TODO: run the other schema linking steps that will eventually
-        # be passed to the sql builder, including
-        # tables for joins
-        # columns for selection and metric
-        # whatever kind of aggregation you need to do
-        # and I think handle filter values better, handle IN and like
-        # dates and stuff aswell
-        retrievals = self._vector_index.search(
-            self.embedding_model.embed_query(structured_query),
-            k=5)
-
-        # TODO: do postprocessing to return structured result output
-        # that will be ingested by the deterministic SQL builder, for now
-        post_processed = {
-            "retrievals": retrievals
-        }
-
-        return post_processed
+        return CandidateTables(
+            subject_entries=subject_results,
+            metric_entries=metric_results,
+            filter_tables=filter_candidates
+        )

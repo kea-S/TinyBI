@@ -2,68 +2,19 @@ from datetime import date
 from typing import Optional
 
 
-def map_subject(subject: str, time_granularity: Optional[str] = None) -> str:
-    """
-    Map QuerySchema.subject (+ time_granularity when needed) to a SQL expression.
-    Returns an empty string when no subject column is needed (global).
-    """
-    if not subject:
-        return ""
-
-    s = subject.strip().lower()
-    if s == "logistics_provider":
-        return "logistics_provider"
-    if s == "country":
-        return "buyer_country AS country"
-    if s == "route":
-        return "CONCAT(seller_region, ' -> ', buyer_region)"
-    if s == "global":
-        return ""
-    if s == "time_series":
-        if not time_granularity:
-            raise ValueError("time_series subject requires time_granularity")
-        g = time_granularity.strip().lower()
-        if g not in ("day", "week", "month"):
-            raise ValueError("time_granularity must be one of: day, week, month")
-        return f"{g}(dt)"
-
-    raise ValueError(f"Unsupported subject: {subject!r}")
+def map_subject(subject_list: list[str]) -> str:
+    pass
 
 
-def map_metric(metric: str) -> str:
+def map_view_name(view_name: str) -> str:
+    pass
+
+
+def map_metric(metric: str, aggregation: str) -> str:
     """
     Map QuerySchema.metric to a SQL aggregation expression.
     """
-    if not metric:
-        raise ValueError("metric is required")
-
-    m = metric.strip().lower()
-    if m == "total_parcel_qty":
-        return "sum(parcel_qty) AS total_parcels"
-    if m == "avg_bwt":
-        return "round(sum(sum_bwt)/sum(parcel_qty), 3) AS avg_bwt"
-    if m == "avg_apt":
-        return "round(sum(sum_apt)/sum(parcel_qty), 3) AS avg_apt"
-    if m == "avg_parcel_qty":
-        return "avg(parcel_qty) AS avg_parcel_qty"
-
-    raise ValueError(f"Unsupported metric: {metric!r}")
-
-
-def map_validity(include: str) -> str:
-    """
-    Map QuerySchema.validity_filter to a WHERE clause (or empty string).
-    """
-    if not include:
-        return ""
-    v = include.strip().lower()
-    if v == "valid only":
-        return "WHERE is_valid_pdt = TRUE"
-    if v == "anomalies only":
-        return "WHERE is_valid_pdt = FALSE"
-    if v in ("all data", "all"):
-        return ""
-    return ""
+    pass
 
 
 def map_date(d: date | str) -> str:
@@ -88,8 +39,7 @@ def map_sort_on(
     sort_on: str,
     *,
     metric: Optional[str] = None,
-    subject: Optional[str] = None,
-    time_granularity: Optional[str] = None,
+    subject: Optional[str] = None
 ) -> str:
     """
     Resolve the ORDER BY target:
@@ -147,10 +97,11 @@ def map_ordering(ordering: str) -> str:
         return "ASC"
     if o == "desc":
         return "DESC"
+
     raise ValueError("ordering must be 'asc' or 'desc'")
 
 
-def map_extra_conditions(
+def map_conditions(
     *,
     logistics_providers: list[str] | None = None,
     buyer_countries: list[str] | None = None,
@@ -203,3 +154,14 @@ def map_extra_conditions(
         return ""
 
     return "AND " + " AND ".join(conditions)
+
+
+def map_join():
+    """
+    TODO: next release
+    """
+    pass
+
+
+def map_groupby(subject_entries, metric_entries):
+    pass
