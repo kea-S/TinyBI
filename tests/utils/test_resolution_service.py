@@ -1,5 +1,5 @@
 from src.utils.pydantic_models import ColumnVectorIndexEntry, FilterIntent
-from src.utils.value_resolution.resolution_service import resolve_filter_literals
+from src.utils.value_resolution.value_resolver import resolve_filter_literals
 
 
 def test_resolve_filter_literals_matches_canonical_values_by_normalized_text():

@@ -1,20 +1,66 @@
 from datetime import date
 from typing import Optional
+from src.utils.pydantic_models import ColumnVectorIndexEntry
 
 
-def map_subject(subject_list: list[str]) -> str:
-    pass
+def map_subject(subject_entries: list[ColumnVectorIndexEntry]) -> str:
+    """
+    Convert subject entries (source_key format: table.column) to SQL select clauses.
+    Each column is aliased to just the column name.
+    Input: [ColumnVectorIndexEntry(source_key='shipments.provider'), ...]
+    Output: 'shipments.provider AS provider, shipments.region AS region'
+    """
+    if not subject_entries:
+        return ""
+    parts = []
+    for entry in subject_entries:
+        source_key = entry.source_key
+        column_name = source_key.split(".")[-1] if "." in source_key else source_key
+        parts.append(f"{source_key} AS {column_name}")
+    return ", ".join(parts)
+
+
+def map_metric(metric_entry: ColumnVectorIndexEntry | None, aggregation: str | None) -> str:
+    """
+    Map metric entry to SQL aggregation expression.
+    - If aggregation is set, wrap in aggregation function (e.g., SUM, AVG)
+    - If aggregation is None, return raw column
+    Input: (ColumnVectorIndexEntry(source_key='shipments.order_value'), 'sum') -> 'SUM(shipments.order_value)'
+    Input: (ColumnVectorIndexEntry(source_key='shipments.bwt'), None) -> 'shipments.bwt'
+    """
+    if not metric_entry:
+        return ""
+    source_key = metric_entry.source_key
+    if aggregation:
+        agg_upper = aggregation.upper()
+        return f"{agg_upper}({source_key})"
+    return source_key
 
 
 def map_view_name(view_name: str) -> str:
-    pass
+    """
+    Return view name as-is with null safety.
+    """
+    if not view_name:
+        raise ValueError("view_name cannot be empty")
+    return view_name
 
 
-def map_metric(metric: str, aggregation: str) -> str:
+def map_metric(metric_entry: ColumnVectorIndexEntry | None, aggregation: str | None) -> str:
     """
-    Map QuerySchema.metric to a SQL aggregation expression.
+    Map metric entry to SQL aggregation expression.
+    - If aggregation is set, wrap in aggregation function (e.g., SUM, AVG)
+    - If aggregation is None, return raw column
+    Input: (ColumnVectorIndexEntry(source_key='shipments.order_value'), 'sum') -> 'SUM(shipments.order_value)'
+    Input: (ColumnVectorIndexEntry(source_key='shipments.bwt'), None) -> 'shipments.bwt'
     """
-    pass
+    if not metric_entry:
+        return ""
+    source_key = metric_entry.source_key
+    if aggregation:
+        agg_upper = aggregation.upper()
+        return f"{agg_upper}({source_key})"
+    return source_key
 
 
 def map_date(d: date | str) -> str:
@@ -37,51 +83,31 @@ def map_limit(limit: Optional[int]) -> Optional[int]:
 
 def map_sort_on(
     sort_on: str,
-    *,
-    metric: Optional[str] = None,
-    subject: Optional[str] = None
+    metric_entry: Optional[ColumnVectorIndexEntry],
+    subject_entries: list[ColumnVectorIndexEntry],
+    aggregation: Optional[str]
 ) -> str:
     """
-    Resolve the ORDER BY target:
-    - If sort_on == 'metric', return the metric alias (e.g., 'total_parcels', 'avg_bwt').
-    - If sort_on == 'subject', return the subject column/expression (or alias if applicable).
+    Resolve the ORDER BY target using resolved attributes.
+    - sort_on == 'metric' or 'metric_hint': use metric column
+    - sort_on == 'subject': use first subject column
     """
     if not sort_on:
         return ""
     key = sort_on.strip().lower()
 
-    if key == "metric":
-        if not metric:
-            raise ValueError("metric is required to sort on metric")
-        m = metric.strip().lower()
-        if m == "total_parcel_qty":
-            return "total_parcels"
-        if m in ("avg_bwt", "avg_apt", "avg_parcel_qty"):
-            return m
-        raise ValueError(f"Unsupported metric for sort: {metric!r}")
+    if key in ("metric", "metric_hint"):
+        if not metric_entry:
+            return ""
+        source_key = metric_entry.source_key
+        if aggregation:
+            return f"{aggregation.upper()}({source_key})"
+        return source_key
 
     if key == "subject":
-        if not subject:
-            raise ValueError("subject is required to sort on subject")
-        s = subject.strip().lower()
-        if s == "logistics_provider":
-            return "logistics_provider"
-        if s == "country":
-            # map_subject returns 'buyer_country AS country', we sort by the alias
-            return "country"
-        if s == "route":
-            return "CONCAT(seller_region, ' -> ', buyer_region)"
-        if s == "global":
-            # No subject column available in global rollups
+        if not subject_entries:
             return ""
-        if s == "time_series":
-            if not time_granularity:
-                raise ValueError("time_series subject requires time_granularity to sort")
-            g = time_granularity.strip().lower()
-            if g not in ("day", "week", "month"):
-                raise ValueError("time_granularity must be one of: day, week, month")
-            return f"{g}(dt)"
-        raise ValueError(f"Unsupported subject for sort: {subject!r}")
+        return subject_entries[0].source_key
 
     return ""
 
@@ -102,13 +128,8 @@ def map_ordering(ordering: str) -> str:
 
 
 def map_conditions(
-    *,
-    logistics_providers: list[str] | None = None,
-    buyer_countries: list[str] | None = None,
-    seller_countries: list[str] | None = None,
-    buyer_regions: list[str] | None = None,
-    seller_regions: list[str] | None = None,
-) -> str:
+    column
+    ) -> str:
     """
     Deterministic Filter Assembly:
     - Same-dimension values -> OR semantics via IN (...)
@@ -156,12 +177,25 @@ def map_conditions(
     return "AND " + " AND ".join(conditions)
 
 
+def map_groupby(subject_entries: list[ColumnVectorIndexEntry], aggregation: str | None) -> str:
+    """
+    Generate GROUP BY clause.
+    - Only if aggregation is set
+    - If multiple subject columns, group by all of them
+    - If no aggregation, return empty string
+    Input: ([ColumnVectorIndexEntry(...)], 'sum') -> 'GROUP BY shipments.provider, shipments.region'
+    Input: ([...], None) -> ''
+    """
+    if not aggregation:
+        return ""
+    if not subject_entries:
+        return ""
+    columns = [entry.source_key for entry in subject_entries]
+    return "GROUP BY " + ", ".join(columns)
+
+
 def map_join():
     """
     TODO: next release
     """
-    pass
-
-
-def map_groupby(subject_entries, metric_entries):
     pass

@@ -67,16 +67,19 @@ def resolve_columns(
 
     subject_entries_final = pick_entries(subject_entries, primary_table)
 
-    metric_entry_final = max(metric_entries, key=lambda r: r.score).entry
+    # Metric: pick highest confidence entry that passes threshold
+    valid_metrics = [r for r in metric_entries if r.score >= MIN_CONFIDENCE]
+    metric_entry_final = max(valid_metrics, key=lambda r: r.score).entry if valid_metrics else None
 
-    filter_entries_final = [
-        max(filter_group, key=lambda r: r.score)
-        for filter_group
-        in filter_entries
-    ]
+    # Filters: pick highest confidence from each filter group that passes threshold
+    filter_entries_final = []
+    for filter_group in filter_entries:
+        valid_filters = [r for r in filter_group if r.score >= MIN_CONFIDENCE]
+        if valid_filters:
+            filter_entries_final.append(max(valid_filters, key=lambda r: r.score).entry)
 
     return FinalAttributes(
         subject_entries=subject_entries_final,
-        metric_entries=metric_entry_final,
+        metric_entry=metric_entry_final,
         filter_entries=filter_entries_final
     ), primary_table

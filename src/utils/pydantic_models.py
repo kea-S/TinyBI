@@ -305,5 +305,5 @@ class FinalAttributes(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     subject_entries: List[ColumnVectorIndexEntry]
-    metric_entries: ColumnVectorIndexEntry
+    metric_entry: Optional[ColumnVectorIndexEntry]
     filter_entries: List[ColumnVectorIndexEntry]

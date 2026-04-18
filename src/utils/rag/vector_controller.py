@@ -2,7 +2,7 @@ from pathlib import Path
 
 from src.utils.rag.vector_index import VectorIndex
 from src.utils.models import get_embedding_model
-from src.utils.value_resolution.resolution_service import resolve_filter_literals
+from src.utils.value_resolution.value_resolver import resolve_filter_literals
 
 from src.utils.pydantic_models import (
     BatchColumnVectorIndexResponse,
@@ -10,7 +10,7 @@ from src.utils.pydantic_models import (
     QuerySchema,
     FilterIntent,
     VectorSearchResult,
-    CandidateTables,
+    CandidateAttributes,
 )
 from src.config import APP_DATA_PATH
 
@@ -112,8 +112,8 @@ class VectorController:
         # once we've received all the tables that we might need to build
         # the query, we pass responsibility to the query builder tool
 
-        return CandidateTables(
+        return CandidateAttributes(
             subject_entries=subject_results,
             metric_entries=metric_results,
-            filter_tables=filter_candidates
+            filter_entries=filter_candidates
         )
