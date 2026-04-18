@@ -1,5 +1,9 @@
+import os
+import socket
+from urllib.parse import urlparse
+from unittest.mock import MagicMock
+import pandas as pd
 import pytest
-from unittest.mock import patch, MagicMock
 
 from src.utils.pydantic_models import (
     ColumnVectorIndexEntry,
@@ -8,6 +12,20 @@ from src.utils.pydantic_models import (
     QuerySchema,
 )
 from src.tools.query_tool import query_tool
+from src.utils.rag.vector_controller import VectorController
+
+
+class FakeEmbeddingModel:
+    def __init__(self):
+        self.document_inputs = []
+
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
+        self.document_inputs.append(texts)
+        dim = len(texts)
+        return [[1.0 if i == j else 0.0 for j in range(dim)] for i in range(dim)]
+
+    def embed_query(self, text: str) -> list[float]:
+        return [1.0, 0.0, 0.0]
 
 
 def _entry(table_name: str, column_name: str, **extra) -> ColumnVectorIndexEntry:
@@ -148,3 +166,74 @@ class TestQueryToolBuildsValidSQL:
         _, sql = query_tool(query)
 
         assert "LIMIT 5" in sql
+
+
+class TestQueryToolIntegration:
+    @pytest.mark.integration
+    def test_end_to_end_produces_valid_sql(self, monkeypatch, tmp_path):
+        endpoint = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434")
+        parsed = urlparse(endpoint if "://" in endpoint else f"http://{endpoint}")
+        hostname = parsed.hostname or "127.0.0.1"
+        port = parsed.port or 11434
+        try:
+            with socket.create_connection((hostname, port), timeout=1):
+                pass
+        except OSError:
+            pytest.skip("Ollama is not reachable")
+
+        entries = [
+            ColumnVectorIndexEntry(
+                entry_id=0,
+                table_name="orders",
+                column_name="provider",
+                source_key="orders.provider",
+                payload={"is_categorical": True, "canonical_values": ["DB Schenker", "SPX"]},
+            ),
+            ColumnVectorIndexEntry(
+                entry_id=1,
+                table_name="orders",
+                column_name="buyer_country",
+                source_key="orders.buyer_country",
+                payload={"is_categorical": True, "canonical_values": ["Singapore", "Malaysia"]},
+            ),
+            ColumnVectorIndexEntry(
+                entry_id=2,
+                table_name="orders",
+                column_name="order_value",
+                source_key="orders.order_value",
+                payload={"is_categorical": False},
+            ),
+        ]
+
+        controller = VectorController("nomic-embed-text", vector_index_path=tmp_path / "columns")
+        controller.batch_insert_index_entries(entries)
+
+        monkeypatch.setattr(
+            "src.tools.query_tool.VectorController",
+            lambda *a, **kw: controller,
+        )
+        monkeypatch.setattr("src.tools.query_tool.global_database.query", lambda sql: pd.DataFrame())
+        monkeypatch.setattr("src.tools.query_tool.global_database.get_connection", lambda _: None)
+        monkeypatch.setattr("src.tools.query_tool.global_database.close_connection", lambda: None)
+
+        fi = FilterIntent(
+            attribute_hint="provider",
+            operator="=",
+            raw_value_text=("DB Schenker",),
+        )
+        query = QuerySchema(
+            subject="provider",
+            metric_hint="order value",
+            aggregation="sum",
+            filters=[fi],
+            sort_on="metric_hint",
+            ordering="desc",
+            limit=5,
+        )
+
+        _, sql = query_tool(query, dataset_path=str(tmp_path / "test.csv"))
+
+        print(sql)
+
+        assert "SELECT" in sql
+        assert "FROM" in sql

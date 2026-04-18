@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from src.api.routes.vector import router as vector_router
+from src.api.routes.query import router as query_router
 
 
 def create_app() -> FastAPI:
@@ -11,6 +12,7 @@ def create_app() -> FastAPI:
         return {"status": "ok"}
 
     app.include_router(vector_router)
+    app.include_router(query_router)
     return app
 
 
