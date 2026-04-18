@@ -3,6 +3,10 @@ from typing_extensions import Self
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
+SINGLE_VALUE_OPERATORS = {"=", "<", "<=", ">", ">=", "CONTAINS"}
+ORDERED_OPERATORS = {"<", "<=", ">", ">="}
+
+
 class FilterIntent(BaseModel):
     """
     Representations of the user's constraints in the natural language question.
@@ -12,7 +16,7 @@ class FilterIntent(BaseModel):
     included as a filter intent. It should instead be included under the limit
     attribute
     """
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
     attribute_hint: str = Field(
         ...,
@@ -41,11 +45,11 @@ class FilterIntent(BaseModel):
         """,
     )
 
-    raw_value_text: str | List[str] = Field(
+    raw_value_text: tuple[str, ...] = Field(
         ...,
         description="""
             Literal values copied from the user request detailing what the user
-            intends to filter for in the target field
+            intends to filter for in the target field. Always a tuple.
         """,
     )
 
@@ -85,10 +89,7 @@ class FilterIntent(BaseModel):
     @classmethod
     def _normalise_raw_value_text(cls, v):
         if isinstance(v, str):
-            cleaned = v.strip()
-            if not cleaned:
-                raise ValueError("raw_value_text must not be empty")
-            return cleaned
+            v = [v]
 
         if isinstance(v, (list, tuple)):
             cleaned_items: List[str] = []
@@ -101,9 +102,58 @@ class FilterIntent(BaseModel):
 
             if not cleaned_items:
                 raise ValueError("raw_value_text list must contain at least one non-empty string")
-            return cleaned_items
+            return tuple(cleaned_items)
 
-        raise ValueError("raw_value_text must be a string or a list of strings")
+        raise ValueError("raw_value_text must be a list or tuple of strings")
+
+    @model_validator(mode="before")
+    @classmethod
+    def _normalise_operator_value_consistency(cls, data):
+        if not isinstance(data, dict):
+            return data
+
+        raw_value_text = data.get("raw_value_text")
+        operator = data.get("operator")
+
+        if raw_value_text is None:
+            return data
+
+        if isinstance(raw_value_text, str):
+            raw_value_text = [raw_value_text]
+            data = {**data, "raw_value_text": raw_value_text}
+
+        if isinstance(raw_value_text, (list, tuple)):
+            n = len(raw_value_text)
+        else:
+            return data
+
+        if operator == "BETWEEN":
+            if n != 2:
+                raise ValueError(
+                    f"operator 'BETWEEN' requires exactly 2 values, got {n}"
+                )
+            return data
+
+        if operator == "=" and n > 1:
+            data = {**data, "operator": "IN"}
+            return data
+
+        if operator is None:
+            if n == 1:
+                data = {**data, "operator": "="}
+            else:
+                data = {**data, "operator": "IN"}
+            return data
+
+        if operator in SINGLE_VALUE_OPERATORS and n > 1:
+            if operator in ORDERED_OPERATORS:
+                values = sorted(raw_value_text, reverse=(operator in (">", ">=")))
+                data = {**data, "raw_value_text": (values[0],)}
+            else:
+                data = {**data, "raw_value_text": (raw_value_text[0],)}
+            return data
+
+        return data
 
 
 class QuerySchema(BaseModel):
@@ -298,7 +348,7 @@ class CandidateAttributes(BaseModel):
 
     subject_entries: List[VectorSearchResult]
     metric_entries: List[VectorSearchResult]
-    filter_entries: List[List[VectorSearchResult]]
+    filter_entries: dict[FilterIntent, List[VectorSearchResult]]
 
 
 class FinalAttributes(BaseModel):
@@ -306,4 +356,4 @@ class FinalAttributes(BaseModel):
 
     subject_entries: List[ColumnVectorIndexEntry]
     metric_entry: Optional[ColumnVectorIndexEntry]
-    filter_entries: List[ColumnVectorIndexEntry]
+    filter_entries: dict[FilterIntent, ColumnVectorIndexEntry]

@@ -17,7 +17,6 @@ def query_tool(structured_query: QuerySchema,
     Resolve canonical locations for deterministic SQL filters
     """
 
-    # setup
     global_database.get_connection(dataset_path)
     vector_controller = VectorController(DEFAULT_EMBEDDING_MODEL)
 
@@ -35,6 +34,7 @@ def query_tool(structured_query: QuerySchema,
         final_attributes.metric_entry,
         structured_query.aggregation
     )
+    where_clause = nrm.map_conditions(final_attributes.filter_entries)
     group_by_clause = nrm.map_groupby(
         final_attributes.subject_entries,
         structured_query.aggregation
@@ -47,9 +47,7 @@ def query_tool(structured_query: QuerySchema,
         structured_query.aggregation
     )
     limit_clause = nrm.map_limit(structured_query.limit)
-    join_clause = nrm.map_join()
 
-    # Build select clause: subjects comma-separated, then metric (if present)
     select_parts = []
     if subject_clause:
         select_parts.append(subject_clause)
@@ -57,17 +55,25 @@ def query_tool(structured_query: QuerySchema,
         select_parts.append(metric_clause)
     select_clause = ", ".join(select_parts)
 
-    sql = f"""
-        SELECT
-        {select_clause}
-        FROM
-        {view_name}
-        {where_clause}
-        {group_by_clause}
-        {order_by_column} {order_by_direction}
-        {limit_clause}
-        {join_clause}
-        """.strip()
+    sql_parts = [
+        f"SELECT {select_clause}",
+        f"FROM {view_name}",
+    ]
+
+    if where_clause:
+        sql_parts.append(where_clause)
+
+    if group_by_clause:
+        sql_parts.append(group_by_clause)
+
+    if order_by_column:
+        direction = f" {order_by_direction}" if order_by_direction else ""
+        sql_parts.append(f"ORDER BY {order_by_column}{direction}")
+
+    if limit_clause is not None:
+        sql_parts.append(f"LIMIT {limit_clause}")
+
+    sql = "\n".join(sql_parts)
 
     df = global_database.query(sql)
 

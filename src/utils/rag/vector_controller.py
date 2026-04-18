@@ -2,7 +2,7 @@ from pathlib import Path
 
 from src.utils.rag.vector_index import VectorIndex
 from src.utils.models import get_embedding_model
-from src.utils.value_resolution.value_resolver import resolve_filter_literals
+from src.utils.value_resolution.value_resolver import can_resolve_value
 
 from src.utils.pydantic_models import (
     BatchColumnVectorIndexResponse,
@@ -77,12 +77,10 @@ class VectorController:
 
         # map filters to the ground truth columns
         filters: list[FilterIntent] = structured_query.filters
-        filter_candidates: list[list[VectorSearchResult]] = []
+        filter_candidates: dict[FilterIntent, list[VectorSearchResult]] = {}
 
         for filter in filters:
 
-            # search just using column hint for now, can make better
-            # using raw_value_text?
             attribute_hint = filter.attribute_hint
             raw_value_text = filter.raw_value_text
 
@@ -94,20 +92,15 @@ class VectorController:
             attribute_results: list[VectorSearchResult] = \
                 self._vector_index.search(filter_embedding, k=3)
 
-            if not attribute_results:
-                raise ValueError("No relevant columns found")
-
-            # ideally handle confidence/ logprops cut off inside search
-            # select relevant candidates
-            filter_group: list[ColumnVectorIndexEntry] = []
+            filter_group: list[VectorSearchResult] = []
             for result in attribute_results:
                 index_entry: ColumnVectorIndexEntry = result.entry
 
-                if resolve_filter_literals(filter, index_entry):
-                    # if inside the thing
+                if can_resolve_value(filter, index_entry):
                     filter_group.append(result)
 
-                filter_candidates.append(filter_group)
+            if filter_group:
+                filter_candidates[filter] = filter_group
 
         # once we've received all the tables that we might need to build
         # the query, we pass responsibility to the query builder tool

@@ -14,7 +14,7 @@ def _normalize_literal(value: str) -> str:
     return cleaned
 
 
-def _as_list(value: str | list[str]) -> list[str]:
+def _as_list(value: str | list[str] | tuple[str, ...]) -> list[str]:
     return [value] if isinstance(value, str) else list(value)
 
 
@@ -47,79 +47,83 @@ def _choose_fuzzy_match(
     return top_value, top_score
 
 
-def resolve_filter_literals(
-    filter_intent: FilterIntent,
-    index_entry: ColumnVectorIndexEntry,
-) -> FilterIntent | None:
+def _get_resolution_context(index_entry: ColumnVectorIndexEntry):
     payload = index_entry.payload or {}
     is_categorical = bool(payload.get("is_categorical"))
-    raw_values = _as_list(filter_intent.raw_value_text)
-
-    if not is_categorical:
-        return filter_intent
-
     canonical_values = payload.get("canonical_values") or []
-    if not isinstance(canonical_values, list):
-        raise ValueError("payload.canonical_values must be a list[str] when is_categorical is true")
-
     value_labels = payload.get("value_labels") or {}
-    if not isinstance(value_labels, dict):
-        raise ValueError("payload.value_labels must be a dict[str, str] when provided")
 
     normalized_canonical_map: dict[str, str] = {}
     normalized_label_map: dict[str, str] = {}
 
     for canonical_value in canonical_values:
-        if not isinstance(canonical_value, str):
-            raise ValueError("payload.canonical_values entries must be strings")
-
         normalized_canonical_map[_normalize_literal(canonical_value)] = canonical_value
-
         label = value_labels.get(canonical_value)
         if isinstance(label, str) and label.strip():
             normalized_label_map[_normalize_literal(label)] = canonical_value
 
     fuzzy_candidates = {**normalized_canonical_map, **normalized_label_map}
+
+    return is_categorical, canonical_values, normalized_canonical_map, normalized_label_map, fuzzy_candidates
+
+
+def can_resolve_value(
+    filter_intent: FilterIntent,
+    index_entry: ColumnVectorIndexEntry,
+) -> bool:
+    is_categorical, canonical_values, norm_map, label_map, fuzzy_candidates = _get_resolution_context(index_entry)
+
+    if not is_categorical:
+        return True
+
+    if not canonical_values:
+        return False
+
+    raw_values = _as_list(filter_intent.raw_value_text)
+
+    for raw_value in raw_values:
+        normalized_value = _normalize_literal(raw_value)
+        if (
+            raw_value in canonical_values
+            or normalized_value in norm_map
+            or normalized_value in label_map
+            or _choose_fuzzy_match(normalized_value, fuzzy_candidates)[0] is not None
+        ):
+            return True
+
+    return False
+
+
+def resolve_filter_literals(
+    filter_intent: FilterIntent,
+    index_entry: ColumnVectorIndexEntry,
+) -> FilterIntent:
+    is_categorical, canonical_values, norm_map, label_map, fuzzy_candidates = _get_resolution_context(index_entry)
+    raw_values = _as_list(filter_intent.raw_value_text)
+
+    if not is_categorical:
+        return filter_intent
+
     resolved_values: list[str] = []
     unresolved_values: list[str] = []
-    matches: list[dict[str, str | float | None]] = []
 
     for raw_value in raw_values:
         normalized_value = _normalize_literal(raw_value)
         resolved_value: str | None = None
-        match_type = "none"
-        score = 0.0
 
         if raw_value in canonical_values:
             resolved_value = raw_value
-            match_type = "exact"
-            score = 1.0
-        elif normalized_value in normalized_canonical_map:
-            resolved_value = normalized_canonical_map[normalized_value]
-            match_type = "normalized"
-            score = 1.0
-        elif normalized_value in normalized_label_map:
-            resolved_value = normalized_label_map[normalized_value]
-            match_type = "label"
-            score = 1.0
+        elif normalized_value in norm_map:
+            resolved_value = norm_map[normalized_value]
+        elif normalized_value in label_map:
+            resolved_value = label_map[normalized_value]
         else:
-            resolved_value, score = _choose_fuzzy_match(normalized_value, fuzzy_candidates)
-            if resolved_value is not None:
-                match_type = "fuzzy"
+            resolved_value, _ = _choose_fuzzy_match(normalized_value, fuzzy_candidates)
 
         if resolved_value is None:
             unresolved_values.append(raw_value)
         else:
             resolved_values.append(resolved_value)
-
-        matches.append(
-            {
-                "raw_value": raw_value,
-                "resolved_value": resolved_value,
-                "match_type": match_type,
-                "score": round(score, 4),
-            }
-        )
 
     if unresolved_values:
         logger.info(
@@ -130,18 +134,13 @@ def resolve_filter_literals(
                 "raw_values": raw_values,
                 "resolved_values": resolved_values,
                 "unresolved_values": unresolved_values,
-                "matches": matches,
             },
         )
 
     if not resolved_values:
         return None
 
-    cleaned_value: str | list[str]
-    if len(resolved_values) == 1:
-        cleaned_value = resolved_values[0]
-    else:
-        cleaned_value = resolved_values
+    cleaned_value = resolved_values
 
     cleaned_operator = filter_intent.operator
     if len(resolved_values) > 1 and cleaned_operator in (None, "="):
@@ -153,4 +152,3 @@ def resolve_filter_literals(
         raw_value_text=cleaned_value,
         negated=filter_intent.negated,
     )
-

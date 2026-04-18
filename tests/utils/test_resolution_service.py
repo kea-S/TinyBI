@@ -22,7 +22,7 @@ def test_resolve_filter_literals_matches_canonical_values_by_normalized_text():
     result = resolve_filter_literals(filter_intent, entry)
 
     assert result is not None
-    assert result.raw_value_text == "DB Schenker"
+    assert result.raw_value_text == ("DB Schenker",)
     assert result.operator == "="
     assert result.negated is False
 
@@ -51,7 +51,7 @@ def test_resolve_filter_literals_uses_value_labels_to_map_user_friendly_text():
     result = resolve_filter_literals(filter_intent, entry)
 
     assert result is not None
-    assert result.raw_value_text == "F"
+    assert result.raw_value_text == ("F",)
     assert result.operator == "="
 
 
@@ -75,7 +75,7 @@ def test_resolve_filter_literals_fuzzy_matches_small_typos():
     result = resolve_filter_literals(filter_intent, entry)
 
     assert result is not None
-    assert result.raw_value_text == "Singapore"
+    assert result.raw_value_text == ("Singapore",)
     assert result.operator == "="
 
 
@@ -120,7 +120,7 @@ def test_resolve_filter_literals_passes_non_categorical_values_through():
     result = resolve_filter_literals(filter_intent, entry)
 
     assert result is not None
-    assert result.raw_value_text == ["2025-01-01", "2025-01-31"]
+    assert result.raw_value_text == ("2025-01-01", "2025-01-31")
     assert result.operator == "BETWEEN"
 
 
@@ -144,5 +144,5 @@ def test_resolve_filter_literals_drops_unresolved_values_and_upgrades_operator_t
     result = resolve_filter_literals(filter_intent, entry)
 
     assert result is not None
-    assert result.raw_value_text == ["Singapore", "Malaysia"]
+    assert result.raw_value_text == ("Singapore", "Malaysia")
     assert result.operator == "IN"

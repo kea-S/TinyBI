@@ -1,9 +1,11 @@
 from src.utils.pydantic_models import (
     CandidateAttributes,
     FinalAttributes,
+    FilterIntent,
     VectorSearchResult,
     ColumnVectorIndexEntry,
 )
+from src.utils.value_resolution.value_resolver import resolve_filter_literals
 from collections import Counter
 
 # hyperparameters
@@ -33,7 +35,7 @@ def resolve_columns(
     for result in metric_entries:
         process_entry(result)
 
-    for filter_group in filter_entries:
+    for filter_group in filter_entries.values():
         for result in filter_group:
             process_entry(result)
 
@@ -71,12 +73,15 @@ def resolve_columns(
     valid_metrics = [r for r in metric_entries if r.score >= MIN_CONFIDENCE]
     metric_entry_final = max(valid_metrics, key=lambda r: r.score).entry if valid_metrics else None
 
-    # Filters: pick highest confidence from each filter group that passes threshold
-    filter_entries_final = []
-    for filter_group in filter_entries:
+    # Filters: pick highest confidence column per FilterIntent, then resolve literals
+    filter_entries_final: dict[FilterIntent, ColumnVectorIndexEntry] = {}
+    for filter_intent, filter_group in filter_entries.items():
         valid_filters = [r for r in filter_group if r.score >= MIN_CONFIDENCE]
         if valid_filters:
-            filter_entries_final.append(max(valid_filters, key=lambda r: r.score).entry)
+            best_entry = max(valid_filters, key=lambda r: r.score).entry
+            resolved_intent = resolve_filter_literals(filter_intent, best_entry)
+            if resolved_intent is not None:
+                filter_entries_final[resolved_intent] = best_entry
 
     return FinalAttributes(
         subject_entries=subject_entries_final,

@@ -1,7 +1,7 @@
 import pytest
 from datetime import date
 
-from src.utils.pydantic_models import ColumnVectorIndexEntry
+from src.utils.pydantic_models import ColumnVectorIndexEntry, FilterIntent
 from src.utils.sql_normaliser import (
     map_subject,
     map_metric,
@@ -10,6 +10,7 @@ from src.utils.sql_normaliser import (
     map_sort_on,
     map_ordering,
     map_groupby,
+    map_conditions,
 )
 
 
@@ -213,3 +214,96 @@ class TestMapGroupby:
 
     def test_empty_entries_no_aggregation(self):
         assert map_groupby([], None) == ""
+
+
+def _entry(table_name: str, column_name: str) -> ColumnVectorIndexEntry:
+    return ColumnVectorIndexEntry(
+        entry_id=1,
+        table_name=table_name,
+        column_name=column_name,
+        source_key=f"{table_name}.{column_name}",
+    )
+
+
+class TestMapConditions:
+    def test_empty_dict_returns_empty(self):
+        assert map_conditions({}) == ""
+
+    def test_single_equals_condition(self):
+        fi = FilterIntent(attribute_hint="country", operator="=", raw_value_text=("Singapore",))
+        entry = _entry("orders", "buyer_country")
+        result = map_conditions({fi: entry})
+        assert result == "WHERE orders.buyer_country = 'Singapore'"
+
+    def test_single_in_condition(self):
+        fi = FilterIntent(attribute_hint="country", operator="IN", raw_value_text=("Singapore", "Malaysia"))
+        entry = _entry("orders", "buyer_country")
+        result = map_conditions({fi: entry})
+        assert result == "WHERE orders.buyer_country IN ('Singapore', 'Malaysia')"
+
+    def test_greater_than_condition(self):
+        fi = FilterIntent(attribute_hint="order_value", operator=">", raw_value_text=("100",))
+        entry = _entry("orders", "order_value")
+        result = map_conditions({fi: entry})
+        assert result == "WHERE orders.order_value > '100'"
+
+    def test_less_than_condition(self):
+        fi = FilterIntent(attribute_hint="order_value", operator="<", raw_value_text=("50",))
+        entry = _entry("orders", "order_value")
+        result = map_conditions({fi: entry})
+        assert result == "WHERE orders.order_value < '50'"
+
+    def test_greater_equal_condition(self):
+        fi = FilterIntent(attribute_hint="order_value", operator=">=", raw_value_text=("100",))
+        entry = _entry("orders", "order_value")
+        result = map_conditions({fi: entry})
+        assert result == "WHERE orders.order_value >= '100'"
+
+    def test_less_equal_condition(self):
+        fi = FilterIntent(attribute_hint="order_value", operator="<=", raw_value_text=("50",))
+        entry = _entry("orders", "order_value")
+        result = map_conditions({fi: entry})
+        assert result == "WHERE orders.order_value <= '50'"
+
+    def test_between_condition(self):
+        fi = FilterIntent(attribute_hint="created_at", operator="BETWEEN", raw_value_text=("2025-01-01", "2025-01-31"))
+        entry = _entry("orders", "created_at")
+        result = map_conditions({fi: entry})
+        assert result == "WHERE orders.created_at BETWEEN '2025-01-01' AND '2025-01-31'"
+
+    def test_contains_condition(self):
+        fi = FilterIntent(attribute_hint="description", operator="CONTAINS", raw_value_text=("shipped",))
+        entry = _entry("orders", "description")
+        result = map_conditions({fi: entry})
+        assert result == "WHERE orders.description LIKE '%shipped%'"
+
+    def test_negated_condition(self):
+        fi = FilterIntent(attribute_hint="provider", operator="=", raw_value_text=("SPX",), negated=True)
+        entry = _entry("orders", "logistics_provider")
+        result = map_conditions({fi: entry})
+        assert result == "WHERE NOT (orders.logistics_provider = 'SPX')"
+
+    def test_negated_in_condition(self):
+        fi = FilterIntent(attribute_hint="country", operator="IN", raw_value_text=("Singapore", "Malaysia"), negated=True)
+        entry = _entry("orders", "buyer_country")
+        result = map_conditions({fi: entry})
+        assert result == "WHERE NOT (orders.buyer_country IN ('Singapore', 'Malaysia'))"
+
+    def test_multiple_conditions_joined_with_and(self):
+        fi1 = FilterIntent(attribute_hint="country", operator="=", raw_value_text=("Singapore",))
+        fi2 = FilterIntent(attribute_hint="provider", operator="=", raw_value_text=("DB Schenker",))
+        entry1 = _entry("orders", "buyer_country")
+        entry2 = _entry("orders", "logistics_provider")
+        result = map_conditions({fi1: entry1, fi2: entry2})
+        assert "WHERE" in result
+        assert "orders.buyer_country = 'Singapore'" in result
+        assert "orders.logistics_provider = 'DB Schenker'" in result
+        assert result.index("'Singapore'") < result.index("'DB Schenker'")
+        parts = result.split(" ", 2)
+        assert parts[0] == "WHERE"
+
+    def test_sql_escapes_single_quotes(self):
+        fi = FilterIntent(attribute_hint="provider", operator="=", raw_value_text=("O'Brien",))
+        entry = _entry("orders", "provider")
+        result = map_conditions({fi: entry})
+        assert result == "WHERE orders.provider = 'O''Brien'"
