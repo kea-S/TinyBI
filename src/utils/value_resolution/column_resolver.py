@@ -9,7 +9,7 @@ from src.utils.value_resolution.value_resolver import resolve_filter_literals
 from collections import Counter
 
 # hyperparameters
-MIN_CONFIDENCE = 0.8
+MIN_CONFIDENCE = 0.5
 
 
 def resolve_columns(

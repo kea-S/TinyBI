@@ -2,9 +2,12 @@ from pydantic import ValidationError
 import pytest
 
 from src.utils.pydantic_models import (
+    CandidateAttributes,
     ColumnVectorIndexEntry,
     FilterIntent,
+    FinalAttributes,
     QuerySchema,
+    VectorSearchResult,
 )
 
 
@@ -293,3 +296,178 @@ class TestFilterIntentOperatorNormalization:
         assert fi.operator == "IN"
         assert fi.negated is True
         assert fi.raw_value_text == ("DB Schenker", "SPX")
+
+
+class TestCandidateAttributesToLogDict:
+    def test_serialises_subject_and_metric_entries(self):
+        candidates = CandidateAttributes(
+            subject_entries=[
+                VectorSearchResult(
+                    entry=ColumnVectorIndexEntry(
+                        entry_id=1,
+                        table_name="orders",
+                        column_name="customer",
+                        source_key="orders.customer",
+                    ),
+                    score=0.95,
+                )
+            ],
+            metric_entries=[
+                VectorSearchResult(
+                    entry=ColumnVectorIndexEntry(
+                        entry_id=2,
+                        table_name="orders",
+                        column_name="total",
+                        source_key="orders.total",
+                    ),
+                    score=0.90,
+                )
+            ],
+            filter_entries={},
+        )
+        log = candidates.to_log_dict()
+
+        assert "subject_entries" in log
+        assert len(log["subject_entries"]) == 1
+        assert log["subject_entries"][0]["entry"]["column_name"] == "customer"
+        assert log["subject_entries"][0]["score"] == 0.95
+        assert "metric_entries" in log
+        assert len(log["metric_entries"]) == 1
+
+    def test_serialises_filter_entries_as_list(self):
+        fi = FilterIntent(
+            attribute_hint="provider",
+            operator="=",
+            raw_value_text=("DB Schenker",),
+        )
+        candidates = CandidateAttributes(
+            subject_entries=[
+                VectorSearchResult(
+                    entry=ColumnVectorIndexEntry(
+                        entry_id=1,
+                        table_name="orders",
+                        column_name="customer",
+                        source_key="orders.customer",
+                    ),
+                    score=0.95,
+                )
+            ],
+            metric_entries=[],
+            filter_entries={
+                fi: [
+                    VectorSearchResult(
+                        entry=ColumnVectorIndexEntry(
+                            entry_id=3,
+                            table_name="orders",
+                            column_name="provider",
+                            source_key="orders.provider",
+                        ),
+                        score=0.88,
+                    )
+                ],
+            },
+        )
+        log = candidates.to_log_dict()
+
+        assert "filter_entries" in log
+        assert isinstance(log["filter_entries"], list)
+        assert len(log["filter_entries"]) == 1
+        entry = log["filter_entries"][0]
+        assert entry["intent"]["attribute_hint"] == "provider"
+        assert entry["intent"]["raw_value_text"] == ["DB Schenker"]
+        assert len(entry["results"]) == 1
+        assert entry["results"][0]["entry"]["column_name"] == "provider"
+
+    def test_empty_filter_entries(self):
+        candidates = CandidateAttributes(
+            subject_entries=[],
+            metric_entries=[],
+            filter_entries={},
+        )
+        log = candidates.to_log_dict()
+        assert log["filter_entries"] == []
+        assert log["subject_entries"] == []
+        assert log["metric_entries"] == []
+
+
+class TestFinalAttributesToLogDict:
+    def test_serialises_subject_entries(self):
+        attrs = FinalAttributes(
+            subject_entries=[
+                ColumnVectorIndexEntry(
+                    entry_id=1,
+                    table_name="orders",
+                    column_name="customer",
+                    source_key="orders.customer",
+                )
+            ],
+            metric_entry=None,
+            filter_entries={},
+        )
+        log = attrs.to_log_dict()
+
+        assert "subject_entries" in log
+        assert len(log["subject_entries"]) == 1
+        assert log["subject_entries"][0]["column_name"] == "customer"
+
+    def test_serialises_metric_entry(self):
+        attrs = FinalAttributes(
+            subject_entries=[],
+            metric_entry=ColumnVectorIndexEntry(
+                entry_id=2,
+                table_name="orders",
+                column_name="total",
+                source_key="orders.total",
+            ),
+            filter_entries={},
+        )
+        log = attrs.to_log_dict()
+
+        assert log["metric_entry"]["column_name"] == "total"
+
+    def test_serialises_none_metric_entry(self):
+        attrs = FinalAttributes(
+            subject_entries=[],
+            metric_entry=None,
+            filter_entries={},
+        )
+        log = attrs.to_log_dict()
+        assert log["metric_entry"] is None
+
+    def test_serialises_filter_entries(self):
+        fi = FilterIntent(
+            attribute_hint="provider",
+            operator="IN",
+            raw_value_text=("DB Schenker", "SPX"),
+        )
+        attrs = FinalAttributes(
+            subject_entries=[],
+            metric_entry=None,
+            filter_entries={
+                fi: ColumnVectorIndexEntry(
+                    entry_id=3,
+                    table_name="orders",
+                    column_name="provider",
+                    source_key="orders.provider",
+                )
+            },
+        )
+        log = attrs.to_log_dict()
+
+        assert "filter_entries" in log
+        assert isinstance(log["filter_entries"], list)
+        assert len(log["filter_entries"]) == 1
+        entry = log["filter_entries"][0]
+        assert entry["intent"]["attribute_hint"] == "provider"
+        assert entry["intent"]["raw_value_text"] == ["DB Schenker", "SPX"]
+        assert entry["intent"]["operator"] == "IN"
+        assert entry["column"]["column_name"] == "provider"
+
+    def test_empty_filter_entries(self):
+        attrs = FinalAttributes(
+            subject_entries=[],
+            metric_entry=None,
+            filter_entries={},
+        )
+        log = attrs.to_log_dict()
+        assert log["filter_entries"] == []

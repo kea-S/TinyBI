@@ -1,7 +1,14 @@
+import logging
+
 from fastapi import FastAPI
 
 from src.api.routes.vector import router as vector_router
 from src.api.routes.query import router as query_router
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(name)s %(levelname)s %(message)s",
+)
 
 
 def create_app() -> FastAPI:

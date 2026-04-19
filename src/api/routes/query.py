@@ -1,10 +1,14 @@
+import logging
+
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
-from src.utils.models import LOCAL_GRANITE4
 
 from src.llms.extractor import get_extractor
 from src.tools.query_tool import query_tool
+from src.utils.models import LOCAL_GRANITE4
 from src.utils.pydantic_models import QuerySchema
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/query", tags=["query"])
 
@@ -25,6 +29,7 @@ async def query_endpoint(request: QueryRequest):
     try:
         extractor = get_extractor(LOCAL_GRANITE4, True)
         query_schema: QuerySchema = await extractor.ainvoke(request.question)
+        logger.info("Extracted schema: %s", query_schema.model_dump(mode="json"))
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

@@ -350,6 +350,19 @@ class CandidateAttributes(BaseModel):
     metric_entries: List[VectorSearchResult]
     filter_entries: dict[FilterIntent, List[VectorSearchResult]]
 
+    def to_log_dict(self) -> dict:
+        return {
+            "subject_entries": [r.model_dump(mode="json") for r in self.subject_entries],
+            "metric_entries": [r.model_dump(mode="json") for r in self.metric_entries],
+            "filter_entries": [
+                {
+                    "intent": fi.model_dump(mode="json"),
+                    "results": [r.model_dump(mode="json") for r in group],
+                }
+                for fi, group in self.filter_entries.items()
+            ],
+        }
+
 
 class FinalAttributes(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -357,3 +370,16 @@ class FinalAttributes(BaseModel):
     subject_entries: List[ColumnVectorIndexEntry]
     metric_entry: Optional[ColumnVectorIndexEntry]
     filter_entries: dict[FilterIntent, ColumnVectorIndexEntry]
+
+    def to_log_dict(self) -> dict:
+        return {
+            "subject_entries": [e.model_dump(mode="json") for e in self.subject_entries],
+            "metric_entry": self.metric_entry.model_dump(mode="json") if self.metric_entry else None,
+            "filter_entries": [
+                {
+                    "intent": fi.model_dump(mode="json"),
+                    "column": entry.model_dump(mode="json"),
+                }
+                for fi, entry in self.filter_entries.items()
+            ],
+        }

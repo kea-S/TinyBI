@@ -1,3 +1,5 @@
+import logging
+
 from src.utils.database import global_database
 from src.config import TABLE_DATA_PATH
 from src.utils.pydantic_models import (
@@ -9,6 +11,8 @@ from src.utils.value_resolution.column_resolver import resolve_columns
 from src.utils.rag.vector_controller import VectorController
 from src.utils.models import DEFAULT_EMBEDDING_MODEL
 import src.utils.sql_normaliser as nrm
+
+logger = logging.getLogger(__name__)
 
 
 def query_tool(structured_query: QuerySchema,
@@ -23,10 +27,14 @@ def query_tool(structured_query: QuerySchema,
     candidate_attributes: CandidateAttributes = \
         vector_controller.run(structured_query)
 
+    logger.info("Candidate attributes: %s", candidate_attributes.to_log_dict())
+
     final_attributes: FinalAttributes
     primary_table: str
     final_attributes, primary_table = \
         resolve_columns(candidate_attributes)
+
+    logger.info("Final attributes: %s", final_attributes.to_log_dict())
 
     subject_clause = nrm.map_subject(final_attributes.subject_entries)
     view_name = nrm.map_view_name(primary_table)
@@ -74,6 +82,8 @@ def query_tool(structured_query: QuerySchema,
         sql_parts.append(f"LIMIT {limit_clause}")
 
     sql = "\n".join(sql_parts)
+
+    logger.info("Final SQL:\n%s", sql)
 
     df = global_database.query(sql)
 
