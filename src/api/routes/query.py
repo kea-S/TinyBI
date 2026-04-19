@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
+from src.utils.models import LOCAL_GRANITE4
 
 from src.llms.extractor import get_extractor
 from src.tools.query_tool import query_tool
@@ -22,7 +23,7 @@ class QueryResponse(BaseModel):
 @router.post("", response_model=QueryResponse, status_code=status.HTTP_200_OK)
 async def query_endpoint(request: QueryRequest):
     try:
-        extractor = get_extractor(request.model, request.local)
+        extractor = get_extractor(LOCAL_GRANITE4, True)
         query_schema: QuerySchema = await extractor.ainvoke(request.question)
     except Exception as exc:
         raise HTTPException(

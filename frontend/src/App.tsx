@@ -5,11 +5,14 @@ import {
   type ConnectionState,
 } from "@/pages/DashboardHome"
 import { VectorIndexBuilderPage } from "@/pages/VectorIndexBuilderPage"
+import { QueryPage } from "@/pages/QueryPage"
 
-type AppRoute = "/" | "/vector-index"
+type AppRoute = "/" | "/vector-index" | "/query"
 
 function resolveRoute(pathname: string): AppRoute {
-  return pathname === "/vector-index" ? "/vector-index" : "/"
+  if (pathname === "/vector-index") return "/vector-index"
+  if (pathname === "/query") return "/query"
+  return "/"
 }
 
 function App() {
@@ -42,6 +45,10 @@ function App() {
     return <VectorIndexBuilderPage onBackToDashboard={() => navigate("/")} />
   }
 
+  if (route === "/query") {
+    return <QueryPage onBackToDashboard={() => navigate("/")} />
+  }
+
   return (
     <DashboardHome
       connectionState={connectionState}
@@ -49,6 +56,7 @@ function App() {
       setConnectionState={setConnectionState}
       setConnectionMessage={setConnectionMessage}
       onOpenVectorIndexBuilder={() => navigate("/vector-index")}
+      onOpenQueryPage={() => navigate("/query")}
     />
   )
 }

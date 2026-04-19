@@ -7,4 +7,4 @@ DATA_PATH = Path(__file__).resolve().parents[1] / "data"
 
 APP_DATA_PATH = DATA_PATH / "app_data"
 
-TABLE_DATA_PATH = DATA_PATH / "minidev_raw"
+TABLE_DATA_PATH = DATA_PATH / "minidev_raw" / "financial" / "financial.sqlite"

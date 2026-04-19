@@ -5,6 +5,7 @@ import {
   Database,
   LayoutDashboard,
   RefreshCw,
+  Search,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -75,6 +76,7 @@ type DashboardHomeProps = {
   setConnectionState: Dispatch<SetStateAction<ConnectionState>>
   setConnectionMessage: Dispatch<SetStateAction<string>>
   onOpenVectorIndexBuilder: () => void
+  onOpenQueryPage: () => void
 }
 
 export function DashboardHome({
@@ -83,6 +85,7 @@ export function DashboardHome({
   setConnectionMessage,
   setConnectionState,
   onOpenVectorIndexBuilder,
+  onOpenQueryPage,
 }: DashboardHomeProps) {
   async function handlePing() {
     setConnectionState("loading")
@@ -151,6 +154,10 @@ export function DashboardHome({
               <Button variant="outline" className="min-w-52" onClick={onOpenVectorIndexBuilder}>
                 Open index builder
                 <ArrowRight />
+              </Button>
+              <Button variant="outline" className="min-w-52" onClick={onOpenQueryPage}>
+                <Search />
+                Query
               </Button>
             </div>
           </div>
