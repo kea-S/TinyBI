@@ -11,8 +11,15 @@ from src.utils.pydantic_models import (
     FilterIntent,
     QuerySchema,
 )
-from src.tools.query_tool import query_tool
+from src.tools.query_tool import query_tool, global_database
 from src.utils.rag.vector_controller import VectorController
+
+
+def _mock_setup_database(monkeypatch):
+    mock_conn = MagicMock()
+    def replacement(*a, **kw):
+        global_database._CONN = mock_conn
+    monkeypatch.setattr("src.tools.query_tool.global_database.setup_database", replacement)
 
 
 class FakeEmbeddingModel:
@@ -66,9 +73,7 @@ class TestQueryToolBuildsValidSQL:
         mock_vc.run.return_value = MagicMock()
         monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
         monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda _: (attrs, table))
-        monkeypatch.setattr("src.tools.query_tool.global_database.query", lambda sql: object())
-        monkeypatch.setattr("src.tools.query_tool.global_database.get_connection", lambda *a: None)
-        monkeypatch.setattr("src.tools.query_tool.global_database.close_connection", lambda: None)
+        _mock_setup_database(monkeypatch)
 
         query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum")
         _, sql = query_tool(query)
@@ -89,9 +94,7 @@ class TestQueryToolBuildsValidSQL:
         mock_vc.run.return_value = MagicMock()
         monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
         monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda _: (attrs, table))
-        monkeypatch.setattr("src.tools.query_tool.global_database.query", lambda sql: object())
-        monkeypatch.setattr("src.tools.query_tool.global_database.get_connection", lambda *a: None)
-        monkeypatch.setattr("src.tools.query_tool.global_database.close_connection", lambda: None)
+        _mock_setup_database(monkeypatch)
 
         query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum", filters=[fi])
         _, sql = query_tool(query)
@@ -107,9 +110,7 @@ class TestQueryToolBuildsValidSQL:
         mock_vc.run.return_value = MagicMock()
         monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
         monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda _: (attrs, table))
-        monkeypatch.setattr("src.tools.query_tool.global_database.query", lambda sql: object())
-        monkeypatch.setattr("src.tools.query_tool.global_database.get_connection", lambda *a: None)
-        monkeypatch.setattr("src.tools.query_tool.global_database.close_connection", lambda: None)
+        _mock_setup_database(monkeypatch)
 
         query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum")
         _, sql = query_tool(query)
@@ -124,9 +125,7 @@ class TestQueryToolBuildsValidSQL:
         mock_vc.run.return_value = MagicMock()
         monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
         monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda _: (attrs, table))
-        monkeypatch.setattr("src.tools.query_tool.global_database.query", lambda sql: object())
-        monkeypatch.setattr("src.tools.query_tool.global_database.get_connection", lambda *a: None)
-        monkeypatch.setattr("src.tools.query_tool.global_database.close_connection", lambda: None)
+        _mock_setup_database(monkeypatch)
 
         query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum")
         _, sql = query_tool(query)
@@ -141,9 +140,7 @@ class TestQueryToolBuildsValidSQL:
         mock_vc.run.return_value = MagicMock()
         monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
         monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda _: (attrs, table))
-        monkeypatch.setattr("src.tools.query_tool.global_database.query", lambda sql: object())
-        monkeypatch.setattr("src.tools.query_tool.global_database.get_connection", lambda *a: None)
-        monkeypatch.setattr("src.tools.query_tool.global_database.close_connection", lambda: None)
+        _mock_setup_database(monkeypatch)
 
         query = QuerySchema(subject="provider", metric_hint="order value")
         _, sql = query_tool(query)
@@ -158,9 +155,7 @@ class TestQueryToolBuildsValidSQL:
         mock_vc.run.return_value = MagicMock()
         monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
         monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda _: (attrs, table))
-        monkeypatch.setattr("src.tools.query_tool.global_database.query", lambda sql: object())
-        monkeypatch.setattr("src.tools.query_tool.global_database.get_connection", lambda *a: None)
-        monkeypatch.setattr("src.tools.query_tool.global_database.close_connection", lambda: None)
+        _mock_setup_database(monkeypatch)
 
         query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum", limit=5)
         _, sql = query_tool(query)
@@ -213,7 +208,7 @@ class TestQueryToolIntegration:
             lambda *a, **kw: controller,
         )
         monkeypatch.setattr("src.tools.query_tool.global_database.query", lambda sql: pd.DataFrame())
-        monkeypatch.setattr("src.tools.query_tool.global_database.get_connection", lambda _: None)
+        _mock_setup_database(monkeypatch)
         monkeypatch.setattr("src.tools.query_tool.global_database.close_connection", lambda: None)
 
         fi = FilterIntent(
@@ -231,9 +226,7 @@ class TestQueryToolIntegration:
             limit=5,
         )
 
-        _, sql = query_tool(query, dataset_path=str(tmp_path / "test.csv"))
-
-        print(sql)
+        _, sql = query_tool(query)
 
         assert "SELECT" in sql
         assert "FROM" in sql

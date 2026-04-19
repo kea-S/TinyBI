@@ -1,7 +1,7 @@
 import logging
 
 from src.utils.database import global_database
-from src.config import TABLE_DATA_PATH
+from src.config import SQLITE_DATA_PATH, TABLE_DATA_PATH
 from src.utils.pydantic_models import (
     QuerySchema,
     CandidateAttributes,
@@ -16,12 +16,13 @@ logger = logging.getLogger(__name__)
 
 
 def query_tool(structured_query: QuerySchema,
-               dataset_path: str = TABLE_DATA_PATH):
+               duckdb_path: str = TABLE_DATA_PATH,
+               sqlite_path: str = SQLITE_DATA_PATH):
     """
     Resolve canonical locations for deterministic SQL filters
     """
 
-    global_database.get_connection(dataset_path)
+    global_database.setup_database(duckdb_path, sqlite_path)
     vector_controller = VectorController(DEFAULT_EMBEDDING_MODEL)
 
     candidate_attributes: CandidateAttributes = \

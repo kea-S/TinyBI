@@ -1,51 +1,76 @@
 import sqlite3
 
+import duckdb
+import pytest
+
 from src.utils.database import Database
 
 
-def test_register_sqlitedb_as_table_converts_sqlite_to_duckdb(tmp_path):
-    sqlite_database_dir = tmp_path / "sample_database"
+def test_setup_converts_sqlite_to_duckdb_when_not_exists(tmp_path):
+    sqlite_database_dir = tmp_path / "db"
     sqlite_database_dir.mkdir()
-    sqlite_path = sqlite_database_dir / "sample.sqlite"
-    duckdb_path = tmp_path / "sample.duckdb"
+    sqlite_path = sqlite_database_dir / "data.sqlite"
+    duckdb_path = tmp_path / "data.duckdb"
     description_path = sqlite_database_dir / "database_description"
     description_path.mkdir()
-    (description_path / "metrics.csv").write_text(
+    (description_path / "orders.csv").write_text(
         "original_column_name,column_name,column_description,data_format\n"
-        "id,id,metric identifier,integer\n"
-        "name,name,metric name,text\n"
-        "value,value,metric value,integer\n",
+        "id,id,order identifier,integer\n"
+        "provider,provider,logistics provider,text\n",
         encoding="utf-8",
     )
 
     sqlite_conn = sqlite3.connect(sqlite_path)
     sqlite_conn.execute(
-        """
-        CREATE TABLE metrics (
-            id INTEGER PRIMARY KEY,
-            name TEXT NOT NULL,
-            value INTEGER NOT NULL
-        )
-        """
+        "CREATE TABLE orders (id INTEGER PRIMARY KEY, provider TEXT NOT NULL)"
     )
     sqlite_conn.executemany(
-        "INSERT INTO metrics (name, value) VALUES (?, ?)",
-        [("alpha", 10), ("beta", 20)],
+        "INSERT INTO orders (provider) VALUES (?)", [("DB Schenker",), ("SPX",)]
     )
     sqlite_conn.commit()
     sqlite_conn.close()
 
     database = Database()
     database._get_database_path = lambda _: duckdb_path.resolve()
-    database.get_connection("ignored.duckdb")
-    output_path = database.register_sqlitedb_as_table(sqlite_database_dir)
 
-    rows = database._CONN.execute(
-        "SELECT id, name, value FROM metrics ORDER BY id"
-    ).fetchall()
+    conn = database.setup_database("ignored.duckdb", sqlite_database_dir)
 
-    assert output_path == duckdb_path.resolve()
+    rows = conn.execute("SELECT id, provider FROM orders ORDER BY id").fetchall()
+    assert rows == [(1, "DB Schenker"), (2, "SPX")]
     assert duckdb_path.exists()
-    assert rows == [(1, "alpha", 10), (2, "beta", 20)]
 
     database.close_connection()
+
+
+def test_setup_connects_directly_when_duckdb_exists(tmp_path):
+    duckdb_path = tmp_path / "data.duckdb"
+
+    existing_conn = duckdb.connect(database=str(duckdb_path))
+    existing_conn.execute("CREATE TABLE orders (id INTEGER, provider TEXT)")
+    existing_conn.execute("INSERT INTO orders VALUES (1, 'Existing')")
+    existing_conn.close()
+
+    sqlite_database_dir = tmp_path / "db"
+    sqlite_database_dir.mkdir()
+
+    database = Database()
+    database._get_database_path = lambda _: duckdb_path.resolve()
+
+    conn = database.setup_database("ignored.duckdb", sqlite_database_dir)
+
+    rows = conn.execute("SELECT id, provider FROM orders").fetchall()
+    assert rows == [(1, "Existing")]
+
+    database.close_connection()
+
+
+def test_setup_raises_when_neither_duckdb_nor_sqlite_exists(tmp_path):
+    duckdb_path = tmp_path / "data.duckdb"
+    sqlite_database_dir = tmp_path / "db"
+    sqlite_database_dir.mkdir()
+
+    database = Database()
+    database._get_database_path = lambda _: duckdb_path.resolve()
+
+    with pytest.raises((FileNotFoundError, ValueError)):
+        database.setup_database("ignored.duckdb", sqlite_database_dir)
