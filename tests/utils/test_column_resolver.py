@@ -186,6 +186,44 @@ class TestResolveColumnsFilterEntries:
         assert len(final_attrs.filter_entries) == 0
 
 
+class TestResolveColumnsFiltersToPrimaryTable:
+    def test_metric_picks_from_primary_table_only(self):
+        fi = _filter("provider", ["DB Schenker"])
+        candidates = CandidateAttributes(
+            subject_entries=[_result(1, 0.95, table_name="orders", column_name="customer")],
+            metric_entries=[
+                _result(2, 0.99, table_name="shipments", column_name="order_value"),
+                _result(3, 0.85, table_name="orders", column_name="order_value"),
+            ],
+            filter_entries={fi: [_result(4, 0.95, table_name="orders", column_name="provider")]},
+        )
+        final_attrs, primary_table = resolve_columns(candidates)
+
+        assert primary_table == "orders"
+        assert final_attrs.metric_entry is not None
+        assert final_attrs.metric_entry.table_name == "orders"
+        assert final_attrs.metric_entry.column_name == "order_value"
+
+    def test_filters_pick_from_primary_table_only(self):
+        fi = _filter("provider", ["DB Schenker"])
+        candidates = CandidateAttributes(
+            subject_entries=[_result(1, 0.95, table_name="orders", column_name="customer")],
+            metric_entries=[_result(2, 0.90, table_name="orders", column_name="order_value")],
+            filter_entries={
+                fi: [
+                    _result(3, 0.99, table_name="shipments", column_name="provider"),
+                    _result(4, 0.85, table_name="orders", column_name="provider"),
+                ],
+            },
+        )
+        final_attrs, primary_table = resolve_columns(candidates)
+
+        assert primary_table == "orders"
+        assert len(final_attrs.filter_entries) == 1
+        resolved_col = list(final_attrs.filter_entries.values())[0]
+        assert resolved_col.table_name == "orders"
+
+
 class TestResolveColumnsPreservesSubjectAndMetric:
     def test_subject_entries_from_primary_table(self):
         fi = _filter("provider", ["DB Schenker"])

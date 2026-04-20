@@ -69,14 +69,24 @@ def resolve_columns(
 
     subject_entries_final = pick_entries(subject_entries, primary_table)
 
-    # Metric: pick highest confidence entry that passes threshold
-    valid_metrics = [r for r in metric_entries if r.score >= MIN_CONFIDENCE]
+    # NOTE: filtering by primary_table below is TEMPORARY — see issue #184.
+    # In the final product, cross-table metrics should be resolved via JOINs, not discarded.
+
+    valid_metrics = [
+        r for r in metric_entries
+        if r.score >= MIN_CONFIDENCE and r.entry.table_name == primary_table
+    ]
     metric_entry_final = max(valid_metrics, key=lambda r: r.score).entry if valid_metrics else None
 
-    # Filters: pick highest confidence column per FilterIntent, then resolve literals
+    # Filters: pick highest confidence column per FilterIntent from primary table, then resolve literals
+    # NOTE: filtering by primary_table here is TEMPORARY — see issue #184.
+    # In the final product, cross-table filters should be resolved via JOINs, not discarded.
     filter_entries_final: dict[FilterIntent, ColumnVectorIndexEntry] = {}
     for filter_intent, filter_group in filter_entries.items():
-        valid_filters = [r for r in filter_group if r.score >= MIN_CONFIDENCE]
+        valid_filters = [
+            r for r in filter_group
+            if r.score >= MIN_CONFIDENCE and r.entry.table_name == primary_table
+        ]
         if valid_filters:
             best_entry = max(valid_filters, key=lambda r: r.score).entry
             resolved_intent = resolve_filter_literals(filter_intent, best_entry)
