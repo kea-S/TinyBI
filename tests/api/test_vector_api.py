@@ -59,6 +59,7 @@ def test_get_current_index_entries_endpoint(monkeypatch):
             "aliases": ["city"],
             "sample_values": ["Berlin"],
             "payload": {"is_groupable": True},
+            "references": None,
         }
     ]
 
@@ -175,4 +176,84 @@ def test_batch_insert_index_entries_moves_legacy_data_type_into_data_format(monk
     entry = FakeVectorController.last_batch_entries[0]
     assert entry.data_format == "text"
     assert entry.payload == {}
+
+
+def test_column_with_references_submitted(monkeypatch):
+    monkeypatch.setattr(vector_routes, "VectorController", FakeVectorController)
+    FakeVectorController.last_batch_entries = None
+    client = TestClient(create_app())
+
+    response = client.post(
+        "/vector/index-entries/batch",
+        json={
+            "entries": [
+                {
+                    "entry_id": 1,
+                    "table_name": "orders",
+                    "column_name": "customer_id",
+                    "source_key": "orders.customer_id",
+                    "references": "customers.id",
+                }
+            ],
+        },
+    )
+
+    assert response.status_code == 201
+    assert FakeVectorController.last_batch_entries is not None
+    entry = FakeVectorController.last_batch_entries[0]
+    assert entry.references == "customers.id"
+
+
+def test_get_current_index_entries_includes_references(monkeypatch):
+    class FakeVectorControllerWithReferences:
+        def __init__(self, embedding_model: str):
+            self.embedding_model = embedding_model
+
+        def get_current_index_entries(self):
+            return [
+                {
+                    "entry_id": 1,
+                    "table_name": "orders",
+                    "column_name": "customer_id",
+                    "source_key": "orders.customer_id",
+                    "description": "FK to customers",
+                    "references": "customers.id",
+                    "aliases": [],
+                    "sample_values": [],
+                    "payload": {},
+                }
+            ]
+
+    monkeypatch.setattr(vector_routes, "_get_controller", lambda: FakeVectorControllerWithReferences("nomic-embed-text"))
+    client = TestClient(create_app())
+
+    response = client.get("/vector/index-entries/current")
+
+    assert response.status_code == 200
+    entries = response.json()
+    assert entries[0]["references"] == "customers.id"
+
+
+def test_references_null_when_not_set(monkeypatch):
+    monkeypatch.setattr(vector_routes, "VectorController", FakeVectorController)
+    FakeVectorController.last_batch_entries = None
+    client = TestClient(create_app())
+
+    response = client.post(
+        "/vector/index-entries/batch",
+        json={
+            "entries": [
+                {
+                    "entry_id": 1,
+                    "table_name": "orders",
+                    "column_name": "customer_city",
+                    "source_key": "orders.customer_city",
+                }
+            ],
+        },
+    )
+
+    assert response.status_code == 201
+    entry = FakeVectorController.last_batch_entries[0]
+    assert entry.references is None
 

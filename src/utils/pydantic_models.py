@@ -279,6 +279,7 @@ class ColumnVectorIndexEntry(BaseModel):
     aliases: List[str] = Field(default_factory=list)
     sample_values: List[str] = Field(default_factory=list)
     payload: dict[str, Any] = Field(default_factory=dict)
+    references: Optional[str] = Field(default=None, description="FK reference to another column's source_key.")
 
     @model_validator(mode="after")
     def _normalise_legacy_data_type(self) -> Self:

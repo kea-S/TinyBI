@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   Download,
   ArrowLeft,
@@ -46,6 +46,7 @@ type ColumnDraft = {
   aliasesText: string
   sampleValuesText: string
   payloadText: string
+  references: string
 }
 
 type SubmitState = "idle" | "submitting" | "success" | "error"
@@ -76,6 +77,7 @@ function createEmptyColumn(): ColumnDraft {
     aliasesText: "",
     sampleValuesText: "",
     payloadText: defaultPayloadText,
+    references: "",
   }
 }
 
@@ -116,6 +118,7 @@ function buildTablesFromEntries(entries: ColumnVectorIndexEntryRequest[]): Table
       aliasesText: entry.aliases.join(", "),
       sampleValuesText: entry.sample_values.join(", "),
       payloadText: JSON.stringify(sanitisePayload(entry.payload), null, 2),
+      references: entry.references ?? "",
     })
 
     tablesByName.set(entry.table_name, table)
@@ -142,6 +145,15 @@ export function VectorIndexBuilderPage({
   )
   const [submitResponse, setSubmitResponse] =
     useState<BatchColumnVectorIndexResponse | null>(null)
+  const [existingColumns, setExistingColumns] = useState<ColumnVectorIndexEntryRequest[]>([])
+
+  useEffect(() => {
+    fetchCurrentVectorIndexEntries().then((result) => {
+      if (typeof result !== "string") {
+        setExistingColumns(result)
+      }
+    })
+  }, [])
 
   const selectedTable =
     tables.find((table) => table.id === selectedTableId) ?? tables[0] ?? null
@@ -300,6 +312,7 @@ export function VectorIndexBuilderPage({
           aliases: parseCommaSeparatedList(column.aliasesText),
           sample_values: parseCommaSeparatedList(column.sampleValuesText),
           payload,
+          references: column.references.trim() || null,
         })
 
         nextEntryId += 1
@@ -559,6 +572,11 @@ export function VectorIndexBuilderPage({
                               <p className="font-medium text-foreground">
                                 {column.columnName.trim() || "Untitled column"}
                               </p>
+                              {column.references && (
+                                <p className="text-xs text-muted-foreground">
+                                  → {column.references}
+                                </p>
+                              )}
                             </div>
                             <Button
                               variant="ghost"
@@ -640,6 +658,42 @@ export function VectorIndexBuilderPage({
                         placeholder="date, currency, percentage, iso_country_code"
                       />
                     </label>
+
+                    {(() => {
+                      const allColumns = [
+                        ...existingColumns.map((c) => c.source_key),
+                        ...tables.flatMap((t) =>
+                          t.columns
+                            .filter((c) => c.sourceKey && c.sourceKey !== selectedColumn.sourceKey)
+                            .map((c) => c.sourceKey)
+                        ),
+                      ].filter((v, i, a) => a.indexOf(v) === i && v)
+
+                      return (
+                        <label className="space-y-2">
+                          <span className="text-sm font-medium">References (FK)</span>
+                          <select
+                            value={selectedColumn.references}
+                            onChange={(event) =>
+                              updateColumnField(
+                                selectedTable.id,
+                                selectedColumn.id,
+                                "references",
+                                event.target.value
+                              )
+                            }
+                            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <option value="">No reference</option>
+                            {allColumns.map((sourceKey) => (
+                              <option key={sourceKey} value={sourceKey}>
+                                {sourceKey}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      )
+                    })()}
 
                     <label className="space-y-2">
                       <span className="text-sm font-medium">Description</span>
