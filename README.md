@@ -1,4 +1,6 @@
-# Logistic text-to-sql
+# TinyBI
+
+https://github.com/user-attachments/assets/cb99aeeb-8042-45b4-b035-0dec7fbd5d59
 
 ## Project Setup and Execution Guide
 
