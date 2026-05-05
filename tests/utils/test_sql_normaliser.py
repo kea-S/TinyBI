@@ -1,7 +1,7 @@
 import pytest
 from datetime import date
 
-from src.utils.pydantic_models import ColumnVectorIndexEntry, FilterIntent
+from src.utils.pydantic_models import ColumnVectorIndexEntry, FilterIntent, FinalJoins, JoinStep
 from src.utils.sql_normaliser import (
     map_subject,
     map_metric,
@@ -11,6 +11,7 @@ from src.utils.sql_normaliser import (
     map_ordering,
     map_groupby,
     map_conditions,
+    map_join,
 )
 
 
@@ -307,3 +308,20 @@ class TestMapConditions:
         entry = _entry("orders", "provider")
         result = map_conditions({fi: entry})
         assert result == "WHERE orders.provider = 'O''Brien'"
+
+
+class TestMapJoin:
+    def test_map_join_empty(self):
+        final_joins = FinalJoins(from_table="sales", joins=[])
+        assert map_join(final_joins) == ""
+
+    def test_map_join_multiple_steps(self):
+        joins = [
+            JoinStep(table="users", parent="sales", on_clause="sales.user_id = users.id"),
+            JoinStep(table="companies", parent="users", on_clause="users.company_id = companies.id")
+        ]
+        final_joins = FinalJoins(from_table="sales", joins=joins)
+        result = map_join(final_joins)
+        assert "LEFT JOIN users ON sales.user_id = users.id" in result
+        assert "LEFT JOIN companies ON users.company_id = companies.id" in result
+        assert "\n" in result

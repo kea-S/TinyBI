@@ -344,7 +344,7 @@ class BatchColumnVectorIndexResponse(BaseModel):
     metadata_path: str
 
 
-class CandidateAttributes(BaseModel):
+class CandidateEntries(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     subject_entries: List[VectorSearchResult]
@@ -365,7 +365,7 @@ class CandidateAttributes(BaseModel):
         }
 
 
-class FinalAttributes(BaseModel):
+class FinalEntries(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     subject_entries: List[ColumnVectorIndexEntry]
@@ -384,3 +384,22 @@ class FinalAttributes(BaseModel):
                 for fi, entry in self.filter_entries.items()
             ],
         }
+
+
+# join tree data structure
+class JoinStep(BaseModel):
+    """
+    Represents tables
+    """
+    table: str
+    parent: str
+    on_clause: str
+
+
+class FinalJoins(BaseModel):
+    """
+    Represents final joins needed for sql
+    """
+    from_table: str
+    joins: list[JoinStep]
+

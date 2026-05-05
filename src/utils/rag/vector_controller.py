@@ -10,7 +10,7 @@ from src.utils.pydantic_models import (
     QuerySchema,
     FilterIntent,
     VectorSearchResult,
-    CandidateAttributes,
+    CandidateEntries,
 )
 from src.config import APP_DATA_PATH
 
@@ -105,8 +105,11 @@ class VectorController:
         # once we've received all the tables that we might need to build
         # the query, we pass responsibility to the query builder tool
 
-        return CandidateAttributes(
+        return CandidateEntries(
             subject_entries=subject_results,
             metric_entries=metric_results,
             filter_entries=filter_candidates
         )
+
+
+

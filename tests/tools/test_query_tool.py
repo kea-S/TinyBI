@@ -7,7 +7,7 @@ import pytest
 
 from src.utils.pydantic_models import (
     ColumnVectorIndexEntry,
-    FinalAttributes,
+    FinalEntries,
     FilterIntent,
     QuerySchema,
 )
@@ -46,33 +46,30 @@ def _entry(table_name: str, column_name: str, **extra) -> ColumnVectorIndexEntry
     return ColumnVectorIndexEntry(**defaults)
 
 
-def _base_final_attrs(
+def _base_final_entries(
     subject_entries=None,
     metric_entry=None,
     filter_entries=None,
-    primary_table="orders",
 ):
     if subject_entries is None:
         subject_entries = [_entry("orders", "provider")]
-    return (
-        FinalAttributes(
-            subject_entries=subject_entries,
-            metric_entry=metric_entry,
-            filter_entries=filter_entries or {},
-        ),
-        primary_table,
+    return FinalEntries(
+        subject_entries=subject_entries,
+        metric_entry=metric_entry,
+        filter_entries=filter_entries or {},
     )
 
 
 class TestQueryToolBuildsValidSQL:
     def test_select_from_with_subject_and_metric(self, monkeypatch):
-        attrs, table = _base_final_attrs(
+        entries = _base_final_entries(
             metric_entry=_entry("orders", "order_value"),
         )
         mock_vc = MagicMock()
         mock_vc.run.return_value = MagicMock()
+        mock_vc.get_current_index_entries.return_value = []
         monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
-        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda _: (attrs, table))
+        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda _: entries)
         _mock_setup_database(monkeypatch)
 
         query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum")
@@ -86,14 +83,15 @@ class TestQueryToolBuildsValidSQL:
     def test_includes_where_clause_from_filters(self, monkeypatch):
         fi = FilterIntent(attribute_hint="country", operator="=", raw_value_text=("Singapore",))
         entry = _entry("orders", "buyer_country")
-        attrs, table = _base_final_attrs(
+        entries = _base_final_entries(
             filter_entries={fi: entry},
             metric_entry=_entry("orders", "order_value"),
         )
         mock_vc = MagicMock()
         mock_vc.run.return_value = MagicMock()
+        mock_vc.get_current_index_entries.return_value = []
         monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
-        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda _: (attrs, table))
+        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda _: entries)
         _mock_setup_database(monkeypatch)
 
         query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum", filters=[fi])
@@ -103,13 +101,14 @@ class TestQueryToolBuildsValidSQL:
         assert "orders.buyer_country = 'Singapore'" in sql
 
     def test_no_where_clause_when_no_filters(self, monkeypatch):
-        attrs, table = _base_final_attrs(
+        entries = _base_final_entries(
             metric_entry=_entry("orders", "order_value"),
         )
         mock_vc = MagicMock()
         mock_vc.run.return_value = MagicMock()
+        mock_vc.get_current_index_entries.return_value = []
         monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
-        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda _: (attrs, table))
+        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda _: entries)
         _mock_setup_database(monkeypatch)
 
         query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum")
@@ -118,13 +117,14 @@ class TestQueryToolBuildsValidSQL:
         assert "WHERE" not in sql
 
     def test_group_by_with_aggregation(self, monkeypatch):
-        attrs, table = _base_final_attrs(
+        entries = _base_final_entries(
             metric_entry=_entry("orders", "order_value"),
         )
         mock_vc = MagicMock()
         mock_vc.run.return_value = MagicMock()
+        mock_vc.get_current_index_entries.return_value = []
         monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
-        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda _: (attrs, table))
+        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda _: entries)
         _mock_setup_database(monkeypatch)
 
         query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum")
@@ -133,13 +133,14 @@ class TestQueryToolBuildsValidSQL:
         assert "GROUP BY" in sql
 
     def test_no_group_by_without_aggregation(self, monkeypatch):
-        attrs, table = _base_final_attrs(
+        entries = _base_final_entries(
             metric_entry=_entry("orders", "order_value"),
         )
         mock_vc = MagicMock()
         mock_vc.run.return_value = MagicMock()
+        mock_vc.get_current_index_entries.return_value = []
         monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
-        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda _: (attrs, table))
+        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda _: entries)
         _mock_setup_database(monkeypatch)
 
         query = QuerySchema(subject="provider", metric_hint="order value")
@@ -148,13 +149,14 @@ class TestQueryToolBuildsValidSQL:
         assert "GROUP BY" not in sql
 
     def test_limit_applied(self, monkeypatch):
-        attrs, table = _base_final_attrs(
+        entries = _base_final_entries(
             metric_entry=_entry("orders", "order_value"),
         )
         mock_vc = MagicMock()
         mock_vc.run.return_value = MagicMock()
+        mock_vc.get_current_index_entries.return_value = []
         monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
-        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda _: (attrs, table))
+        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda _: entries)
         _mock_setup_database(monkeypatch)
 
         query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum", limit=5)

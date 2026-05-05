@@ -10,7 +10,7 @@ from src.api.main import create_app
 from src.api.routes import query as query_routes
 from src.utils.pydantic_models import (
     ColumnVectorIndexEntry,
-    FinalAttributes,
+    FinalEntries,
     FilterIntent,
     QuerySchema,
 )
@@ -24,26 +24,23 @@ class FakeExtractor:
         return self._result
 
 
-def _fake_final_attrs():
-    return (
-        FinalAttributes(
-            subject_entries=[
-                ColumnVectorIndexEntry(
-                    entry_id=0,
-                    table_name="orders",
-                    column_name="provider",
-                    source_key="orders.provider",
-                )
-            ],
-            metric_entry=ColumnVectorIndexEntry(
-                entry_id=1,
+def _fake_final_entries():
+    return FinalEntries(
+        subject_entries=[
+            ColumnVectorIndexEntry(
+                entry_id=0,
                 table_name="orders",
-                column_name="order_value",
-                source_key="orders.order_value",
-            ),
-            filter_entries={},
+                column_name="provider",
+                source_key="orders.provider",
+            )
+        ],
+        metric_entry=ColumnVectorIndexEntry(
+            entry_id=1,
+            table_name="orders",
+            column_name="order_value",
+            source_key="orders.order_value",
         ),
-        "orders",
+        filter_entries={},
     )
 
 

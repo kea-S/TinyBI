@@ -2,10 +2,10 @@ from pydantic import ValidationError
 import pytest
 
 from src.utils.pydantic_models import (
-    CandidateAttributes,
+    CandidateEntries,
     ColumnVectorIndexEntry,
     FilterIntent,
-    FinalAttributes,
+    FinalEntries,
     QuerySchema,
     VectorSearchResult,
 )
@@ -298,9 +298,9 @@ class TestFilterIntentOperatorNormalization:
         assert fi.raw_value_text == ("DB Schenker", "SPX")
 
 
-class TestCandidateAttributesToLogDict:
+class TestCandidateEntriesToLogDict:
     def test_serialises_subject_and_metric_entries(self):
-        candidates = CandidateAttributes(
+        candidates = CandidateEntries(
             subject_entries=[
                 VectorSearchResult(
                     entry=ColumnVectorIndexEntry(
@@ -340,7 +340,7 @@ class TestCandidateAttributesToLogDict:
             operator="=",
             raw_value_text=("DB Schenker",),
         )
-        candidates = CandidateAttributes(
+        candidates = CandidateEntries(
             subject_entries=[
                 VectorSearchResult(
                     entry=ColumnVectorIndexEntry(
@@ -379,7 +379,7 @@ class TestCandidateAttributesToLogDict:
         assert entry["results"][0]["entry"]["column_name"] == "provider"
 
     def test_empty_filter_entries(self):
-        candidates = CandidateAttributes(
+        candidates = CandidateEntries(
             subject_entries=[],
             metric_entries=[],
             filter_entries={},
@@ -390,9 +390,9 @@ class TestCandidateAttributesToLogDict:
         assert log["metric_entries"] == []
 
 
-class TestFinalAttributesToLogDict:
+class TestFinalEntriesToLogDict:
     def test_serialises_subject_entries(self):
-        attrs = FinalAttributes(
+        attrs = FinalEntries(
             subject_entries=[
                 ColumnVectorIndexEntry(
                     entry_id=1,
@@ -411,7 +411,7 @@ class TestFinalAttributesToLogDict:
         assert log["subject_entries"][0]["column_name"] == "customer"
 
     def test_serialises_metric_entry(self):
-        attrs = FinalAttributes(
+        attrs = FinalEntries(
             subject_entries=[],
             metric_entry=ColumnVectorIndexEntry(
                 entry_id=2,
@@ -426,7 +426,7 @@ class TestFinalAttributesToLogDict:
         assert log["metric_entry"]["column_name"] == "total"
 
     def test_serialises_none_metric_entry(self):
-        attrs = FinalAttributes(
+        attrs = FinalEntries(
             subject_entries=[],
             metric_entry=None,
             filter_entries={},
@@ -440,7 +440,7 @@ class TestFinalAttributesToLogDict:
             operator="IN",
             raw_value_text=("DB Schenker", "SPX"),
         )
-        attrs = FinalAttributes(
+        attrs = FinalEntries(
             subject_entries=[],
             metric_entry=None,
             filter_entries={
@@ -464,7 +464,7 @@ class TestFinalAttributesToLogDict:
         assert entry["column"]["column_name"] == "provider"
 
     def test_empty_filter_entries(self):
-        attrs = FinalAttributes(
+        attrs = FinalEntries(
             subject_entries=[],
             metric_entry=None,
             filter_entries={},

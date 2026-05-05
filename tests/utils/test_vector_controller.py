@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from src.utils.pydantic_models import (
-    CandidateAttributes,
+    CandidateEntries,
     ColumnVectorIndexEntry,
     FilterIntent,
     QuerySchema,
@@ -154,7 +154,7 @@ def _make_result(entry_id, score, table_name="orders", column_name=None, **extra
 
 
 class TestRunReturnsDictBasedFilterEntries:
-    def test_run_returns_candidate_attributes_with_filter_dict(self, monkeypatch, tmp_path):
+    def test_run_returns_candidate_entries_with_filter_dict(self, monkeypatch, tmp_path):
         fi = FilterIntent(
             attribute_hint="provider",
             operator="=",
@@ -200,7 +200,7 @@ class TestRunReturnsDictBasedFilterEntries:
         controller = VectorController("fake-model", vector_index_path=tmp_path / "idx")
         result = controller.run(query)
 
-        assert isinstance(result, CandidateAttributes)
+        assert isinstance(result, CandidateEntries)
         assert isinstance(result.filter_entries, dict)
         assert len(result.filter_entries) == 1
         assert fi in result.filter_entries

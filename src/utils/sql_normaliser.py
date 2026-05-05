@@ -1,6 +1,6 @@
 from datetime import date
 from typing import Optional
-from src.utils.pydantic_models import ColumnVectorIndexEntry, FilterIntent
+from src.utils.pydantic_models import ColumnVectorIndexEntry, FilterIntent, FinalJoins
 
 
 def map_subject(subject_entries: list[ColumnVectorIndexEntry]) -> str:
@@ -191,8 +191,18 @@ def map_groupby(subject_entries: list[ColumnVectorIndexEntry], aggregation: str 
     return "GROUP BY " + ", ".join(columns)
 
 
-def map_join():
+def map_join(final_joins: FinalJoins) -> str:
     """
-    TODO: next release
+    Convert FinalJoins into a sequence of SQL LEFT JOIN clauses.
     """
-    pass
+    if not final_joins.joins:
+        return ""
+
+    join_clauses = []
+    for step in final_joins.joins:
+        join_clauses.append(f"LEFT JOIN {step.table} ON {step.on_clause}")
+
+    return "\n".join(join_clauses)
+
+
+

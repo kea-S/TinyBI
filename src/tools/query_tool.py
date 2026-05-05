@@ -4,10 +4,12 @@ from src.utils.database import global_database
 from src.config import SQLITE_DATA_PATH, TABLE_DATA_PATH
 from src.utils.pydantic_models import (
     QuerySchema,
-    CandidateAttributes,
-    FinalAttributes,
+    CandidateEntries,
+    FinalEntries,
 )
 from src.utils.value_resolution.column_resolver import resolve_columns
+from src.utils.value_resolution.join_resolution import resolve_joins
+from src.utils.value_resolution.db_schema_graph import build_schema_graph
 from src.utils.rag.vector_controller import VectorController
 from src.utils.models import DEFAULT_EMBEDDING_MODEL
 import src.utils.sql_normaliser as nrm
@@ -25,34 +27,38 @@ def query_tool(structured_query: QuerySchema,
     global_database.setup_database(duckdb_path, sqlite_path)
     vector_controller = VectorController(DEFAULT_EMBEDDING_MODEL)
 
-    candidate_attributes: CandidateAttributes = \
+    candidate_entries: CandidateEntries = \
         vector_controller.run(structured_query)
 
-    logger.info("Candidate attributes: %s", candidate_attributes.to_log_dict())
+    logger.info("Candidate entries: %s", candidate_entries.to_log_dict())
 
-    final_attributes: FinalAttributes
-    primary_table: str
-    final_attributes, primary_table = \
-        resolve_columns(candidate_attributes)
+    all_entries = vector_controller.get_current_index_entries()
+    schema_graph = build_schema_graph(all_entries)
 
-    logger.info("Final attributes: %s", final_attributes.to_log_dict())
+    final_entries: FinalEntries
+    final_entries = resolve_columns(candidate_entries, schema_graph)
 
-    subject_clause = nrm.map_subject(final_attributes.subject_entries)
-    view_name = nrm.map_view_name(primary_table)
+    final_joins = resolve_joins(final_entries, schema_graph)
+
+    logger.info("Final entries: %s", final_entries.to_log_dict())
+
+    join_clause = nrm.map_join(final_joins)
+    subject_clause = nrm.map_subject(final_entries.subject_entries)
+    view_name = nrm.map_view_name(final_joins.from_table)
     metric_clause = nrm.map_metric(
-        final_attributes.metric_entry,
+        final_entries.metric_entry,
         structured_query.aggregation
     )
-    where_clause = nrm.map_conditions(final_attributes.filter_entries)
+    where_clause = nrm.map_conditions(final_entries.filter_entries)
     group_by_clause = nrm.map_groupby(
-        final_attributes.subject_entries,
+        final_entries.subject_entries,
         structured_query.aggregation
     )
     order_by_direction = nrm.map_ordering(structured_query.ordering)
     order_by_column = nrm.map_sort_on(
         structured_query.sort_on,
-        final_attributes.metric_entry,
-        final_attributes.subject_entries,
+        final_entries.metric_entry,
+        final_entries.subject_entries,
         structured_query.aggregation
     )
     limit_clause = nrm.map_limit(structured_query.limit)
@@ -68,6 +74,9 @@ def query_tool(structured_query: QuerySchema,
         f"SELECT {select_clause}",
         f"FROM {view_name}",
     ]
+
+    if join_clause:
+        sql_parts.append(join_clause)
 
     if where_clause:
         sql_parts.append(where_clause)
@@ -91,3 +100,4 @@ def query_tool(structured_query: QuerySchema,
     global_database.close_connection()
 
     return df, sql
+
