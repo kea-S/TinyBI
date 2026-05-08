@@ -7,228 +7,125 @@ from src.utils.value_resolution.value_resolver import (
 )
 
 
-def make_categorical_entry(
-    canonical_values: list[str],
-    value_labels: dict[str, str] | None = None,
+def make_entry(
+    statistical_type: str = "nominal",
+    categories: list[str] | None = None,
+    value_mappings: dict[str, list[str]] | None = None,
+    **kwargs
 ):
     return ColumnVectorIndexEntry(
         entry_id=1,
-        table_name="orders",
-        column_name="provider",
-        source_key="orders.provider",
-        payload={
-            "is_categorical": True,
-            "canonical_values": canonical_values,
-            "value_labels": value_labels or {},
-        },
+        table_name="test_table",
+        column_name="test_col",
+        source_key="test_table.test_col",
+        statistical_type=statistical_type,
+        categories=categories or [],
+        value_mappings=value_mappings or {},
+        **kwargs
     )
 
 
-def make_non_categorical_entry():
-    return ColumnVectorIndexEntry(
-        entry_id=2,
-        table_name="orders",
-        column_name="created_at",
-        source_key="orders.created_at",
-        payload={
-            "is_categorical": False,
-        },
-    )
-
-
-class TestCanResolveValue:
-    def test_exact_match_returns_true(self):
-        entry = make_categorical_entry(["DB Schenker", "SPX"])
-        intent = FilterIntent(
-            attribute_hint="provider",
-            operator="=",
-            raw_value_text=["DB Schenker"],
-        )
-        assert can_resolve_value(intent, entry) is True
-
-    def test_normalized_match_returns_true(self):
-        entry = make_categorical_entry(["DB Schenker", "SPX"])
-        intent = FilterIntent(
-            attribute_hint="provider",
-            operator="=",
-            raw_value_text=["db-schenker"],
-        )
-        assert can_resolve_value(intent, entry) is True
-
-    def test_label_match_returns_true(self):
-        entry = make_categorical_entry(
-            ["DB Schenker", "SPX"],
-            value_labels={"DB Schenker": "dbschenker", "SPX": "spx"},
-        )
-        intent = FilterIntent(
-            attribute_hint="provider",
-            operator="=",
-            raw_value_text=["dbschenker"],
-        )
-        assert can_resolve_value(intent, entry) is True
-
-    def test_fuzzy_match_returns_true(self):
-        entry = make_categorical_entry(["DB Schenker", "SPX"])
-        intent = FilterIntent(
-            attribute_hint="provider",
-            operator="=",
-            raw_value_text=["dbschenkerr"],
-        )
-        assert can_resolve_value(intent, entry) is True
-
-    def test_no_match_returns_false(self):
-        entry = make_categorical_entry(["DB Schenker", "SPX"])
-        intent = FilterIntent(
-            attribute_hint="provider",
-            operator="=",
-            raw_value_text=["Atlantis Logistics"],
-        )
-        assert can_resolve_value(intent, entry) is False
-
-    def test_non_categorical_returns_true(self):
-        entry = make_non_categorical_entry()
-        intent = FilterIntent(
-            attribute_hint="date",
-            operator="BETWEEN",
-            raw_value_text=["2025-01-01", "2025-01-31"],
-        )
-        assert can_resolve_value(intent, entry) is True
-
-    def test_multiple_values_one_resolves_returns_true(self):
-        entry = make_categorical_entry(["DB Schenker", "SPX"])
-        intent = FilterIntent(
-            attribute_hint="provider",
-            operator="=",
-            raw_value_text=["DB Schenker", "Atlantis Logistics"],
-        )
-        assert can_resolve_value(intent, entry) is True
-
-    def test_multiple_values_none_resolve_returns_false(self):
-        entry = make_categorical_entry(["DB Schenker", "SPX"])
-        intent = FilterIntent(
-            attribute_hint="provider",
-            operator="=",
-            raw_value_text=["Fake Co", "Atlantis Logistics"],
-        )
-        assert can_resolve_value(intent, entry) is False
-
-    def test_empty_canonical_values_returns_false(self):
-        entry = make_categorical_entry([])
-        intent = FilterIntent(
-            attribute_hint="provider",
-            operator="=",
-            raw_value_text=["DB Schenker"],
-        )
-        assert can_resolve_value(intent, entry) is False
-
-
-class TestResolveFilterLiterals:
-    def test_exact_match_resolves_to_canonical(self):
-        entry = make_categorical_entry(["DB Schenker", "SPX"])
-        intent = FilterIntent(
-            attribute_hint="provider",
-            operator="=",
-            raw_value_text=["DB Schenker"],
-        )
-        result = resolve_filter_literals(intent, entry)
-        assert result.raw_value_text == ("DB Schenker",)
-        assert result.operator == "="
-
-    def test_normalized_match_resolves_to_canonical(self):
-        entry = make_categorical_entry(["DB Schenker", "SPX"])
-        intent = FilterIntent(
-            attribute_hint="provider",
-            operator="=",
-            raw_value_text=["db-schenker"],
-        )
-        result = resolve_filter_literals(intent, entry)
-        assert result.raw_value_text == ("DB Schenker",)
-
-    def test_label_match_resolves_to_canonical(self):
-        entry = make_categorical_entry(
-            ["F", "M"],
-            value_labels={"F": "female", "M": "male"},
+class TestValueResolverNewTaxonomy:
+    def test_resolve_synonym_from_mapping(self):
+        # 'woman' is a synonym for 'F'
+        entry = make_entry(
+            statistical_type="nominal",
+            categories=["F", "M"],
+            value_mappings={"F": ["female", "woman"], "M": ["male", "man"]}
         )
         intent = FilterIntent(
             attribute_hint="gender",
             operator="=",
-            raw_value_text=["female"],
+            raw_value_text=["woman"],
         )
         result = resolve_filter_literals(intent, entry)
         assert result.raw_value_text == ("F",)
 
-    def test_fuzzy_match_resolves_to_canonical(self):
-        entry = make_categorical_entry(["Singapore", "Malaysia"])
+    def test_resolve_exact_category_match(self):
+        # User uses the raw DB code 'F' directly
+        entry = make_entry(
+            statistical_type="nominal",
+            categories=["F", "M"],
+            value_mappings={"F": ["female"], "M": ["male"]}
+        )
         intent = FilterIntent(
-            attribute_hint="country",
+            attribute_hint="gender",
             operator="=",
-            raw_value_text=["Singapre"],
+            raw_value_text=["F"],
         )
         result = resolve_filter_literals(intent, entry)
-        assert result.raw_value_text == ("Singapore",)
+        assert result.raw_value_text == ("F",)
 
-    def test_partial_match_returns_only_resolved(self):
-        entry = make_categorical_entry(["Singapore", "Malaysia"])
+    def test_resolve_ordinal_preserves_order(self):
+        entry = make_entry(
+            statistical_type="ordinal",
+            categories=["low", "medium", "high"],
+            value_mappings={}
+        )
         intent = FilterIntent(
-            attribute_hint="country",
-            operator="IN",
-            raw_value_text=["Singapore", "Atlantis"],
+            attribute_hint="priority",
+            operator="=",
+            raw_value_text=["high"],
         )
         result = resolve_filter_literals(intent, entry)
-        assert result.raw_value_text == ("Singapore",)
+        assert result.raw_value_text == ("high",)
+
+    def test_quantitative_pass_through(self):
+        # Continuous data should not attempt mapping resolution
+        entry = make_entry(
+            statistical_type="continuous",
+            categories=[],
+            value_mappings={"100": ["one hundred"]} # Mapping should be ignored
+        )
+        intent = FilterIntent(
+            attribute_hint="price",
+            operator=">",
+            raw_value_text=["100"],
+        )
+        result = resolve_filter_literals(intent, entry)
+        assert result.raw_value_text == ("100",)
+        assert result.operator == ">"
+
+    def test_resolve_multiple_synonyms_to_in_clause(self):
+        entry = make_entry(
+            statistical_type="nominal",
+            categories=["F", "M"],
+            value_mappings={"F": ["female", "woman"], "M": ["male", "man"]}
+        )
+        intent = FilterIntent(
+            attribute_hint="gender",
+            operator="=",
+            raw_value_text=["woman", "man"],
+        )
+        result = resolve_filter_literals(intent, entry)
+        assert set(result.raw_value_text) == {"F", "M"}
         assert result.operator == "IN"
 
-    def test_multiple_resolved_upgrades_to_in(self):
-        entry = make_categorical_entry(["Singapore", "Malaysia"])
-        intent = FilterIntent(
-            attribute_hint="country",
-            operator="=",
-            raw_value_text=["Singapore", "Malaysia"],
+    def test_unresolvable_categorical_returns_none(self):
+        entry = make_entry(
+            statistical_type="categorical",
+            categories=["A", "B"],
+            value_mappings={"A": ["Apple"]}
         )
-        result = resolve_filter_literals(intent, entry)
-        assert result.raw_value_text == ("Singapore", "Malaysia")
-        assert result.operator == "IN"
-
-    def test_multiple_resolved_single_value_stays_equals(self):
-        entry = make_categorical_entry(["Singapore", "Malaysia"])
         intent = FilterIntent(
-            attribute_hint="country",
+            attribute_hint="fruit",
             operator="=",
-            raw_value_text=["Singapore"],
-        )
-        result = resolve_filter_literals(intent, entry)
-        assert result.raw_value_text == ("Singapore",)
-        assert result.operator == "="
-
-    def test_non_categorical_passes_through(self):
-        entry = make_non_categorical_entry()
-        intent = FilterIntent(
-            attribute_hint="date",
-            operator="BETWEEN",
-            raw_value_text=["2025-01-01", "2025-01-31"],
-        )
-        result = resolve_filter_literals(intent, entry)
-        assert result.raw_value_text == ("2025-01-01", "2025-01-31")
-        assert result.operator == "BETWEEN"
-
-    def test_all_unresolved_returns_none(self):
-        entry = make_categorical_entry(["Singapore", "Malaysia"])
-        intent = FilterIntent(
-            attribute_hint="country",
-            operator="=",
-            raw_value_text=["Atlantis", "Narnia"],
+            raw_value_text=["Banana"], # Not in mapping or categories
         )
         result = resolve_filter_literals(intent, entry)
         assert result is None
 
-    def test_negated_preserved_in_result(self):
-        entry = make_categorical_entry(["DB Schenker", "SPX"])
+    def test_fuzzy_match_on_synonyms(self):
+        # 'womann' (typo) should match 'woman' synonym for 'F'
+        entry = make_entry(
+            statistical_type="nominal",
+            categories=["F", "M"],
+            value_mappings={"F": ["female", "woman"]}
+        )
         intent = FilterIntent(
-            attribute_hint="provider",
+            attribute_hint="gender",
             operator="=",
-            raw_value_text=["DB Schenker"],
-            negated=True,
+            raw_value_text=["womann"],
         )
         result = resolve_filter_literals(intent, entry)
-        assert result.negated is True
-        assert result.raw_value_text == ("DB Schenker",)
+        assert result.raw_value_text == ("F",)

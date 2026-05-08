@@ -6,6 +6,10 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 SINGLE_VALUE_OPERATORS = {"=", "<", "<=", ">", ">=", "CONTAINS"}
 ORDERED_OPERATORS = {"<", "<=", ">", ">="}
 
+# Statistical taxonomy constants
+CATEGORICAL_TYPES = {"nominal", "ordinal", "categorical"}
+QUANTITATIVE_TYPES = {"continuous", "discrete", "quantitative"}
+
 
 class FilterIntent(BaseModel):
     """
@@ -276,18 +280,71 @@ class ColumnVectorIndexEntry(BaseModel):
         default=None,
         description="Semantic format descriptor such as date, currency, percentage, or iso_country_code.",
     )
+    statistical_type: Optional[Literal[
+        "nominal", "ordinal", "categorical", 
+        "continuous", "discrete", "quantitative"
+    ]] = Field(
+        default=None,
+        description="The statistical nature of the data, used to determine resolution strategies."
+    )
+    categories: List[str] = Field(
+        default_factory=list,
+        description="The raw values as they appear in the database for categorical data."
+    )
+    value_mappings: dict[str, List[str]] = Field(
+        default_factory=dict,
+        description="Maps raw database values to lists of human-friendly synonyms."
+    )
     aliases: List[str] = Field(default_factory=list)
     sample_values: List[str] = Field(default_factory=list)
     payload: dict[str, Any] = Field(default_factory=dict)
     references: Optional[str] = Field(default=None, description="FK reference to another column's source_key.")
 
     @model_validator(mode="after")
-    def _normalise_legacy_data_type(self) -> Self:
+    def _migrate_metadata_fields(self) -> Self:
+        # Migrate data_type to data_format
         legacy_data_type = self.payload.pop("data_type", None)
         if self.data_format is None and isinstance(legacy_data_type, str):
             trimmed_legacy_data_type = legacy_data_type.strip()
             if trimmed_legacy_data_type:
                 self.data_format = trimmed_legacy_data_type
+
+        # Migrate is_categorical to statistical_type
+        if self.statistical_type is None:
+            is_cat = self.payload.pop("is_categorical", None)
+            if is_cat:
+                self.statistical_type = "categorical"
+
+        # Migrate canonical_values to categories
+        if not self.categories:
+            canon = self.payload.pop("canonical_values", None)
+            if isinstance(canon, list):
+                self.categories = [str(c) for c in canon]
+
+        # Migrate value_labels to value_mappings (converting str values to List[str])
+        if not self.value_mappings:
+            labels = self.payload.pop("value_labels", None)
+            if isinstance(labels, dict):
+                for k, v in labels.items():
+                    if isinstance(v, str):
+                        self.value_mappings[str(k)] = [v]
+                    elif isinstance(v, list):
+                        self.value_mappings[str(k)] = [str(i) for i in v]
+        
+        # Migrate any top-level new fields if they were put in payload manually
+        if self.statistical_type is None:
+            self.statistical_type = self.payload.pop("statistical_type", None)
+        
+        if not self.categories:
+            cat = self.payload.pop("categories", None)
+            if isinstance(cat, list):
+                self.categories = cat
+
+        if not self.value_mappings:
+            vm = self.payload.pop("value_mappings", None)
+            if isinstance(vm, dict):
+                self.value_mappings = vm
+
         return self
 
     def to_embedding_text(self) -> str:
@@ -402,4 +459,8 @@ class FinalJoins(BaseModel):
     """
     from_table: str
     joins: list[JoinStep]
+
+
+
+
 

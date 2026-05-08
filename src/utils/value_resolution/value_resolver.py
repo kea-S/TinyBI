@@ -1,8 +1,13 @@
 import logging
 import re
 from difflib import SequenceMatcher
+from typing import Dict, List, Tuple, Optional
 
-from src.utils.pydantic_models import FilterIntent, ColumnVectorIndexEntry
+from src.utils.pydantic_models import (
+    FilterIntent, 
+    ColumnVectorIndexEntry,
+    CATEGORICAL_TYPES
+)
 
 logger = logging.getLogger(__name__)
 
@@ -48,35 +53,44 @@ def _choose_fuzzy_match(
 
 
 def _get_resolution_context(index_entry: ColumnVectorIndexEntry):
-    payload = index_entry.payload or {}
-    is_categorical = bool(payload.get("is_categorical"))
-    canonical_values = payload.get("canonical_values") or []
-    value_labels = payload.get("value_labels") or {}
+    """
+    Build a search map from the new taxonomy fields.
+    """
+    is_categorical = index_entry.statistical_type in CATEGORICAL_TYPES
+    
+    # categories: raw DB values
+    categories = index_entry.categories or []
+    # value_mappings: db_value -> [synonyms]
+    value_mappings = index_entry.value_mappings or {}
 
     normalized_canonical_map: dict[str, str] = {}
-    normalized_label_map: dict[str, str] = {}
+    normalized_synonym_map: dict[str, str] = {}
 
-    for canonical_value in canonical_values:
-        normalized_canonical_map[_normalize_literal(canonical_value)] = canonical_value
-        label = value_labels.get(canonical_value)
-        if isinstance(label, str) and label.strip():
-            normalized_label_map[_normalize_literal(label)] = canonical_value
+    # 1. Map raw categories to themselves (exact/normalized match fallback)
+    for category in categories:
+        normalized_canonical_map[_normalize_literal(category)] = category
 
-    fuzzy_candidates = {**normalized_canonical_map, **normalized_label_map}
+    # 2. Map synonyms to the raw category
+    for db_value, synonyms in value_mappings.items():
+        for synonym in synonyms:
+            normalized_synonym_map[_normalize_literal(synonym)] = db_value
 
-    return is_categorical, canonical_values, normalized_canonical_map, normalized_label_map, fuzzy_candidates
+    # For fuzzy matching, prioritize synonyms over raw codes
+    fuzzy_candidates = {**normalized_canonical_map, **normalized_synonym_map}
+
+    return is_categorical, categories, normalized_canonical_map, normalized_synonym_map, fuzzy_candidates
 
 
 def can_resolve_value(
     filter_intent: FilterIntent,
     index_entry: ColumnVectorIndexEntry,
 ) -> bool:
-    is_categorical, canonical_values, norm_map, label_map, fuzzy_candidates = _get_resolution_context(index_entry)
+    is_categorical, categories, norm_map, synonym_map, fuzzy_candidates = _get_resolution_context(index_entry)
 
     if not is_categorical:
         return True
 
-    if not canonical_values:
+    if not categories and not synonym_map:
         return False
 
     raw_values = _as_list(filter_intent.raw_value_text)
@@ -84,9 +98,9 @@ def can_resolve_value(
     for raw_value in raw_values:
         normalized_value = _normalize_literal(raw_value)
         if (
-            raw_value in canonical_values
+            raw_value in categories
             or normalized_value in norm_map
-            or normalized_value in label_map
+            or normalized_value in synonym_map
             or _choose_fuzzy_match(normalized_value, fuzzy_candidates)[0] is not None
         ):
             return True
@@ -97,8 +111,8 @@ def can_resolve_value(
 def resolve_filter_literals(
     filter_intent: FilterIntent,
     index_entry: ColumnVectorIndexEntry,
-) -> FilterIntent:
-    is_categorical, canonical_values, norm_map, label_map, fuzzy_candidates = _get_resolution_context(index_entry)
+) -> Optional[FilterIntent]:
+    is_categorical, categories, norm_map, synonym_map, fuzzy_candidates = _get_resolution_context(index_entry)
     raw_values = _as_list(filter_intent.raw_value_text)
 
     if not is_categorical:
@@ -111,12 +125,12 @@ def resolve_filter_literals(
         normalized_value = _normalize_literal(raw_value)
         resolved_value: str | None = None
 
-        if raw_value in canonical_values:
+        if raw_value in categories:
             resolved_value = raw_value
         elif normalized_value in norm_map:
             resolved_value = norm_map[normalized_value]
-        elif normalized_value in label_map:
-            resolved_value = label_map[normalized_value]
+        elif normalized_value in synonym_map:
+            resolved_value = synonym_map[normalized_value]
         else:
             resolved_value, _ = _choose_fuzzy_match(normalized_value, fuzzy_candidates)
 
@@ -140,7 +154,7 @@ def resolve_filter_literals(
     if not resolved_values:
         return None
 
-    cleaned_value = resolved_values
+    cleaned_value = tuple(resolved_values)
 
     cleaned_operator = filter_intent.operator
     if len(resolved_values) > 1 and cleaned_operator in (None, "="):
@@ -152,3 +166,4 @@ def resolve_filter_literals(
         raw_value_text=cleaned_value,
         negated=filter_intent.negated,
     )
+
