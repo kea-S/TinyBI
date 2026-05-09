@@ -14,8 +14,7 @@ User question (natural language)
   → DuckDB         →  pandas DataFrame
   → LLM Explainer  →  Business insight (optional, currently disabled)
 
-Two interfaces:
-  • Web app        —  FastAPI backend + React/Vite frontend
+Interface: a **FastAPI backend** serving a **React/Vite frontend**.
 ```
 
 ## Quick Start
@@ -70,16 +69,9 @@ ollama pull llama3.2:3b       # alternative lightweight model
 ollama pull qwen2.5:7b        # larger, better quality
 ```
 
-### 6. Set environment variables
+### 6. Set environment variables (optional)
 
-**CLI chatbot:**
-
-```bash
-export TINYBI_MODEL=granite4:3b
-export TINYBI_LOCAL=true
-```
-
-**Web app** — the API endpoint is hardcoded to use `granite4:3b` in local mode. To change the model, edit the `get_extractor` call in `src/api/routes/query.py`.
+The web app defaults to `granite4:3b` in local mode. To change the model or switch to remote, edit the `get_extractor` call in `src/api/routes/query.py`.
 
 ### Supported local models
 
@@ -101,6 +93,42 @@ export TINYBI_LOCAL=true
 | `text-embedding-3-small` | OpenAI | Remote — requires API key |
 
 To change the embedding model, edit `DEFAULT_EMBEDDING_MODEL` in `src/utils/models.py:33`.
+
+## Start the servers
+
+**Terminal 1 — Backend (FastAPI):**
+
+```bash
+uv run uvicorn src.api.main:app --reload --port 8000
+```
+
+**Terminal 2 — Frontend (Vite dev server):**
+
+```bash
+cd frontend && npm run dev
+```
+
+The frontend opens at `http://localhost:5173`. It proxies `/api/*` to the backend at `http://127.0.0.1:8000`.
+
+## Vector index
+
+The vector index maps natural language concepts to database columns. **It is pre-built and included in the repo** (`data/app_data/columns.faiss` + `columns.json`) — no action needed.
+
+To rebuild it (e.g. after changing the database schema or the embedding model):
+
+### Rebuild via the frontend
+
+Use the **frontend's Vector Index Builder** — navigate to `/vector-index`, load the 41 columns from `data/app_data/columns.json`, verify them, and click "Submit Index Batch".
+
+### Rebuild via the API
+
+```bash
+curl -X POST http://127.0.0.1:8000/vector/index-entries/batch \
+  -H "Content-Type: application/json" \
+  -d @data/app_data/columns.json
+```
+
+> The index is persisted to `data/app_data/columns.faiss` and reused across restarts.
 
 ## Testing
 
@@ -140,7 +168,7 @@ cd frontend && npm test
 │       └── lib/api.ts             # API client types + fetch wrappers
 │
 ├── src/                           # Python backend
-│   ├── main.py                    # CLI chatbot entry point
+│   ├── main.py                    # Application entry point
 │   ├── config.py                  # Path configuration
 │   ├── api/
 │   │   ├── main.py                # FastAPI app (lifespan, health, routers)
@@ -195,8 +223,6 @@ GET /health  →  {"status": "ok"}
 |---|---|---|
 | `OPENAI_API_KEY` | — | Required for remote extraction with GPT-4o |
 | `GROQ_API_KEY` | — | Alternative remote provider (Groq) |
-| `TINYBI_MODEL` | `gpt-4o` | Which model the CLI chatbot uses |
-| `TINYBI_LOCAL` | `false` | Set to `true` for Ollama models in the CLI |
 | `VITE_BACKEND_URL` | `http://127.0.0.1:8000` | Backend URL for the frontend proxy |
 
 Database paths are configured in `src/config.py`.
