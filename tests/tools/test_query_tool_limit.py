@@ -22,7 +22,7 @@ def _entry(table_name: str, column_name: str) -> ColumnVectorIndexEntry:
         statistical_type="nominal"
     )
 
-def test_query_tool_defaults_to_limit_5(monkeypatch):
+def test_query_tool_defaults_to_limit_1000(monkeypatch):
     # Setup mocks to skip vector search and resolution
     entries = FinalEntries(
         subject_entries=[_entry("orders", "provider")],
@@ -42,7 +42,7 @@ def test_query_tool_defaults_to_limit_5(monkeypatch):
     query = QuerySchema(subject="provider", metric_hint="order total")
     _, sql = query_tool(query)
 
-    assert "LIMIT 5" in sql
+    assert "LIMIT 1000" in sql
 
 def test_query_tool_respects_explicit_limit(monkeypatch):
     entries = FinalEntries(
