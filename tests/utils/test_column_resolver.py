@@ -28,6 +28,7 @@ def _entry(entry_id: int, table_name: str, column_name: str, **extra):
         table_name=table_name,
         column_name=column_name,
         source_key=f"{table_name}.{column_name}",
+        statistical_type="nominal",
     )
     defaults.update(extra)
     return ColumnVectorIndexEntry(**defaults)
@@ -91,7 +92,8 @@ class TestResolveColumnsFilterEntries:
             metric_entries=[_result(2, 0.90, table_name="orders", column_name="total")],
             filter_entries={
                 fi: [
-                    _result(3, 0.88, table_name="orders", column_name="provider"),
+                    _result(3, 0.88, table_name="orders", column_name="provider", 
+                            categorical_values={"DB Schenker": []}),
                     _result(4, 0.70, table_name="orders", column_name="provider_alt"),
                 ],
             },
@@ -110,8 +112,10 @@ class TestResolveColumnsFilterEntries:
             subject_entries=[_result(1, 0.95, table_name="orders", column_name="customer")],
             metric_entries=[_result(2, 0.90, table_name="orders", column_name="total")],
             filter_entries={
-                fi_provider: [_result(3, 0.88, table_name="orders", column_name="provider")],
-                fi_country: [_result(4, 0.92, table_name="orders", column_name="buyer_country")],
+                fi_provider: [_result(3, 0.88, table_name="orders", column_name="provider", 
+                                      categorical_values={"DB Schenker": []})],
+                fi_country: [_result(4, 0.92, table_name="orders", column_name="buyer_country", 
+                                     categorical_values={"Singapore": []})],
             },
         )
         final_entries = resolve_columns(candidates, fully_connected_graph)
@@ -185,7 +189,7 @@ class TestResolveColumnsCrossTableConnectivity:
                 fi: [
                     _result(2, 0.99, table_name="hr_data", column_name="employee_name"),
                     _result(3, 0.80, table_name="users", column_name="username", 
-                            payload={"is_categorical": True, "canonical_values": ["Alice"]}),
+                            statistical_type="categorical", categorical_values={"Alice": []}),
                 ]
             },
         )

@@ -10,7 +10,8 @@ def make_entry(table: str, column: str, references: str = None):
         table_name=table,
         column_name=column,
         source_key=f"{table}.{column}",
-        references=references
+        references=references,
+        statistical_type="nominal",
     )
 
 class TestResolveJoins:

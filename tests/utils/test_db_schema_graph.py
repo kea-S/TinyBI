@@ -12,7 +12,8 @@ def sample_entries():
             column_name="user_id",
             source_key="orders.user_id",
             references="users.id",
-            description="Link to user"
+            description="Link to user",
+            statistical_type="nominal",
         ),
         ColumnVectorIndexEntry(
             entry_id=2,
@@ -20,7 +21,8 @@ def sample_entries():
             column_name="id",
             source_key="users.id",
             references=None,
-            description="User primary key"
+            description="User primary key",
+            statistical_type="nominal",
         ),
         ColumnVectorIndexEntry(
             entry_id=3,
@@ -28,7 +30,8 @@ def sample_entries():
             column_name="id",
             source_key="products.id",
             references=None,
-            description="Product primary key"
+            description="Product primary key",
+            statistical_type="nominal",
         )
     ]
 

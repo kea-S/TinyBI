@@ -122,6 +122,7 @@ def test_column_vector_entry_moves_legacy_data_type_to_data_format():
         table_name="orders",
         column_name="customer_city",
         source_key="orders.customer_city",
+        statistical_type="nominal",
         payload={"data_type": "text", "is_groupable": True},
     )
 
@@ -136,6 +137,7 @@ def test_column_vector_entry_preserves_explicit_data_format_over_legacy_payload_
         column_name="customer_city",
         source_key="orders.customer_city",
         data_format="city_name",
+        statistical_type="nominal",
         payload={"data_type": "text", "is_groupable": True},
     )
 
@@ -308,6 +310,7 @@ class TestCandidateEntriesToLogDict:
                         table_name="orders",
                         column_name="customer",
                         source_key="orders.customer",
+                        statistical_type="nominal",
                     ),
                     score=0.95,
                 )
@@ -319,6 +322,7 @@ class TestCandidateEntriesToLogDict:
                         table_name="orders",
                         column_name="total",
                         source_key="orders.total",
+                        statistical_type="continuous",
                     ),
                     score=0.90,
                 )
@@ -348,6 +352,7 @@ class TestCandidateEntriesToLogDict:
                         table_name="orders",
                         column_name="customer",
                         source_key="orders.customer",
+                        statistical_type="nominal",
                     ),
                     score=0.95,
                 )
@@ -361,6 +366,7 @@ class TestCandidateEntriesToLogDict:
                             table_name="orders",
                             column_name="provider",
                             source_key="orders.provider",
+                            statistical_type="nominal",
                         ),
                         score=0.88,
                     )
@@ -399,6 +405,7 @@ class TestFinalEntriesToLogDict:
                     table_name="orders",
                     column_name="customer",
                     source_key="orders.customer",
+                    statistical_type="nominal",
                 )
             ],
             metric_entry=None,
@@ -418,6 +425,7 @@ class TestFinalEntriesToLogDict:
                 table_name="orders",
                 column_name="total",
                 source_key="orders.total",
+                statistical_type="continuous",
             ),
             filter_entries={},
         )
@@ -449,6 +457,7 @@ class TestFinalEntriesToLogDict:
                     table_name="orders",
                     column_name="provider",
                     source_key="orders.provider",
+                    statistical_type="nominal",
                 )
             },
         )
@@ -471,3 +480,87 @@ class TestFinalEntriesToLogDict:
         )
         log = attrs.to_log_dict()
         assert log["filter_entries"] == []
+
+def test_column_vector_entry_rejects_categorical_values_for_non_categorical_types():
+    from pydantic import ValidationError
+    with pytest.raises(ValidationError, match="Categorical values can only be provided for nominal, ordinal, or categorical types"):
+        ColumnVectorIndexEntry(
+            entry_id=1,
+            table_name="t",
+            column_name="c",
+            source_key="t.c",
+            statistical_type="continuous",
+            categorical_values={"A": ["Alpha"]}
+        )
+
+def test_column_vector_entry_migrates_legacy_categorical_fields_to_unified_field():
+    entry = ColumnVectorIndexEntry(
+        entry_id=1,
+        table_name="t",
+        column_name="c",
+        source_key="t.c",
+        statistical_type="nominal",
+        payload={
+            "categories": ["M", "F"],
+            "value_mappings": {"M": ["Male"]}
+        }
+    )
+    assert entry.categorical_values == {"M": ["Male"], "F": []}
+
+def test_column_vector_entry_accepts_valid_categorical_values():
+    entry = ColumnVectorIndexEntry(
+        entry_id=1,
+        table_name="t",
+        column_name="c",
+        source_key="t.c",
+        statistical_type="nominal",
+        categorical_values={"M": ["Male"]}
+    )
+    assert entry.categorical_values == {"M": ["Male"]}
+
+def test_column_vector_entry_defaults_statistical_type_to_nominal():
+    # It used to be required but now we default it in migration for legacy data
+    entry = ColumnVectorIndexEntry(
+        entry_id=1,
+        table_name="t",
+        column_name="c",
+        source_key="t.c",
+    )
+    assert entry.statistical_type == "nominal"
+
+def test_column_vector_entry_rejects_categorical_values_for_non_categorical_types():
+    with pytest.raises(ValidationError, match="Categorical values can only be provided for nominal, ordinal, or categorical types"):
+        ColumnVectorIndexEntry(
+            entry_id=1,
+            table_name="t",
+            column_name="c",
+            source_key="t.c",
+            statistical_type="continuous",
+            categorical_values={"A": ["Alpha"]}
+        )
+
+def test_column_vector_entry_migrates_legacy_categorical_fields_to_unified_field():
+    # legacy 'categories' and 'value_mappings' in payload should migrate
+    entry = ColumnVectorIndexEntry(
+        entry_id=1,
+        table_name="t",
+        column_name="c",
+        source_key="t.c",
+        statistical_type="nominal",
+        payload={
+            "categories": ["M", "F"],
+            "value_mappings": {"M": ["Male"]}
+        }
+    )
+    assert entry.categorical_values == {"M": ["Male"], "F": []}
+
+def test_column_vector_entry_accepts_valid_categorical_values():
+    entry = ColumnVectorIndexEntry(
+        entry_id=1,
+        table_name="t",
+        column_name="c",
+        source_key="t.c",
+        statistical_type="nominal",
+        categorical_values={"M": ["Male"]}
+    )
+    assert entry.categorical_values == {"M": ["Male"]}

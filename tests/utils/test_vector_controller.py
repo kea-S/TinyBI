@@ -38,6 +38,7 @@ def test_batch_insert_index_entries_builds_and_persists_index(monkeypatch, tmp_p
             column_name="customer_city",
             source_key="orders.customer_city",
             description="Customer city",
+            statistical_type="nominal",
         ),
         ColumnVectorIndexEntry(
             entry_id=2,
@@ -45,6 +46,7 @@ def test_batch_insert_index_entries_builds_and_persists_index(monkeypatch, tmp_p
             column_name="order_total",
             source_key="orders.order_total",
             description="Order total",
+            statistical_type="quantitative",
         ),
     ]
 
@@ -92,12 +94,14 @@ def test_get_current_index_entries_returns_persisted_entries(monkeypatch, tmp_pa
             table_name="orders",
             column_name="customer_city",
             source_key="orders.customer_city",
+            statistical_type="nominal",
         ),
         ColumnVectorIndexEntry(
             entry_id=2,
             table_name="orders",
             column_name="order_total",
             source_key="orders.order_total",
+            statistical_type="quantitative",
         ),
     ]
 
@@ -142,6 +146,7 @@ def _make_entry(entry_id, table_name, column_name, **extra):
         table_name=table_name,
         column_name=column_name,
         source_key=f"{table_name}.{column_name}",
+        statistical_type="nominal",
     )
     defaults.update(extra)
     return ColumnVectorIndexEntry(**defaults)
@@ -170,7 +175,7 @@ class TestRunReturnsDictBasedFilterEntries:
         metric_result = _make_result(2, 0.85, column_name="order_total")
         filter_result = _make_result(
             3, 0.88, column_name="provider",
-            payload={"is_categorical": True, "canonical_values": ["DB Schenker", "SPX"]},
+            statistical_type="nominal", categorical_values={"DB Schenker": [], "SPX": []},
         )
 
         fake_index = FakeVectorIndex([

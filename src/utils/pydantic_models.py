@@ -280,71 +280,117 @@ class ColumnVectorIndexEntry(BaseModel):
         default=None,
         description="Semantic format descriptor such as date, currency, percentage, or iso_country_code.",
     )
-    statistical_type: Optional[Literal[
+    statistical_type: Literal[
         "nominal", "ordinal", "categorical", 
-        "continuous", "discrete", "quantitative"
-    ]] = Field(
-        default=None,
+        "continuous", "discrete", "quantitative", 
+        "temporal", "identifier"
+    ] = Field(
+        ...,
         description="The statistical nature of the data, used to determine resolution strategies."
     )
-    categories: List[str] = Field(
-        default_factory=list,
-        description="The raw values as they appear in the database for categorical data."
-    )
-    value_mappings: dict[str, List[str]] = Field(
+    categorical_values: dict[str, List[str]] = Field(
         default_factory=dict,
-        description="Maps raw database values to lists of human-friendly synonyms."
+        description="Maps raw database values to lists of human-friendly synonyms. Only for categorical data."
     )
     aliases: List[str] = Field(default_factory=list)
     sample_values: List[str] = Field(default_factory=list)
     payload: dict[str, Any] = Field(default_factory=dict)
     references: Optional[str] = Field(default=None, description="FK reference to another column's source_key.")
 
-    @model_validator(mode="after")
-    def _migrate_metadata_fields(self) -> Self:
-        # Migrate data_type to data_format
-        legacy_data_type = self.payload.pop("data_type", None)
-        if self.data_format is None and isinstance(legacy_data_type, str):
-            trimmed_legacy_data_type = legacy_data_type.strip()
-            if trimmed_legacy_data_type:
-                self.data_format = trimmed_legacy_data_type
+    @model_validator(mode="before")
+    @classmethod
+    def _migrate_metadata_fields(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return data
 
-        # Migrate is_categorical to statistical_type
-        if self.statistical_type is None:
-            is_cat = self.payload.pop("is_categorical", None)
-            if is_cat:
-                self.statistical_type = "categorical"
+        # Ensure payload is a dict we can modify
+        payload = data.get("payload")
+        if not isinstance(payload, dict):
+            payload = {}
+        else:
+            # Create a copy to avoid side effects if necessary, 
+            # but usually modifying in-place is expected in 'before' validators for dicts
+            payload = dict(payload)
 
-        # Migrate canonical_values to categories
-        if not self.categories:
-            canon = self.payload.pop("canonical_values", None)
-            if isinstance(canon, list):
-                self.categories = [str(c) for c in canon]
+        # 1. Migrate data_type to data_format
+        if data.get("data_format") is None:
+            legacy_data_type = payload.pop("data_type", None)
+            if isinstance(legacy_data_type, str) and legacy_data_type.strip():
+                data["data_format"] = legacy_data_type.strip()
+        else:
+            payload.pop("data_type", None)
 
-        # Migrate value_labels to value_mappings (converting str values to List[str])
-        if not self.value_mappings:
-            labels = self.payload.pop("value_labels", None)
-            if isinstance(labels, dict):
-                for k, v in labels.items():
+        # 2. Migrate is_categorical / statistical_type
+        if data.get("statistical_type") is None:
+            # Check payload
+            st = payload.pop("statistical_type", None)
+            if st:
+                data["statistical_type"] = st
+            else:
+                is_cat = payload.pop("is_categorical", None)
+                if is_cat is True:
+                    data["statistical_type"] = "categorical"
+                elif is_cat is False:
+                    # Smart default for non-categorical data
+                    fmt = (data.get("data_format") or "").lower()
+                    col_name = (data.get("column_name") or "").lower()
+                    
+                    if "date" in fmt or "time" in fmt:
+                        data["statistical_type"] = "temporal"
+                    elif col_name.endswith("_id") or col_name == "id" or "_id_" in col_name:
+                        data["statistical_type"] = "identifier"
+                    else:
+                        data["statistical_type"] = "quantitative"
+                else:
+                    # Unclear legacy data, default to nominal
+                    data["statistical_type"] = "nominal"
+        else:
+            payload.pop("statistical_type", None)
+            payload.pop("is_categorical", None)
+
+        # 3. Legacy migration into unified categorical_values
+        if data.get("categorical_values") is None:
+            categorical_values = {}
+            
+            # Start with categories / canonical_values
+            categories = payload.pop("categories", None) or payload.pop("canonical_values", None)
+            if isinstance(categories, list):
+                for cat in categories:
+                    cat_str = str(cat)
+                    categorical_values[cat_str] = []
+
+            # Add value_mappings / value_labels
+            value_mappings = payload.pop("value_mappings", None) or payload.pop("value_labels", None)
+            if isinstance(value_mappings, dict):
+                for k, v in value_mappings.items():
+                    k_str = str(k)
                     if isinstance(v, str):
-                        self.value_mappings[str(k)] = [v]
+                        categorical_values[k_str] = [v]
                     elif isinstance(v, list):
-                        self.value_mappings[str(k)] = [str(i) for i in v]
-        
-        # Migrate any top-level new fields if they were put in payload manually
-        if self.statistical_type is None:
-            self.statistical_type = self.payload.pop("statistical_type", None)
-        
-        if not self.categories:
-            cat = self.payload.pop("categories", None)
-            if isinstance(cat, list):
-                self.categories = cat
+                        categorical_values[k_str] = [str(i) for i in v]
+            
+            if categorical_values:
+                data["categorical_values"] = categorical_values
+        else:
+            # Clean up payload even if categorical_values is present
+            payload.pop("categories", None)
+            payload.pop("canonical_values", None)
+            payload.pop("value_mappings", None)
+            payload.pop("value_labels", None)
 
-        if not self.value_mappings:
-            vm = self.payload.pop("value_mappings", None)
-            if isinstance(vm, dict):
-                self.value_mappings = vm
+        data["payload"] = payload
+        return data
 
+    @model_validator(mode="after")
+    def _validate_categorical_values(self) -> Self:
+        categorical_types = {"nominal", "ordinal", "categorical"}
+        is_categorical = self.statistical_type in categorical_types
+        
+        if not is_categorical and self.categorical_values:
+            raise ValueError(
+                f"Categorical values can only be provided for nominal, ordinal, or categorical types. "
+                f"Current type: {self.statistical_type}"
+            )
         return self
 
     def to_embedding_text(self) -> str:
@@ -459,6 +505,15 @@ class FinalJoins(BaseModel):
     """
     from_table: str
     joins: list[JoinStep]
+
+
+
+
+
+
+
+
+
 
 
 

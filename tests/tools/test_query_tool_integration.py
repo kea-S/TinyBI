@@ -14,7 +14,8 @@ def _entry(entry_id: int, table_name: str, column_name: str, references: str = N
         table_name=table_name,
         column_name=column_name,
         source_key=f"{table_name}.{column_name}",
-        references=references
+        references=references,
+        statistical_type="nominal",
     )
 
 def _result(entry_id: int, score: float, table_name: str, column_name: str, references: str = None):

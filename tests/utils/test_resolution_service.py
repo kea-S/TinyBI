@@ -8,10 +8,8 @@ def test_resolve_filter_literals_matches_canonical_values_by_normalized_text():
         table_name="orders",
         column_name="provider",
         source_key="orders.provider",
-        payload={
-            "is_categorical": True,
-            "canonical_values": ["DB Schenker", "SPX"],
-        },
+        statistical_type="nominal",
+        categorical_values={"DB Schenker": [], "SPX": []}
     )
     filter_intent = FilterIntent(
         attribute_hint="provider",
@@ -33,13 +31,10 @@ def test_resolve_filter_literals_uses_value_labels_to_map_user_friendly_text():
         table_name="client",
         column_name="gender",
         source_key="client.gender",
-        payload={
-            "is_categorical": True,
-            "canonical_values": ["F", "M"],
-            "value_labels": {
-                "F": "female",
-                "M": "male",
-            },
+        statistical_type="nominal",
+        categorical_values={
+            "F": ["female"],
+            "M": ["male"],
         },
     )
     filter_intent = FilterIntent(
@@ -61,10 +56,8 @@ def test_resolve_filter_literals_fuzzy_matches_small_typos():
         table_name="geo",
         column_name="country",
         source_key="geo.country",
-        payload={
-            "is_categorical": True,
-            "canonical_values": ["Singapore", "Malaysia"],
-        },
+        statistical_type="nominal",
+        categorical_values={"Singapore": [], "Malaysia": []}
     )
     filter_intent = FilterIntent(
         attribute_hint="country",
@@ -85,10 +78,8 @@ def test_resolve_filter_literals_marks_unresolved_values_for_review():
         table_name="geo",
         column_name="country",
         source_key="geo.country",
-        payload={
-            "is_categorical": True,
-            "canonical_values": ["Singapore", "Malaysia"],
-        },
+        statistical_type="nominal",
+        categorical_values={"Singapore": [], "Malaysia": []}
     )
     filter_intent = FilterIntent(
         attribute_hint="country",
@@ -107,9 +98,7 @@ def test_resolve_filter_literals_passes_non_categorical_values_through():
         table_name="orders",
         column_name="created_at",
         source_key="orders.created_at",
-        payload={
-            "is_categorical": False,
-        },
+        statistical_type="continuous",
     )
     filter_intent = FilterIntent(
         attribute_hint="date",
@@ -130,10 +119,8 @@ def test_resolve_filter_literals_drops_unresolved_values_and_upgrades_operator_t
         table_name="geo",
         column_name="country",
         source_key="geo.country",
-        payload={
-            "is_categorical": True,
-            "canonical_values": ["Singapore", "Malaysia"],
-        },
+        statistical_type="nominal",
+        categorical_values={"Singapore": [], "Malaysia": []}
     )
     filter_intent = FilterIntent(
         attribute_hint="country",

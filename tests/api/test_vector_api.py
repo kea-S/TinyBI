@@ -34,6 +34,7 @@ class FakeVectorController:
                 "source_key": "orders.customer_city",
                 "description": "Customer city",
                 "data_format": "str",
+                "statistical_type": "nominal",
                 "aliases": ["city"],
                 "sample_values": ["Berlin"],
                 "payload": {"is_groupable": True},
@@ -56,6 +57,8 @@ def test_get_current_index_entries_endpoint(monkeypatch):
             "source_key": "orders.customer_city",
             "description": "Customer city",
             "data_format": "str",
+            "statistical_type": "nominal",
+            "categorical_values": {},
             "aliases": ["city"],
             "sample_values": ["Berlin"],
             "payload": {"is_groupable": True},
@@ -78,10 +81,12 @@ def test_batch_insert_index_entries_endpoint(monkeypatch):
                     "column_name": "customer_city",
                     "source_key": "orders.customer_city",
                     "description": "Customer city",
+                    "statistical_type": "nominal",
                     "aliases": ["city"],
                     "sample_values": ["Berlin"],
                     "payload": {"is_groupable": True},
                 }
+
             ],
         },
     )
@@ -109,7 +114,9 @@ def test_batch_insert_index_entries_qwen3_endpoint(monkeypatch):
                     "table_name": "orders",
                     "column_name": "customer_city",
                     "source_key": "orders.customer_city",
+                    "statistical_type": "nominal",
                 }
+
             ],
         },
     )
@@ -131,7 +138,9 @@ def test_batch_insert_index_entries_endpoint_rejects_unknown_model_key(monkeypat
                     "table_name": "orders",
                     "column_name": "customer_city",
                     "source_key": "orders.customer_city",
+                    "statistical_type": "nominal",
                 }
+
             ],
         },
     )
@@ -165,8 +174,10 @@ def test_batch_insert_index_entries_moves_legacy_data_type_into_data_format(monk
                     "table_name": "orders",
                     "column_name": "customer_city",
                     "source_key": "orders.customer_city",
+                    "statistical_type": "nominal",
                     "payload": {"data_type": "text"},
                 }
+
             ],
         },
     )
@@ -192,8 +203,10 @@ def test_column_with_references_submitted(monkeypatch):
                     "table_name": "orders",
                     "column_name": "customer_id",
                     "source_key": "orders.customer_id",
+                    "statistical_type": "nominal",
                     "references": "customers.id",
                 }
+
             ],
         },
     )
@@ -217,13 +230,13 @@ def test_get_current_index_entries_includes_references(monkeypatch):
                     "column_name": "customer_id",
                     "source_key": "orders.customer_id",
                     "description": "FK to customers",
+                    "statistical_type": "nominal",
                     "references": "customers.id",
                     "aliases": [],
                     "sample_values": [],
                     "payload": {},
                 }
             ]
-
     monkeypatch.setattr(vector_routes, "_get_controller", lambda: FakeVectorControllerWithReferences("nomic-embed-text"))
     client = TestClient(create_app())
 
@@ -248,7 +261,9 @@ def test_references_null_when_not_set(monkeypatch):
                     "table_name": "orders",
                     "column_name": "customer_city",
                     "source_key": "orders.customer_city",
+                    "statistical_type": "nominal",
                 }
+
             ],
         },
     )

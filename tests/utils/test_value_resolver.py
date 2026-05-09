@@ -9,8 +9,7 @@ from src.utils.value_resolution.value_resolver import (
 
 def make_entry(
     statistical_type: str = "nominal",
-    categories: list[str] | None = None,
-    value_mappings: dict[str, list[str]] | None = None,
+    categorical_values: dict[str, list[str]] | None = None,
     **kwargs
 ):
     return ColumnVectorIndexEntry(
@@ -19,8 +18,7 @@ def make_entry(
         column_name="test_col",
         source_key="test_table.test_col",
         statistical_type=statistical_type,
-        categories=categories or [],
-        value_mappings=value_mappings or {},
+        categorical_values=categorical_values or {},
         **kwargs
     )
 
@@ -30,8 +28,7 @@ class TestValueResolverNewTaxonomy:
         # 'woman' is a synonym for 'F'
         entry = make_entry(
             statistical_type="nominal",
-            categories=["F", "M"],
-            value_mappings={"F": ["female", "woman"], "M": ["male", "man"]}
+            categorical_values={"F": ["female", "woman"], "M": ["male", "man"]}
         )
         intent = FilterIntent(
             attribute_hint="gender",
@@ -45,8 +42,7 @@ class TestValueResolverNewTaxonomy:
         # User uses the raw DB code 'F' directly
         entry = make_entry(
             statistical_type="nominal",
-            categories=["F", "M"],
-            value_mappings={"F": ["female"], "M": ["male"]}
+            categorical_values={"F": ["female"], "M": ["male"]}
         )
         intent = FilterIntent(
             attribute_hint="gender",
@@ -59,8 +55,7 @@ class TestValueResolverNewTaxonomy:
     def test_resolve_ordinal_preserves_order(self):
         entry = make_entry(
             statistical_type="ordinal",
-            categories=["low", "medium", "high"],
-            value_mappings={}
+            categorical_values={"low": [], "medium": [], "high": []}
         )
         intent = FilterIntent(
             attribute_hint="priority",
@@ -74,8 +69,7 @@ class TestValueResolverNewTaxonomy:
         # Continuous data should not attempt mapping resolution
         entry = make_entry(
             statistical_type="continuous",
-            categories=[],
-            value_mappings={"100": ["one hundred"]} # Mapping should be ignored
+            categorical_values={} # Cannot have categorical_values for continuous
         )
         intent = FilterIntent(
             attribute_hint="price",
@@ -89,8 +83,7 @@ class TestValueResolverNewTaxonomy:
     def test_resolve_multiple_synonyms_to_in_clause(self):
         entry = make_entry(
             statistical_type="nominal",
-            categories=["F", "M"],
-            value_mappings={"F": ["female", "woman"], "M": ["male", "man"]}
+            categorical_values={"F": ["female", "woman"], "M": ["male", "man"]}
         )
         intent = FilterIntent(
             attribute_hint="gender",
@@ -104,8 +97,7 @@ class TestValueResolverNewTaxonomy:
     def test_unresolvable_categorical_returns_none(self):
         entry = make_entry(
             statistical_type="categorical",
-            categories=["A", "B"],
-            value_mappings={"A": ["Apple"]}
+            categorical_values={"A": ["Apple"], "B": []}
         )
         intent = FilterIntent(
             attribute_hint="fruit",
@@ -119,8 +111,7 @@ class TestValueResolverNewTaxonomy:
         # 'womann' (typo) should match 'woman' synonym for 'F'
         entry = make_entry(
             statistical_type="nominal",
-            categories=["F", "M"],
-            value_mappings={"F": ["female", "woman"]}
+            categorical_values={"F": ["female", "woman"]}
         )
         intent = FilterIntent(
             attribute_hint="gender",

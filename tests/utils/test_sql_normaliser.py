@@ -19,7 +19,8 @@ class TestMapSubject:
     def test_single_entry(self):
         entries = [ColumnVectorIndexEntry(
             entry_id=1, table_name='shipments',
-            column_name='provider', source_key='shipments.provider'
+            column_name='provider', source_key='shipments.provider',
+            statistical_type='nominal',
         )]
         assert map_subject(entries) == "shipments.provider AS provider"
 
@@ -27,11 +28,13 @@ class TestMapSubject:
         entries = [
             ColumnVectorIndexEntry(
                 entry_id=1, table_name='shipments',
-                column_name='provider', source_key='shipments.provider'
+                column_name='provider', source_key='shipments.provider',
+                statistical_type='nominal',
             ),
             ColumnVectorIndexEntry(
                 entry_id=2, table_name='shipments',
-                column_name='region', source_key='shipments.region'
+                column_name='region', source_key='shipments.region',
+                statistical_type='nominal',
             ),
         ]
         assert map_subject(entries) == "shipments.provider AS provider, shipments.region AS region"
@@ -42,7 +45,8 @@ class TestMapSubject:
     def test_no_dot_in_source_key(self):
         entries = [ColumnVectorIndexEntry(
             entry_id=1, table_name='shipments',
-            column_name='provider', source_key='provider'
+            column_name='provider', source_key='provider',
+            statistical_type='nominal',
         )]
         assert map_subject(entries) == "provider AS provider"
 
@@ -51,21 +55,24 @@ class TestMapMetric:
     def test_with_aggregation(self):
         entry = ColumnVectorIndexEntry(
             entry_id=1, table_name='shipments',
-            column_name='order_value', source_key='shipments.order_value'
+            column_name='order_value', source_key='shipments.order_value',
+            statistical_type='quantitative',
         )
         assert map_metric(entry, "sum") == "SUM(shipments.order_value)"
 
     def test_with_avg_aggregation(self):
         entry = ColumnVectorIndexEntry(
             entry_id=1, table_name='shipments',
-            column_name='bwt', source_key='shipments.bwt'
+            column_name='bwt', source_key='shipments.bwt',
+            statistical_type='quantitative',
         )
         assert map_metric(entry, "avg") == "AVG(shipments.bwt)"
 
     def test_without_aggregation(self):
         entry = ColumnVectorIndexEntry(
             entry_id=1, table_name='shipments',
-            column_name='bwt', source_key='shipments.bwt'
+            column_name='bwt', source_key='shipments.bwt',
+            statistical_type='quantitative',
         )
         assert map_metric(entry, None) == "shipments.bwt"
 
@@ -104,7 +111,8 @@ class TestMapSortOn:
             entry_id=1,
             table_name='shipments',
             column_name='order_value',
-            source_key='shipments.order_value'
+            source_key='shipments.order_value',
+            statistical_type='quantitative',
         )
         assert map_sort_on("metric", metric_entry, [], "sum") == "SUM(shipments.order_value)"
 
@@ -114,7 +122,8 @@ class TestMapSortOn:
             entry_id=1,
             table_name='shipments',
             column_name='order_value',
-            source_key='shipments.order_value'
+            source_key='shipments.order_value',
+            statistical_type='quantitative',
         )
         assert map_sort_on("metric_hint", metric_entry, [], "avg") == "AVG(shipments.order_value)"
 
@@ -124,7 +133,8 @@ class TestMapSortOn:
             entry_id=1,
             table_name='shipments',
             column_name='order_value',
-            source_key='shipments.order_value'
+            source_key='shipments.order_value',
+            statistical_type='quantitative',
         )
         assert map_sort_on("metric", metric_entry, [], None) == "shipments.order_value"
 
@@ -137,7 +147,8 @@ class TestMapSortOn:
             entry_id=1,
             table_name='shipments',
             column_name='provider',
-            source_key='shipments.provider'
+            source_key='shipments.provider',
+            statistical_type='nominal',
         )]
         assert map_sort_on("subject", None, subject_entries, None) == "shipments.provider"
 
@@ -148,13 +159,15 @@ class TestMapSortOn:
                 entry_id=1,
                 table_name='shipments',
                 column_name='provider',
-                source_key='shipments.provider'
+                source_key='shipments.provider',
+                statistical_type='nominal',
             ),
             ColumnVectorIndexEntry(
                 entry_id=2,
                 table_name='shipments',
                 column_name='region',
-                source_key='shipments.region'
+                source_key='shipments.region',
+                statistical_type='nominal',
             )
         ]
         assert map_sort_on("subject", None, subject_entries, None) == "shipments.provider"
@@ -186,7 +199,8 @@ class TestMapGroupby:
     def test_with_aggregation_single_entry(self):
         entries = [ColumnVectorIndexEntry(
             entry_id=1, table_name='shipments',
-            column_name='provider', source_key='shipments.provider'
+            column_name='provider', source_key='shipments.provider',
+            statistical_type='nominal',
         )]
         assert map_groupby(entries, "sum") == "GROUP BY shipments.provider"
 
@@ -194,11 +208,13 @@ class TestMapGroupby:
         entries = [
             ColumnVectorIndexEntry(
                 entry_id=1, table_name='shipments',
-                column_name='provider', source_key='shipments.provider'
+                column_name='provider', source_key='shipments.provider',
+                statistical_type='nominal',
             ),
             ColumnVectorIndexEntry(
                 entry_id=2, table_name='shipments',
-                column_name='region', source_key='shipments.region'
+                column_name='region', source_key='shipments.region',
+                statistical_type='nominal',
             ),
         ]
         assert map_groupby(entries, "sum") == "GROUP BY shipments.provider, shipments.region"
@@ -206,7 +222,8 @@ class TestMapGroupby:
     def test_no_aggregation_returns_empty(self):
         entries = [ColumnVectorIndexEntry(
             entry_id=1, table_name='shipments',
-            column_name='provider', source_key='shipments.provider'
+            column_name='provider', source_key='shipments.provider',
+            statistical_type='nominal',
         )]
         assert map_groupby(entries, None) == ""
 
@@ -223,6 +240,7 @@ def _entry(table_name: str, column_name: str) -> ColumnVectorIndexEntry:
         table_name=table_name,
         column_name=column_name,
         source_key=f"{table_name}.{column_name}",
+        statistical_type="nominal",
     )
 
 

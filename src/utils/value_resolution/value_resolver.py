@@ -58,10 +58,9 @@ def _get_resolution_context(index_entry: ColumnVectorIndexEntry):
     """
     is_categorical = index_entry.statistical_type in CATEGORICAL_TYPES
     
-    # categories: raw DB values
-    categories = index_entry.categories or []
-    # value_mappings: db_value -> [synonyms]
-    value_mappings = index_entry.value_mappings or {}
+    # categorical_values: db_value -> [synonyms]
+    categorical_values = index_entry.categorical_values or {}
+    categories = list(categorical_values.keys())
 
     normalized_canonical_map: dict[str, str] = {}
     normalized_synonym_map: dict[str, str] = {}
@@ -71,7 +70,7 @@ def _get_resolution_context(index_entry: ColumnVectorIndexEntry):
         normalized_canonical_map[_normalize_literal(category)] = category
 
     # 2. Map synonyms to the raw category
-    for db_value, synonyms in value_mappings.items():
+    for db_value, synonyms in categorical_values.items():
         for synonym in synonyms:
             normalized_synonym_map[_normalize_literal(synonym)] = db_value
 
@@ -166,4 +165,5 @@ def resolve_filter_literals(
         raw_value_text=cleaned_value,
         negated=filter_intent.negated,
     )
+
 

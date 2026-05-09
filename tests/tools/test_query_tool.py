@@ -41,6 +41,7 @@ def _entry(table_name: str, column_name: str, **extra) -> ColumnVectorIndexEntry
         table_name=table_name,
         column_name=column_name,
         source_key=f"{table_name}.{column_name}",
+        statistical_type="nominal",
     )
     defaults.update(extra)
     return ColumnVectorIndexEntry(**defaults)
@@ -69,7 +70,7 @@ class TestQueryToolBuildsValidSQL:
         mock_vc.run.return_value = MagicMock()
         mock_vc.get_current_index_entries.return_value = []
         monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
-        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda _: entries)
+        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda *a: entries)
         _mock_setup_database(monkeypatch)
 
         query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum")
@@ -91,7 +92,7 @@ class TestQueryToolBuildsValidSQL:
         mock_vc.run.return_value = MagicMock()
         mock_vc.get_current_index_entries.return_value = []
         monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
-        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda _: entries)
+        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda *a: entries)
         _mock_setup_database(monkeypatch)
 
         query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum", filters=[fi])
@@ -108,7 +109,7 @@ class TestQueryToolBuildsValidSQL:
         mock_vc.run.return_value = MagicMock()
         mock_vc.get_current_index_entries.return_value = []
         monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
-        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda _: entries)
+        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda *a: entries)
         _mock_setup_database(monkeypatch)
 
         query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum")
@@ -124,7 +125,7 @@ class TestQueryToolBuildsValidSQL:
         mock_vc.run.return_value = MagicMock()
         mock_vc.get_current_index_entries.return_value = []
         monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
-        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda _: entries)
+        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda *a: entries)
         _mock_setup_database(monkeypatch)
 
         query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum")
@@ -140,7 +141,7 @@ class TestQueryToolBuildsValidSQL:
         mock_vc.run.return_value = MagicMock()
         mock_vc.get_current_index_entries.return_value = []
         monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
-        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda _: entries)
+        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda *a: entries)
         _mock_setup_database(monkeypatch)
 
         query = QuerySchema(subject="provider", metric_hint="order value")
@@ -156,7 +157,7 @@ class TestQueryToolBuildsValidSQL:
         mock_vc.run.return_value = MagicMock()
         mock_vc.get_current_index_entries.return_value = []
         monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
-        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda _: entries)
+        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda *a: entries)
         _mock_setup_database(monkeypatch)
 
         query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum", limit=5)
@@ -184,21 +185,23 @@ class TestQueryToolIntegration:
                 table_name="orders",
                 column_name="provider",
                 source_key="orders.provider",
-                payload={"is_categorical": True, "canonical_values": ["DB Schenker", "SPX"]},
+                statistical_type="nominal",
+                categorical_values={"DB Schenker": [], "SPX": []},
             ),
             ColumnVectorIndexEntry(
                 entry_id=1,
                 table_name="orders",
                 column_name="buyer_country",
                 source_key="orders.buyer_country",
-                payload={"is_categorical": True, "canonical_values": ["Singapore", "Malaysia"]},
+                statistical_type="nominal",
+                categorical_values={"Singapore": [], "Malaysia": []},
             ),
             ColumnVectorIndexEntry(
                 entry_id=2,
                 table_name="orders",
                 column_name="order_value",
                 source_key="orders.order_value",
-                payload={"is_categorical": False},
+                statistical_type="quantitative",
             ),
         ]
 

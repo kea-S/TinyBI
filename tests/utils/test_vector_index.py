@@ -17,6 +17,7 @@ def test_column_vector_index_entry_renders_embedding_text():
         data_format="city_name",
         aliases=["city", "customer city"],
         sample_values=["Berlin", "Munich"],
+        statistical_type="nominal",
         payload={"is_groupable": True},
     )
 
@@ -40,6 +41,7 @@ def test_vector_index_builds_persists_and_hydrates_results(tmp_path):
             description="Customer city",
             aliases=["city"],
             sample_values=["Berlin", "Munich"],
+            statistical_type="nominal",
         ),
         ColumnVectorIndexEntry(
             entry_id=20,
@@ -49,6 +51,7 @@ def test_vector_index_builds_persists_and_hydrates_results(tmp_path):
             description="Order value in local currency",
             aliases=["total", "revenue"],
             sample_values=["100.50", "250.00"],
+            statistical_type="quantitative",
         ),
     ]
 
@@ -80,12 +83,14 @@ def test_vector_index_can_filter_results_by_table_name(tmp_path):
             table_name="orders",
             column_name="customer_city",
             source_key="orders.customer_city",
+            statistical_type="nominal",
         ),
         ColumnVectorIndexEntry(
             entry_id=2,
             table_name="customers",
             column_name="customer_city",
             source_key="customers.customer_city",
+            statistical_type="nominal",
         ),
     ]
 

@@ -43,10 +43,18 @@ type ColumnDraft = {
   sourceKey: string
   description: string
   dataFormat: string
+  statisticalType: string
+  categoricalValues: CategoricalValue[]
   aliasesText: string
   sampleValuesText: string
   payloadText: string
   references: string
+}
+
+type CategoricalValue = {
+  id: string
+  dbValue: string
+  synonymsText: string
 }
 
 type SubmitState = "idle" | "submitting" | "success" | "error"
@@ -59,7 +67,7 @@ function sanitisePayload(payload: Record<string, unknown> | null | undefined) {
     return {}
   }
 
-  const { data_type: _legacyDataType, ...rest } = payload
+  const { data_type: _legacyDataType, statistical_type: _st, categorical_values: _cv, ...rest } = payload
   return rest
 }
 
@@ -74,6 +82,8 @@ function createEmptyColumn(): ColumnDraft {
     sourceKey: "",
     description: "",
     dataFormat: "",
+    statisticalType: "nominal",
+    categoricalValues: [],
     aliasesText: "",
     sampleValuesText: "",
     payloadText: defaultPayloadText,
@@ -109,12 +119,25 @@ function buildTablesFromEntries(entries: ColumnVectorIndexEntryRequest[]): Table
         columns: [],
       }
 
+    const categoricalValues: CategoricalValue[] = []
+    if (entry.categorical_values) {
+      for (const [dbValue, synonyms] of Object.entries(entry.categorical_values)) {
+        categoricalValues.push({
+          id: createId("cat"),
+          dbValue,
+          synonymsText: synonyms.join(", "),
+        })
+      }
+    }
+
     table.columns.push({
       id: createId("column"),
       columnName: entry.column_name,
       sourceKey: entry.source_key,
       description: entry.description ?? "",
       dataFormat: entry.data_format ?? "",
+      statisticalType: entry.statistical_type ?? "nominal",
+      categoricalValues,
       aliasesText: entry.aliases.join(", "),
       sampleValuesText: entry.sample_values.join(", "),
       payloadText: JSON.stringify(sanitisePayload(entry.payload), null, 2),
@@ -241,7 +264,7 @@ export function VectorIndexBuilderPage({
     tableId: string,
     columnId: string,
     field: keyof ColumnDraft,
-    value: string
+    value: unknown
   ) {
     updateTables((current) =>
       current.map((table) => {
@@ -254,6 +277,71 @@ export function VectorIndexBuilderPage({
           columns: table.columns.map((column) =>
             column.id === columnId ? { ...column, [field]: value } : column
           ),
+        }
+      })
+    )
+  }
+
+  function addCategoricalValue(tableId: string, columnId: string) {
+    updateTables((current) =>
+      current.map((table) => {
+        if (table.id !== tableId) return table
+        return {
+          ...table,
+          columns: table.columns.map((column) => {
+            if (column.id !== columnId) return column
+            return {
+              ...column,
+              categoricalValues: [
+                ...column.categoricalValues,
+                { id: createId("cat"), dbValue: "", synonymsText: "" },
+              ],
+            }
+          }),
+        }
+      })
+    )
+  }
+
+  function updateCategoricalValue(
+    tableId: string,
+    columnId: string,
+    catId: string,
+    field: keyof CategoricalValue,
+    value: string
+  ) {
+    updateTables((current) =>
+      current.map((table) => {
+        if (table.id !== tableId) return table
+        return {
+          ...table,
+          columns: table.columns.map((column) => {
+            if (column.id !== columnId) return column
+            return {
+              ...column,
+              categoricalValues: column.categoricalValues.map((cat) =>
+                cat.id === catId ? { ...cat, [field]: value } : cat
+              ),
+            }
+          }),
+        }
+      })
+    )
+  }
+
+  function removeCategoricalValue(tableId: string, columnId: string, catId: string) {
+    updateTables((current) =>
+      current.map((table) => {
+        if (table.id !== tableId) return table
+        return {
+          ...table,
+          columns: table.columns.map((column) => {
+            if (column.id !== columnId) return column
+            return {
+              ...column,
+              categoricalValues: column.categoricalValues.filter((cat) => cat.id !== catId),
+            }
+          }),
         }
       })
     )
@@ -302,6 +390,17 @@ export function VectorIndexBuilderPage({
         const sourceKey =
           column.sourceKey.trim() || `${tableName}.${columnName}`
 
+        const categorical_values: Record<string, string[]> = {}
+        const categoricalTypes = ["nominal", "ordinal", "categorical"]
+        if (categoricalTypes.includes(column.statisticalType)) {
+          for (const row of column.categoricalValues) {
+            const dbVal = row.dbValue.trim()
+            if (dbVal) {
+              categorical_values[dbVal] = parseCommaSeparatedList(row.synonymsText)
+            }
+          }
+        }
+
         entries.push({
           entry_id: nextEntryId,
           table_name: tableName,
@@ -309,6 +408,8 @@ export function VectorIndexBuilderPage({
           source_key: sourceKey,
           description: column.description.trim() || null,
           data_format: column.dataFormat.trim() || null,
+          statistical_type: column.statisticalType,
+          categorical_values: Object.keys(categorical_values).length > 0 ? categorical_values : undefined,
           aliases: parseCommaSeparatedList(column.aliasesText),
           sample_values: parseCommaSeparatedList(column.sampleValuesText),
           payload,
@@ -643,21 +744,94 @@ export function VectorIndexBuilderPage({
                       </label>
                     </div>
 
-                    <label className="space-y-2">
-                      <span className="text-sm font-medium">Data format</span>
-                      <Input
-                        value={selectedColumn.dataFormat}
-                        onChange={(event) =>
-                          updateColumnField(
-                            selectedTable.id,
-                            selectedColumn.id,
-                            "dataFormat",
-                            event.target.value
-                          )
-                        }
-                        placeholder="date, currency, percentage, iso_country_code"
-                      />
-                    </label>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <label className="space-y-2">
+                        <span className="text-sm font-medium">Data format</span>
+                        <Input
+                          value={selectedColumn.dataFormat}
+                          onChange={(event) =>
+                            updateColumnField(
+                              selectedTable.id,
+                              selectedColumn.id,
+                              "dataFormat",
+                              event.target.value
+                            )
+                          }
+                          placeholder="date, currency, percentage..."
+                        />
+                      </label>
+                      <label className="space-y-2">
+                        <span className="text-sm font-medium">Statistical type</span>
+                        <select
+                          value={selectedColumn.statisticalType}
+                          onChange={(event) =>
+                            updateColumnField(
+                              selectedTable.id,
+                              selectedColumn.id,
+                              "statisticalType",
+                              event.target.value
+                            )
+                          }
+                          className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        >
+                          <option value="nominal">nominal (categorical)</option>
+                          <option value="ordinal">ordinal (ordered categorical)</option>
+                          <option value="categorical">categorical (generic)</option>
+                          <option value="temporal">temporal (dates, times)</option>
+                          <option value="identifier">identifier (IDs, keys, serials)</option>
+                          <option value="continuous">continuous (numeric)</option>
+                          <option value="discrete">discrete (numeric counts)</option>
+                          <option value="quantitative">quantitative (numeric general)</option>
+                        </select>
+                      </label>
+                    </div>
+
+                    {["nominal", "ordinal", "categorical"].includes(selectedColumn.statisticalType) && (
+                      <div className="space-y-3 rounded-2xl border border-dashed border-border/80 bg-muted/30 p-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">Categories & Synonyms</span>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => addCategoricalValue(selectedTable.id, selectedColumn.id)}
+                          >
+                            <Plus className="mr-1 size-3" /> Add category
+                          </Button>
+                        </div>
+                        
+                        {selectedColumn.categoricalValues.length === 0 ? (
+                          <p className="py-2 text-center text-xs text-muted-foreground">
+                            No categories defined. Synonyms help resolve user queries.
+                          </p>
+                        ) : (
+                          <div className="space-y-2">
+                            {selectedColumn.categoricalValues.map((cat) => (
+                              <div key={cat.id} className="flex gap-2">
+                                <Input
+                                  value={cat.dbValue}
+                                  onChange={(e) => updateCategoricalValue(selectedTable.id, selectedColumn.id, cat.id, "dbValue", e.target.value)}
+                                  placeholder="DB Value (e.g. M)"
+                                  className="w-1/3"
+                                />
+                                <Input
+                                  value={cat.synonymsText}
+                                  onChange={(e) => updateCategoricalValue(selectedTable.id, selectedColumn.id, cat.id, "synonymsText", e.target.value)}
+                                  placeholder="Synonyms (e.g. male, man)"
+                                  className="flex-1"
+                                />
+                                <Button
+                                  variant="ghost"
+                                  size="icon-sm"
+                                  onClick={() => removeCategoricalValue(selectedTable.id, selectedColumn.id, cat.id)}
+                                >
+                                  <Trash2 className="size-3" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {(() => {
                       const allColumns = [
