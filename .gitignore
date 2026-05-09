@@ -233,7 +233,13 @@ dist-ssr
 *.sln
 *.sw?
 
+# Data — track only the distributable database and pre-built vector index
 data/*
+!data/app_data/
+!data/minidev_raw/
+data/minidev_raw/*
+!data/minidev_raw/financial/
+data/minidev_raw/financial/financial.duckdb
 
 # Frontend (Vite / React / TypeScript)
 frontend/node_modules/

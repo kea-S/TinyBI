@@ -1,0 +1,1206 @@
+[
+  {
+    "entry_id": 1,
+    "table_name": "account",
+    "column_name": "account_id",
+    "source_key": "account.account_id",
+    "description": "the id of the account.",
+    "data_format": "int64",
+    "statistical_type": "identifier",
+    "categorical_values": {},
+    "aliases": [
+      "account id"
+    ],
+    "sample_values": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": null
+  },
+  {
+    "entry_id": 2,
+    "table_name": "account",
+    "column_name": "district_id",
+    "source_key": "account.district_id",
+    "description": "location of branch.",
+    "data_format": "int64",
+    "statistical_type": "identifier",
+    "categorical_values": {},
+    "aliases": [
+      "location of branch"
+    ],
+    "sample_values": [
+      "18",
+      "1",
+      "5",
+      "12",
+      "15"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": "district.district_id"
+  },
+  {
+    "entry_id": 3,
+    "table_name": "account",
+    "column_name": "frequency",
+    "source_key": "account.frequency",
+    "description": "frequency of the account. categorical. takes values:\n\n\"POPLATEK MESICNE\" stands for monthly issuance\n\"POPLATEK TYDNE\" stands for weekly issuance\n\"POPLATEK PO OBRATU\" stands for issuance after transaction",
+    "data_format": "str",
+    "statistical_type": "nominal",
+    "categorical_values": {
+      "POPLATEK MESICNE": [
+        "monthly issuance"
+      ],
+      "POPLATEK TYDNE": [
+        "weekly issuance"
+      ],
+      "POPLATEK PO OBRATU": [
+        "issuance after transaction"
+      ]
+    },
+    "aliases": [
+      "frequency"
+    ],
+    "sample_values": [
+      "POPLATEK MESICNE",
+      "POPLATEK TYDNE",
+      "POPLATEK PO OBRATU"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": null
+  },
+  {
+    "entry_id": 4,
+    "table_name": "account",
+    "column_name": "date",
+    "source_key": "account.date",
+    "description": "the creation date of the account. in the form YYYY-MM-DD.",
+    "data_format": "str",
+    "statistical_type": "temporal",
+    "categorical_values": {},
+    "aliases": [],
+    "sample_values": [
+      "1995-03-24",
+      "1993-02-26",
+      "1993-02-26"
+    ],
+    "payload": {
+      "is_groupable": false
+    },
+    "references": null
+  },
+  {
+    "entry_id": 5,
+    "table_name": "card",
+    "column_name": "card_id",
+    "source_key": "card.card_id",
+    "description": "id number of credit card.",
+    "data_format": "int64",
+    "statistical_type": "identifier",
+    "categorical_values": {},
+    "aliases": [
+      "credit card id"
+    ],
+    "sample_values": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": null
+  },
+  {
+    "entry_id": 6,
+    "table_name": "card",
+    "column_name": "disp_id",
+    "source_key": "card.disp_id",
+    "description": "disposition id.",
+    "data_format": "int64",
+    "statistical_type": "identifier",
+    "categorical_values": {},
+    "aliases": [
+      "disposition id"
+    ],
+    "sample_values": [
+      "9",
+      "19",
+      "41",
+      "42",
+      "51"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": "disp.disp_id"
+  },
+  {
+    "entry_id": 7,
+    "table_name": "card",
+    "column_name": "type",
+    "source_key": "card.type",
+    "description": "type of credit card. categorical data. Takes values:\n\n\"junior\": junior class of credit card; \n\"classic\": standard class of credit card; \n\"gold\": high-level credit card",
+    "data_format": "str",
+    "statistical_type": "ordinal",
+    "categorical_values": {
+      "junior": [
+        "junior"
+      ],
+      "classic": [
+        "standard"
+      ],
+      "gold": [
+        "high-level"
+      ]
+    },
+    "aliases": [
+      "type of credit card"
+    ],
+    "sample_values": [
+      "junior",
+      "classic",
+      "gold"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": null
+  },
+  {
+    "entry_id": 8,
+    "table_name": "card",
+    "column_name": "issued",
+    "source_key": "card.issued",
+    "description": "the date when the credit card issued. Takes the form YYYY-MM-DD",
+    "data_format": "str",
+    "statistical_type": "temporal",
+    "categorical_values": {},
+    "aliases": [
+      "issued"
+    ],
+    "sample_values": [
+      "1998-10-16",
+      "1998-03-13",
+      "1995-09-03"
+    ],
+    "payload": {
+      "is_groupable": false
+    },
+    "references": null
+  },
+  {
+    "entry_id": 9,
+    "table_name": "client",
+    "column_name": "client_id",
+    "source_key": "client.client_id",
+    "description": "the unique number for the client",
+    "data_format": "int64",
+    "statistical_type": "identifier",
+    "categorical_values": {},
+    "aliases": [
+      "client id"
+    ],
+    "sample_values": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": null
+  },
+  {
+    "entry_id": 10,
+    "table_name": "client",
+    "column_name": "gender",
+    "source_key": "client.gender",
+    "description": "gender of the client. Takes the values:\n\nF\uff1afemale \nM\uff1amale",
+    "data_format": "str",
+    "statistical_type": "categorical",
+    "categorical_values": {
+      "F": [
+        "female"
+      ],
+      "M": [
+        "male"
+      ]
+    },
+    "aliases": [
+      "gender"
+    ],
+    "sample_values": [
+      "F",
+      "M"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": null
+  },
+  {
+    "entry_id": 11,
+    "table_name": "client",
+    "column_name": "birth_date",
+    "source_key": "client.birth_date",
+    "description": "birth date. Takes the form YYYY-MM-DD",
+    "data_format": "str",
+    "statistical_type": "temporal",
+    "categorical_values": {},
+    "aliases": [
+      "birth date"
+    ],
+    "sample_values": [
+      "1970-12-13",
+      "1945-02-04",
+      "1940-10-09"
+    ],
+    "payload": {
+      "is_groupable": false
+    },
+    "references": null
+  },
+  {
+    "entry_id": 12,
+    "table_name": "client",
+    "column_name": "district_id",
+    "source_key": "client.district_id",
+    "description": "location of branch",
+    "data_format": "int64",
+    "statistical_type": "identifier",
+    "categorical_values": {},
+    "aliases": [
+      "location of branch"
+    ],
+    "sample_values": [
+      "18",
+      "1",
+      "1",
+      "5",
+      "5"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": "district.district_id"
+  },
+  {
+    "entry_id": 13,
+    "table_name": "disp",
+    "column_name": "disp_id",
+    "source_key": "disp.disp_id",
+    "description": "unique number of identifying this row of record",
+    "data_format": "int64",
+    "statistical_type": "identifier",
+    "categorical_values": {},
+    "aliases": [
+      "disposition id"
+    ],
+    "sample_values": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": null
+  },
+  {
+    "entry_id": 14,
+    "table_name": "disp",
+    "column_name": "client_id",
+    "source_key": "disp.client_id",
+    "description": "id number of client",
+    "data_format": "int64",
+    "statistical_type": "identifier",
+    "categorical_values": {},
+    "aliases": [
+      "client id"
+    ],
+    "sample_values": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": "client.client_id"
+  },
+  {
+    "entry_id": 15,
+    "table_name": "disp",
+    "column_name": "account_id",
+    "source_key": "disp.account_id",
+    "description": "id number of account",
+    "data_format": "int64",
+    "statistical_type": "identifier",
+    "categorical_values": {},
+    "aliases": [
+      "account id"
+    ],
+    "sample_values": [
+      "1",
+      "2",
+      "2",
+      "3",
+      "3"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": "account.account_id"
+  },
+  {
+    "entry_id": 16,
+    "table_name": "disp",
+    "column_name": "type",
+    "source_key": "disp.type",
+    "description": "type of disposition. Takes the values:\n\n\"OWNER\"\n\"DISPONENT\"\n\ncommonsense evidence:\nthe account can only have the right to issue permanent orders or apply for loans",
+    "data_format": "str",
+    "statistical_type": "nominal",
+    "categorical_values": {
+      "OWNER": [
+        "owner"
+      ],
+      "DISPONENT": [
+        "disponent"
+      ]
+    },
+    "aliases": [
+      "type"
+    ],
+    "sample_values": [
+      "OWNER",
+      "DISPONENT"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": null
+  },
+  {
+    "entry_id": 17,
+    "table_name": "district",
+    "column_name": "district_id",
+    "source_key": "district.district_id",
+    "description": "location of branch",
+    "data_format": "int64",
+    "statistical_type": "identifier",
+    "categorical_values": {},
+    "aliases": [
+      "location of branch"
+    ],
+    "sample_values": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": null
+  },
+  {
+    "entry_id": 18,
+    "table_name": "district",
+    "column_name": "A2",
+    "source_key": "district.A2",
+    "description": "district_name. Made up of categorical values. Takes the values:\n\n'Hl.m. Praha',             'Benesov',              'Beroun',\n              'Kladno',               'Kolin',          'Kutna Hora',\n              'Melnik',      'Mlada Boleslav',             'Nymburk',\n      'Praha - vychod',       'Praha - zapad',             'Pribram',\n            'Rakovnik',    'Ceske Budejovice',       'Cesky Krumlov',\n   'Jindrichuv Hradec',           'Pelhrimov',               'Pisek',\n          'Prachatice',          'Strakonice',               'Tabor',\n           'Domazlice',                'Cheb',        'Karlovy Vary',\n             'Klatovy',       'Plzen - mesto',         'Plzen - jih',\n       'Plzen - sever',            'Rokycany',             'Sokolov',\n              'Tachov',          'Ceska Lipa',               'Decin',\n            'Chomutov',   'Jablonec n. Nisou',             'Liberec',\n          'Litomerice',               'Louny',                'Most',\n             'Teplice',      'Usti nad Labem',      'Havlickuv Brod',\n      'Hradec Kralove',             'Chrudim',               'Jicin',\n              'Nachod',           'Pardubice', 'Rychnov nad Kneznou',\n              'Semily',             'Svitavy',             'Trutnov',\n     'Usti nad Orlici',             'Blansko',        'Brno - mesto',\n       'Brno - venkov',             'Breclav',             'Hodonin',\n             'Jihlava',            'Kromeriz',           'Prostejov',\n              'Trebic',    'Uherske Hradiste',              'Vyskov',\n                'Zlin',              'Znojmo',    'Zdar nad Sazavou',\n             'Bruntal',     'Frydek - Mistek',             'Jesenik',\n             'Karvina',          'Novy Jicin',             'Olomouc',\n               'Opava',     'Ostrava - mesto',              'Prerov',\n             'Sumperk',              'Vsetin'",
+    "data_format": "str",
+    "statistical_type": "nominal",
+    "categorical_values": {
+      "Hl.m. Praha": [],
+      "Benesov": [],
+      "Beroun": [],
+      "Kladno": [],
+      "Kolin": [],
+      "Kutna Hora": [],
+      "Melnik": [],
+      "Mlada Boleslav": [],
+      "Nymburk": [],
+      "Praha - vychod": [],
+      "Praha - zapad": [],
+      "Pribram": [],
+      "Rakovnik": [],
+      "Ceske Budejovice": [],
+      "Cesky Krumlov": [],
+      "Jindrichuv Hradec": [],
+      "Pelhrimov": [],
+      "Pisek": [],
+      "Prachatice": [],
+      "Strakonice": [],
+      "Tabor": [],
+      "Domazlice": [],
+      "Cheb": [],
+      "Karlovy Vary": [],
+      "Klatovy": [],
+      "Plzen - mesto": [],
+      "Plzen - jih": [],
+      "Plzen - sever": [],
+      "Rokycany": [],
+      "Sokolov": [],
+      "Tachov": [],
+      "Ceska Lipa": [],
+      "Decin": [],
+      "Chomutov": [],
+      "Jablonec n. Nisou": [],
+      "Liberec": [],
+      "Litomerice": [],
+      "Louny": [],
+      "Most": [],
+      "Teplice": [],
+      "Usti nad Labem": [],
+      "Havlickuv Brod": [],
+      "Hradec Kralove": [],
+      "Chrudim": [],
+      "Jicin": [],
+      "Nachod": [],
+      "Pardubice": [],
+      "Rychnov nad Kneznou": [],
+      "Semily": [],
+      "Svitavy": [],
+      "Trutnov": [],
+      "Usti nad Orlici": [],
+      "Blansko": [],
+      "Brno - mesto": [],
+      "Brno - venkov": [],
+      "Breclav": [],
+      "Hodonin": [],
+      "Jihlava": [],
+      "Kromeriz": [],
+      "Prostejov": [],
+      "Trebic": [],
+      "Uherske Hradiste": [],
+      "Vyskov": [],
+      "Zlin": [],
+      "Znojmo": [],
+      "Zdar nad Sazavou": [],
+      "Bruntal": [],
+      "Frydek - Mistek": [],
+      "Jesenik": [],
+      "Karvina": [],
+      "Novy Jicin": [],
+      "Olomouc": [],
+      "Opava": [],
+      "Ostrava - mesto": [],
+      "Prerov": [],
+      "Sumperk": [],
+      "Vsetin": []
+    },
+    "aliases": [
+      "district_name"
+    ],
+    "sample_values": [
+      "Hl.m. Praha",
+      "Benesov",
+      "Beroun",
+      "Praha - vychod",
+      "Usti nad Orlici"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": null
+  },
+  {
+    "entry_id": 19,
+    "table_name": "district",
+    "column_name": "A3",
+    "source_key": "district.A3",
+    "description": "region. Holds categorical values, including and limited to:\n\n'Prague', 'central Bohemia',   'south Bohemia',    'west Bohemia',\n   'north Bohemia',    'east Bohemia',   'south Moravia',   'north Moravia'",
+    "data_format": "str",
+    "statistical_type": "nominal",
+    "categorical_values": {
+      "Prague": [
+        "prague"
+      ],
+      "central Bohemia": [
+        "central bohemia"
+      ],
+      "south Bohemia": [
+        "south bohemia"
+      ],
+      "west Bohemia": [
+        "west bohemia"
+      ],
+      "north Bohemia": [
+        "north bohemia"
+      ],
+      "east Bohemia": [
+        "east bohemia"
+      ],
+      "south Moravia": [
+        "south moravia"
+      ],
+      "north Moravia": [
+        "north moravia"
+      ]
+    },
+    "aliases": [
+      "region"
+    ],
+    "sample_values": [
+      "Prague",
+      "central Bohemia",
+      "south Bohemia",
+      "west Bohemia",
+      "north Moravia"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": null
+  },
+  {
+    "entry_id": 20,
+    "table_name": "loan",
+    "column_name": "loan_id",
+    "source_key": "loan.loan_id",
+    "description": "the id number identifying the loan data",
+    "data_format": "int64",
+    "statistical_type": "identifier",
+    "categorical_values": {},
+    "aliases": [
+      "loan id"
+    ],
+    "sample_values": [
+      "4959",
+      "4961",
+      "4962",
+      "4967",
+      "4968"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": null
+  },
+  {
+    "entry_id": 21,
+    "table_name": "loan",
+    "column_name": "account_id",
+    "source_key": "loan.account_id",
+    "description": "the id number identifying the account",
+    "data_format": "int64",
+    "statistical_type": "identifier",
+    "categorical_values": {},
+    "aliases": [
+      "account id"
+    ],
+    "sample_values": [
+      "1",
+      "1",
+      "1",
+      "1",
+      "1"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": "account.account_id"
+  },
+  {
+    "entry_id": 22,
+    "table_name": "loan",
+    "column_name": "date",
+    "source_key": "loan.date",
+    "description": "the date when the loan is approved. in the format YYYY-MM-DD",
+    "data_format": "str",
+    "statistical_type": "temporal",
+    "categorical_values": {},
+    "aliases": [
+      "date"
+    ],
+    "sample_values": [
+      "1994-01-05",
+      "1996-04-29",
+      "1997-12-08"
+    ],
+    "payload": {
+      "is_groupable": false
+    },
+    "references": null
+  },
+  {
+    "entry_id": 23,
+    "table_name": "loan",
+    "column_name": "amount",
+    "source_key": "loan.amount",
+    "description": "approved amount. Unit: US dollar",
+    "data_format": "int64",
+    "statistical_type": "discrete",
+    "categorical_values": {},
+    "aliases": [],
+    "sample_values": [
+      "80952",
+      "30276",
+      "30276",
+      "318480",
+      "110736"
+    ],
+    "payload": {
+      "is_groupable": false
+    },
+    "references": null
+  },
+  {
+    "entry_id": 24,
+    "table_name": "loan",
+    "column_name": "duration",
+    "source_key": "loan.duration",
+    "description": "loan duration. Unit: month",
+    "data_format": "int64",
+    "statistical_type": "temporal",
+    "categorical_values": {},
+    "aliases": [
+      "loan duration"
+    ],
+    "sample_values": [
+      "24",
+      "12",
+      "12",
+      "60",
+      "48"
+    ],
+    "payload": {
+      "is_groupable": false
+    },
+    "references": null
+  },
+  {
+    "entry_id": 25,
+    "table_name": "loan",
+    "column_name": "payments",
+    "source_key": "loan.payments",
+    "description": "monthly payments. Unit: US Dollars per month",
+    "data_format": "float64",
+    "statistical_type": "discrete",
+    "categorical_values": {},
+    "aliases": [
+      "monthly payments"
+    ],
+    "sample_values": [
+      "3373.0",
+      "2523.0",
+      "2523.0",
+      "5308.0",
+      "2307.0"
+    ],
+    "payload": {
+      "is_groupable": false
+    },
+    "references": null
+  },
+  {
+    "entry_id": 26,
+    "table_name": "loan",
+    "column_name": "status",
+    "source_key": "loan.status",
+    "description": "repayment status. Holds categorical values, including and limited to:\n\n'A' stands for contract finished, no problems;\n'B' stands for contract finished, loan not paid;\n'C' stands for running contract, OK so far;\n'D' stands for running contract, client in debt",
+    "data_format": "str",
+    "statistical_type": "nominal",
+    "categorical_values": {
+      "A": [
+        "contract finished no problems"
+      ],
+      "B": [
+        "contract finished loan not paid"
+      ],
+      "C": [
+        "running contract OK so far"
+      ],
+      "D": [
+        "running contract client in debt"
+      ]
+    },
+    "aliases": [
+      "repayment status"
+    ],
+    "sample_values": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": null
+  },
+  {
+    "entry_id": 27,
+    "table_name": "order",
+    "column_name": "order_id",
+    "source_key": "order.order_id",
+    "description": "identifying the unique order",
+    "data_format": "int64",
+    "statistical_type": "identifier",
+    "categorical_values": {},
+    "aliases": [
+      "order id"
+    ],
+    "sample_values": [
+      "29401",
+      "29402",
+      "29403",
+      "29404",
+      "29405"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": null
+  },
+  {
+    "entry_id": 28,
+    "table_name": "order",
+    "column_name": "account_id",
+    "source_key": "order.account_id",
+    "description": "id number of account",
+    "data_format": "int64",
+    "statistical_type": "identifier",
+    "categorical_values": {},
+    "aliases": [
+      "account id"
+    ],
+    "sample_values": [
+      "1",
+      "2",
+      "2",
+      "3",
+      "3"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": "account.account_id"
+  },
+  {
+    "entry_id": 29,
+    "table_name": "order",
+    "column_name": "bank_to",
+    "source_key": "order.bank_to",
+    "description": "bank of the recipient. Holds categorical values. Each bank has unique two-letter code. Including and limited to:\n\nYZ,\nST,\nQR,\nWX,\nCD,\nAB,\nUV,\nGH,\nIJ,\nKL,\nEF,\nMN,\nOP",
+    "data_format": "str",
+    "statistical_type": "nominal",
+    "categorical_values": {
+      "YZ": [],
+      "ST": [],
+      "QR": [],
+      "WX": [],
+      "CD": [],
+      "AB": [],
+      "UV": [],
+      "GH": [],
+      "IJ": [],
+      "KL": [],
+      "EF": [],
+      "MN": [],
+      "OP": []
+    },
+    "aliases": [
+      "bank of the recipient"
+    ],
+    "sample_values": [
+      "YZ",
+      "ST",
+      "QR",
+      "WX",
+      "CD",
+      "AB"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": null
+  },
+  {
+    "entry_id": 30,
+    "table_name": "order",
+    "column_name": "amount",
+    "source_key": "order.amount",
+    "description": "debited amount. Unit: US Dollar",
+    "data_format": "float64",
+    "statistical_type": "discrete",
+    "categorical_values": {},
+    "aliases": [
+      "debited amount"
+    ],
+    "sample_values": [
+      "2452.0",
+      "3372.7",
+      "7266.0",
+      "1135.0",
+      "327.0"
+    ],
+    "payload": {
+      "is_groupable": false
+    },
+    "references": null
+  },
+  {
+    "entry_id": 31,
+    "table_name": "order",
+    "column_name": "k_symbol",
+    "source_key": "order.k_symbol",
+    "description": "purpose of the payment. Holds categorical values: including and limited to:\n\n\"POJISTNE\" stands for insurance payment\n\"SIPO\" stands for household payment\n\"LEASING\" stands for leasing\n\"UVER\" stands for loan payment\n\"\" corrupted values, but still present",
+    "data_format": "str",
+    "statistical_type": "nominal",
+    "categorical_values": {
+      "POJISTNE": [
+        "insurance payment"
+      ],
+      "SIPO": [
+        "household payment"
+      ],
+      "LEASING": [
+        "leasing"
+      ],
+      "UVER": [
+        "loan payment"
+      ],
+      "\"\"": [
+        "corrupted"
+      ]
+    },
+    "aliases": [
+      "characterization of the payment"
+    ],
+    "sample_values": [
+      "POJISTNE",
+      "LEASING",
+      "UVER",
+      "SIPO"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": null
+  },
+  {
+    "entry_id": 32,
+    "table_name": "trans",
+    "column_name": "trans_id",
+    "source_key": "trans.trans_id",
+    "description": "transaction id",
+    "data_format": "int64",
+    "statistical_type": "identifier",
+    "categorical_values": {},
+    "aliases": [
+      "transaction id"
+    ],
+    "sample_values": [
+      "1",
+      "5",
+      "6",
+      "7",
+      "8"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": null
+  },
+  {
+    "entry_id": 33,
+    "table_name": "trans",
+    "column_name": "account_id",
+    "source_key": "trans.account_id",
+    "description": "account id",
+    "data_format": "int64",
+    "statistical_type": "identifier",
+    "categorical_values": {},
+    "aliases": [
+      "account id"
+    ],
+    "sample_values": [
+      "1",
+      "1",
+      "1",
+      "1",
+      "2"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": "account.account_id"
+  },
+  {
+    "entry_id": 34,
+    "table_name": "trans",
+    "column_name": "date",
+    "source_key": "trans.date",
+    "description": "date of transaction. Formatted as YYYY-MM-DD",
+    "data_format": "str",
+    "statistical_type": "temporal",
+    "categorical_values": {},
+    "aliases": [
+      "date of transaction"
+    ],
+    "sample_values": [
+      "1995-03-24",
+      "1995-04-13",
+      "1995-05-13",
+      "1995-06-13",
+      "1995-07-13"
+    ],
+    "payload": {
+      "is_groupable": false
+    },
+    "references": null
+  },
+  {
+    "entry_id": 35,
+    "table_name": "trans",
+    "column_name": "type",
+    "source_key": "trans.type",
+    "description": "+/- transaction. Categorical data: Including and limited to:\n\n\"PRIJEM\" stands for credit\n\"VYDAJ\" stands for withdrawal\n\"VYBER\", not documented in formal documentation, but present in data. stands for issuance",
+    "data_format": "str",
+    "statistical_type": "nominal",
+    "categorical_values": {
+      "PRIJEM": [
+        "credit"
+      ],
+      "VYDAJ": [
+        "withdrawal"
+      ],
+      "VYBER": [
+        "issuance"
+      ]
+    },
+    "aliases": [
+      "+/- transaction"
+    ],
+    "sample_values": [
+      "PRIJEM",
+      "VYDAJ",
+      "VYBER"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": null
+  },
+  {
+    "entry_id": 36,
+    "table_name": "trans",
+    "column_name": "operation",
+    "source_key": "trans.operation",
+    "description": "mode of transaction. Categorical data: including and limited to:\n\n\"VYBER KARTOU\": credit card withdrawal\n\"VKLAD\": credit in cash\n\"PREVOD Z UCTU\" :collection from another bank\n\"VYBER\": withdrawal in cash\n\"PREVOD NA UCET\": remittance to another bank",
+    "data_format": "str",
+    "statistical_type": "nominal",
+    "categorical_values": {
+      "VYBER KARTOU": [
+        "credit card withdrawal"
+      ],
+      "VKLAD": [
+        "credit in cash"
+      ],
+      "PREVOD Z UCTU": [
+        "collection from another bank"
+      ],
+      "VYBER": [
+        "withdrawal in cash"
+      ],
+      "PREVOD NA UCET": [
+        "remittance to another bank"
+      ]
+    },
+    "aliases": [
+      "mode of transaction"
+    ],
+    "sample_values": [
+      "VYBER KARTOU",
+      "VKLAD",
+      "PREVOD Z UCTU",
+      "VYBER",
+      "PREVOD NA UCET"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": null
+  },
+  {
+    "entry_id": 37,
+    "table_name": "trans",
+    "column_name": "amount",
+    "source_key": "trans.amount",
+    "description": "amount of money. Unit: USD",
+    "data_format": "int64",
+    "statistical_type": "discrete",
+    "categorical_values": {},
+    "aliases": [
+      "amount of money"
+    ],
+    "sample_values": [
+      "1000",
+      "3679",
+      "3679",
+      "3679",
+      "3679"
+    ],
+    "payload": {
+      "is_groupable": false
+    },
+    "references": null
+  },
+  {
+    "entry_id": 38,
+    "table_name": "trans",
+    "column_name": "balance",
+    "source_key": "trans.balance",
+    "description": "balance after transaction, Unit: USD",
+    "data_format": "int64",
+    "statistical_type": "discrete",
+    "categorical_values": {},
+    "aliases": [
+      "balance after transaction"
+    ],
+    "sample_values": [
+      "1000",
+      "4679",
+      "20977",
+      "26835",
+      "30415"
+    ],
+    "payload": {
+      "is_groupable": false
+    },
+    "references": null
+  },
+  {
+    "entry_id": 39,
+    "table_name": "trans",
+    "column_name": "k_symbol",
+    "source_key": "trans.k_symbol",
+    "description": "characterization of the transaction. Holds categorical values:\n\n\"POJISTNE\": stands for insurrance payment\n\"SLUZBY\": stands for payment for statement\n\"UROK\": stands for interest credited\n\"SANKC. UROK\": sanction interest if negative balance\n\"SIPO\": stands for household\n\"DUCHOD\": stands for old-age pension\n\"UVER\": stands for loan payment\n\" \": likely corrupted value, but it is still included in the actual database",
+    "data_format": "str",
+    "statistical_type": "nominal",
+    "categorical_values": {
+      "POJISTNE": [
+        "insurrance payment"
+      ],
+      "SLUZBY": [
+        "payment for statement"
+      ],
+      "UROK": [
+        "interest credited"
+      ],
+      "SANKC. UROK": [
+        "sanction interest if negative balance"
+      ],
+      "SIPO": [
+        "household"
+      ],
+      "DUCHOD": [
+        "old-age pension"
+      ],
+      "UVER": [
+        "loan payment"
+      ],
+      "\" \"": [
+        "corrupted"
+      ]
+    },
+    "aliases": [
+      "characterization of the transaction"
+    ],
+    "sample_values": [
+      "SLUZBY",
+      "UROK",
+      "SANKC. UROK",
+      "SIPO",
+      "DUCHOD"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": null
+  },
+  {
+    "entry_id": 40,
+    "table_name": "trans",
+    "column_name": "bank",
+    "source_key": "trans.bank",
+    "description": "bank of the partner. each bank has unique two-letter code. Including but limited to:\n\nAB,\nYZ,\nST,\nQR,\nWX,\nCD,\nUV,\nKL,\nGH,\nOP,\nIJ,\nEF,\nMN",
+    "data_format": "str64",
+    "statistical_type": "nominal",
+    "categorical_values": {
+      "AB": [],
+      "YZ": [],
+      "ST": [],
+      "QR": [],
+      "WX": [],
+      "CD": [],
+      "UV": [],
+      "KL": [],
+      "GH": [],
+      "OP": [],
+      "IJ": [],
+      "EF": [],
+      "MN": []
+    },
+    "aliases": [
+      "bank of the partner"
+    ],
+    "sample_values": [
+      "AB",
+      "YZ",
+      "ST",
+      "QR",
+      "WX"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": null
+  },
+  {
+    "entry_id": 41,
+    "table_name": "trans",
+    "column_name": "account",
+    "source_key": "trans.account",
+    "description": "account of the partner",
+    "data_format": "float64",
+    "statistical_type": "identifier",
+    "categorical_values": {},
+    "aliases": [
+      "account of the partner"
+    ],
+    "sample_values": [
+      "41403269.0",
+      "41403269.0",
+      "41403269.0",
+      "41403269.0",
+      "NaN"
+    ],
+    "payload": {
+      "is_groupable": true
+    },
+    "references": null
+  }
+]

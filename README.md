@@ -1,100 +1,207 @@
 # TinyBI
 
+Natural-language-to-SQL analytics pipeline: ask a business question in plain English, get back an SQL query, a result table, and an AI-generated explanation.
+
 https://github.com/user-attachments/assets/cb99aeeb-8042-45b4-b035-0dec7fbd5d59
 
-## Project Setup and Execution Guide
+## Architecture
 
-This project is optimised for reproducibility using the `uv` package manager, but also supports standard Python virtual environments using `pip`.
+```
+User question (natural language)
+  → LLM Extractor  →  QuerySchema (structured intent)
+  → Vector Search  →  Column resolution (FAISS over schema metadata)
+  → SQL Generator  →  SQL query (SELECT, JOINs, WHERE, GROUP BY, ORDER BY, LIMIT)
+  → DuckDB         →  pandas DataFrame
+  → LLM Explainer  →  Business insight (optional, currently disabled)
 
-For maximum compatibility, use python 3.13.5>=
+Two interfaces:
+  • Web app        —  FastAPI backend + React/Vite frontend
+```
 
-**The projects main entrypoint is notebooks/submission.ipynb**
+## Quick Start
 
----
+Requires **Python ≥ 3.13** and **Node.js ≥ 18**.
 
-### Option 1: Using `uv` (Recommended)
+### 1. Install Python dependencies
 
-If you have `uv` installed, this is the most efficient method to ensure environment parity.
-
-1. Unzip the project folder.
-2. Open a terminal in the project root directory.
-3. Launch the notebook server using the following commands:
 ```bash
 uv venv
 uv pip install -r requirements.txt
-uv run jupyter lab
 ```
 
----
+### 2. Install frontend dependencies
 
-### Option 2: Standard Python (Alternative)
-
-If you do not have `uv` installed, follow these steps to set up the environment manually:
-
-1. Create and activate a virtual environment:
 ```bash
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+cd frontend && npm install && cd ..
 ```
 
-2. Install the necessary dependencies:
-```bash
-pip install -r requirements.txt
-```
+### 3. Set up API keys (remote models only)
 
-3. Launch the Jupyter server:
-```bash
-jupyter lab
-```
+Create a `.env` file in the project root if you want to use OpenAI instead of local Ollama:
 
----
-
-### Configuration
-
-Before executing the cells in the notebook, ensure you have a `.env` file located in the project root directory containing your API credentials:
-e.g.
 ```env
-OPENAI_API_KEY=your_actual_key_here
+OPENAI_API_KEY=sk-...
 ```
-there's a script inside notebooks/submission.ipynb that you can edit to set easily
 
----
+### 4. Install and start Ollama
 
-### Project Structure
+**macOS / Linux:**
+
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+ollama serve
+```
+
+**Windows:**
+
+Download and run the installer from [ollama.com/download/windows](https://ollama.com/download/windows). Ollama starts automatically as a system tray service — no manual `serve` command needed.
+
+### 5. Pull the required models
+
+```bash
+# Embedding model (used for vector search and index building)
+ollama pull nomic-embed-text
+
+# At least one chat model for extraction
+ollama pull granite4:3b       # 3B — fastest, decent quality
+# or
+ollama pull llama3.2:3b       # alternative lightweight model
+# or
+ollama pull qwen2.5:7b        # larger, better quality
+```
+
+### 6. Set environment variables
+
+**CLI chatbot:**
+
+```bash
+export TINYBI_MODEL=granite4:3b
+export TINYBI_LOCAL=true
+```
+
+**Web app** — the API endpoint is hardcoded to use `granite4:3b` in local mode. To change the model, edit the `get_extractor` call in `src/api/routes/query.py`.
+
+### Supported local models
+
+| Model | Size | Notes |
+|---|---|---|
+| `granite4:3b` | 2 GB | Good balance of speed / quality |
+| `gemma3:4b` | 2.5 GB | Google's lightweight model |
+| `llama3.2:3b` | 2 GB | Meta's compact model |
+| `phi4-mini:3.8b` | 2.4 GB | Microsoft's small model |
+| `qwen2.5:7b` | 4.7 GB | Highest quality local option |
+
+### Supported embedding models
+
+| Model | Source | Notes |
+|---|---|---|
+| `nomic-embed-text` | Ollama | Default — 768-dim, fast |
+| `qwen3-embedding:0.6b` | Ollama | Lightweight alternative |
+| `bge-m3:567m` | Ollama | Multilingual |
+| `text-embedding-3-small` | OpenAI | Remote — requires API key |
+
+To change the embedding model, edit `DEFAULT_EMBEDDING_MODEL` in `src/utils/models.py:33`.
+
+## Testing
+
+### Backend tests
+
+```bash
+uv run pytest -m "not integration"
+```
+
+### Frontend tests
+
+```bash
+cd frontend && npm test
+```
+
+## Project structure
+
 ```
 .
-├── notebooks/       # Contains the main submission notebook (submission.ipynb)
-├── src/             # Core logic, pipeline components, and configuration files
-├── data/            # Directory for raw and processed dataset storage
-└── requirements.txt # List of project dependencies
+├── data/
+│   ├── app_data/                  # FAISS vector index + column metadata
+│   │   ├── columns.faiss          # 41 pre-built column embeddings
+│   │   └── columns.json           # 41 column entries (descriptions, FK refs, etc.)
+│   ├── intermediate/              # Cleaned datasets
+│   └── minidev_raw/               # Raw database files
+│       ├── financial/             # The financial database (SQLite + DuckDB + CSVs)
+│       └── debit_card_specializing/  # Alternative database
+│
+├── notebooks/                     # Jupyter notebooks (EDA)
+├── frontend/                      # React + Vite + TypeScript
+│   └── src/
+│       ├── pages/
+│       │   ├── DashboardHome.tsx
+│       │   ├── QueryPage.tsx      # Natural language query UI
+│       │   └── VectorIndexBuilderPage.tsx  # Build/rebuild vector index
+│       ├── components/ui/         # shadcn/ui components
+│       └── lib/api.ts             # API client types + fetch wrappers
+│
+├── src/                           # Python backend
+│   ├── main.py                    # CLI chatbot entry point
+│   ├── config.py                  # Path configuration
+│   ├── api/
+│   │   ├── main.py                # FastAPI app (lifespan, health, routers)
+│   │   └── routes/
+│   │       ├── query.py           # POST /query  (NL → SQL → DataFrame → explanation)
+│   │       └── vector.py          # GET/POST /vector  (FAISS index management)
+│   ├── llms/
+│   │   ├── extractor.py           # LLM chain: user question → QuerySchema
+│   │   ├── explainer.py           # LLM chain: results → business insight
+│   │   └── main_pipeline.py       # Orchestrator (extract → resolve → query → explain)
+│   ├── tools/
+│   │   └── query_tool.py          # QuerySchema + vector search → SQL generation + execution
+│   └── utils/
+│       ├── database.py            # DuckDB wrapper (SQLite import, query, singleton)
+│       ├── models.py              # LLM model definitions + factory functions
+│       ├── prompts.py             # EXTRACTOR_PROMPT and EXPLAINER_PROMPT
+│       ├── pydantic_models.py     # Pydantic schemas (QuerySchema, ColumnVectorIndexEntry, etc.)
+│       ├── sql_normaliser.py      # Maps structured query → SQL clauses
+│       ├── rag/
+│       │   ├── vector_controller.py  # High-level vector search logic
+│       │   └── vector_index.py       # FAISS index (build, persist, search)
+│       └── value_resolution/
+│           ├── column_resolver.py    # Pick best column per intent via schema graph
+│           ├── db_schema_graph.py    # NetworkX graph of FK relationships
+│           ├── join_resolution.py    # BFS join path resolution
+│           └── value_resolver.py     # Fuzzy literal matching against column categories
+│
+├── tests/                         # Python test suite
+├── requirements.txt
+└── pyproject.toml
 ```
 
-## TODO
+## API reference
 
-## Phase 1 — Schema profiling
-- [ ] Pick one BIRD database to develop against
-- [ ] Implement automatic schema profiler (column stats, distinct value counts, top-k samples, FK detection)
-- [ ] LLM-summarise each column from profile output (short description for schema linking, long for SQL generation)
-- [ ] Build LSH index for literal matching
+### `GET /health`
 
-## Phase 2 — Template / deterministic path
-- [ ] Analyse query distribution on chosen database — cluster by structural intent, identify top N query shapes
-- [ ] Build SQL template layer for top N intents (parametric, not hardcoded — schema attributes injected at runtime)
-- [ ] Build intent classifier to route queries to a template or fallback (fine-tune small open-source model here)
-- [ ] Tune classifier confidence threshold
+```
+GET /health  →  {"status": "ok"}
+```
 
-## Phase 3 — Fallback / free-generation path
-- [ ] Implement free SQL generation using open-source model with schema-linked columns + long column descriptions
-- [ ] Build query bank for RAG few-shot retrieval (seed with BIRD training pairs + SQL-to-text generated questions)
-- [ ] Implement semantic retrieval for few-shot examples
-- [ ] Add post-generation SQL validation with one retry on failure
+### Vector index endpoints
 
-## Phase 4 — Eval harness
-- [ ] Set up execution accuracy on BIRD mini-dev (500 questions)
-- [ ] Instrument latency per query, measured separately for template path vs fallback path
-- [ ] Run ablations: template-only vs fallback-only vs hybrid; RAG vs no-RAG; classifier model size comparisons
-- [ ] Document failure modes honestly
+| Method | Path | Description |
+|---|---|---|
+| `POST` | `/vector/index-entries/batch` | Build/replace the FAISS index with the default embedding model |
+| `POST` | `/vector/index-entries/batch/by-model/{key}` | Build/replace the FAISS index with a specific embedding model (`nomic`, `qwen3`, `bge-m3`, `openai-small`) |
+| `GET` | `/vector/index-entries/current` | Retrieve the current index metadata |
 
-## Phase 5 — Production layer
-- [ ] Wrap pipeline in a FastAPI endpoint (POST /query — input: question + db connection, output: SQL + result + latency)
-- [ ] Dockerise — must run fully locally with no external API calls
+## Configuration
+
+| Env variable | Default | Description |
+|---|---|---|
+| `OPENAI_API_KEY` | — | Required for remote extraction with GPT-4o |
+| `GROQ_API_KEY` | — | Alternative remote provider (Groq) |
+| `TINYBI_MODEL` | `gpt-4o` | Which model the CLI chatbot uses |
+| `TINYBI_LOCAL` | `false` | Set to `true` for Ollama models in the CLI |
+| `VITE_BACKEND_URL` | `http://127.0.0.1:8000` | Backend URL for the frontend proxy |
+
+Database paths are configured in `src/config.py`.
+
+## Known limitations
+
+- The explainer agent is currently commented out (returns `null`/empty). To re-enable, uncomment the marked blocks in `src/api/routes/query.py` and `src/llms/main_pipeline.py`.
+- The vector index must be rebuilt if you change the database schema or the embedding model.
