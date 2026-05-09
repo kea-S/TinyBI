@@ -109,6 +109,35 @@ def test_query_endpoint_with_filters(monkeypatch):
     assert len(body["data"]) == 2
 
 
+
+def test_query_endpoint_returns_explanation_none_when_disabled(monkeypatch):
+    expected_schema = QuerySchema(
+        subject="provider",
+        metric_hint="order value",
+        aggregation="sum",
+    )
+
+    fake_df = pd.DataFrame({"provider": ["SPX"], "total": [100]})
+
+    monkeypatch.setattr(
+        query_routes, "get_extractor",
+        lambda model, local: FakeExtractor(expected_schema),
+    )
+    monkeypatch.setattr(
+        query_routes, "query_tool",
+        lambda structured_query, dataset_path=None: (fake_df, "SELECT provider FROM orders"),
+    )
+
+    client = TestClient(create_app())
+    response = client.post("/query", json={"question": "show me providers by order value"})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert "sql" in body
+    assert "data" in body
+    assert body["explanation"] is None
+
+
 def test_query_endpoint_handles_extractor_error(monkeypatch):
     class FailingExtractor:
         async def ainvoke(self, question):

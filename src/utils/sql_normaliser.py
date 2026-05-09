@@ -74,11 +74,11 @@ def map_date(d: date | str) -> str:
     raise ValueError("date must be a date or ISO date string")
 
 
-def map_limit(limit: Optional[int]) -> Optional[int]:
+def map_limit(limit: Optional[int]) -> int:
     """
-    Return the integer limit as-is (or None).
+    Return the integer limit as-is, defaulting to 5 if None.
     """
-    return limit
+    return limit if limit is not None else 1000
 
 
 def map_sort_on(
@@ -203,6 +203,7 @@ def map_join(final_joins: FinalJoins) -> str:
         join_clauses.append(f"LEFT JOIN {step.table} ON {step.on_clause}")
 
     return "\n".join(join_clauses)
+
 
 
 

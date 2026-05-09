@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { ArrowLeft, Search, Send } from "lucide-react"
+import { ArrowLeft, ChevronDown, ChevronUp, Search, Send } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -35,6 +35,7 @@ export function QueryPage({ onBackToDashboard }: QueryPageProps) {
   const [queryState, setQueryState] = useState<QueryState>("idle")
   const [errorMessage, setErrorMessage] = useState("")
   const [result, setResult] = useState<QueryResponse | null>(null)
+  const [resultsExpanded, setResultsExpanded] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -44,6 +45,7 @@ export function QueryPage({ onBackToDashboard }: QueryPageProps) {
     setQueryState("loading")
     setResult(null)
     setErrorMessage("")
+    setResultsExpanded(false)
 
     try {
       const response = await submitQuery({ question: question.trim() })
@@ -170,8 +172,10 @@ export function QueryPage({ onBackToDashboard }: QueryPageProps) {
                   {result.data.length} row{result.data.length === 1 ? "" : "s"} returned.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="overflow-auto rounded-2xl border border-border/70">
+              <CardContent className="space-y-3">
+                <div
+                  className={`overflow-auto rounded-2xl border border-border/70 ${resultsExpanded ? "" : "max-h-80"}`}
+                >
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -193,12 +197,45 @@ export function QueryPage({ onBackToDashboard }: QueryPageProps) {
                     </TableBody>
                   </Table>
                 </div>
+                {result.data.length > 10 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setResultsExpanded(!resultsExpanded)}
+                  >
+                    {resultsExpanded ? (
+                      <>
+                        <ChevronUp /> Show less
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown /> Show all {result.data.length} rows
+                      </>
+                    )}
+                  </Button>
+                )}
               </CardContent>
             </Card>
           ) : (
             <Card className="border-border/70 bg-card/80">
               <CardContent className="py-8 text-center text-muted-foreground">
                 Query returned no results.
+              </CardContent>
+            </Card>
+          )}
+
+          {result.explanation && (
+            <Card className="border-border/70 bg-card/80">
+              <CardHeader>
+                <CardTitle>Explanation</CardTitle>
+                <CardDescription>
+                  AI-generated insight based on the query results.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <pre className="overflow-auto rounded-2xl bg-muted px-4 py-3 text-sm leading-6 whitespace-pre-wrap text-muted-foreground">
+                  {result.explanation}
+                </pre>
               </CardContent>
             </Card>
           )}

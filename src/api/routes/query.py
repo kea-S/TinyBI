@@ -1,8 +1,10 @@
 import logging
 
 from fastapi import APIRouter, HTTPException, status
+# from langchain_core.messages import AIMessage
 from pydantic import BaseModel
 
+# from src.llms.explainer import get_explainer
 from src.llms.extractor import get_extractor
 from src.tools.query_tool import query_tool
 from src.utils.models import LOCAL_GRANITE4
@@ -22,6 +24,7 @@ class QueryRequest(BaseModel):
 class QueryResponse(BaseModel):
     sql: str
     data: list[dict]
+    explanation: str | None = None
 
 
 @router.post("", response_model=QueryResponse, status_code=status.HTTP_200_OK)
@@ -44,4 +47,22 @@ async def query_endpoint(request: QueryRequest):
             detail=f"Failed to execute query: {exc}",
         )
 
-    return QueryResponse(sql=sql, data=df.to_dict(orient="records"))
+    # -------------------------------------------------------
+    # Explainer disabled.
+    # try:
+    #     explainer = get_explainer(LOCAL_GRANITE4, True)
+    #     explainer_input = (
+    #         f"user_message: {request.question}\n\n"
+    #         f"executed_sql: {sql}\n\n"
+    #         f"data_result: {df.to_markdown()}\n\n"
+    #     )
+    #     explanation = await explainer.ainvoke(explainer_input)
+    #     if isinstance(explanation, AIMessage):
+    #         explanation = explanation.content
+    # except Exception as exc:
+    #     logger.warning("Explainer failed — returning result without explanation: %s", exc)
+    #     explanation = None
+    # -------------------------------------------------------
+    explanation = None
+
+    return QueryResponse(sql=sql, data=df.to_dict(orient="records"), explanation=explanation)

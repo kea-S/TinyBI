@@ -98,7 +98,7 @@ class TestMapDate:
 
 class TestMapLimit:
     def test_limit_none(self):
-        assert map_limit(None) is None
+        assert map_limit(None) == 5
 
     def test_limit_value(self):
         assert map_limit(10) == 10
