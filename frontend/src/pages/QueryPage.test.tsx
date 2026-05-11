@@ -23,10 +23,10 @@ describe("QueryPage", () => {
     } as unknown as api.QueryResponse)
 
     const user = userEvent.setup()
-    render(<QueryPage onBackToDashboard={() => {}} />)
+    render(<QueryPage />)
 
     await user.type(
-      screen.getByPlaceholderText("average buyer waiting time by provider in Singapore"),
+      screen.getByPlaceholderText("How many orders were placed last month in Germany?"),
       "test query",
     )
     await user.click(screen.getByRole("button", { name: /submit/i }))
@@ -45,10 +45,10 @@ describe("QueryPage", () => {
     } as unknown as api.QueryResponse)
 
     const user = userEvent.setup()
-    render(<QueryPage onBackToDashboard={() => {}} />)
+    render(<QueryPage />)
 
     await user.type(
-      screen.getByPlaceholderText("average buyer waiting time by provider in Singapore"),
+      screen.getByPlaceholderText("How many orders were placed last month in Germany?"),
       "another query",
     )
     await user.click(screen.getByRole("button", { name: /submit/i }))

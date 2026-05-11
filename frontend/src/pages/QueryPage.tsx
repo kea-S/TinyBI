@@ -1,12 +1,12 @@
 import { useState } from "react"
-import { ArrowLeft, ChevronDown, ChevronUp, Search, Send } from "lucide-react"
+import { Search, Send, Code, Table as TableIcon, Sparkles, ChevronDown, ChevronUp } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -27,10 +27,10 @@ import {
 type QueryState = "idle" | "loading" | "success" | "error"
 
 type QueryPageProps = {
-  onBackToDashboard: () => void
+  isPeek?: boolean
 }
 
-export function QueryPage({ onBackToDashboard }: QueryPageProps) {
+export function QueryPage({ isPeek = false }: QueryPageProps) {
   const [question, setQuestion] = useState("")
   const [queryState, setQueryState] = useState<QueryState>("idle")
   const [errorMessage, setErrorMessage] = useState("")
@@ -39,7 +39,6 @@ export function QueryPage({ onBackToDashboard }: QueryPageProps) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-
     if (!question.trim()) return
 
     setQueryState("loading")
@@ -49,148 +48,142 @@ export function QueryPage({ onBackToDashboard }: QueryPageProps) {
 
     try {
       const response = await submitQuery({ question: question.trim() })
-
-      if (typeof response === "string") {
-        throw new Error("Expected a JSON response from the query API.")
-      }
-
+      if (typeof response === "string") throw new Error("Invalid API response")
       setResult(response)
       setQueryState("success")
     } catch (error) {
       setQueryState("error")
-      setErrorMessage(
-        error instanceof Error ? error.message : "Query failed."
-      )
+      setErrorMessage(error instanceof Error ? error.message : "Query failed")
     }
   }
 
-  const columns = result?.data?.length
-    ? Object.keys(result.data[0])
-    : []
+  const columns = result?.data?.length ? Object.keys(result.data[0]) : []
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
-      <section className="overflow-hidden rounded-[2rem] border border-border/70 bg-card/85 shadow-sm backdrop-blur">
-        <div className="flex flex-col gap-5 px-6 py-6 lg:flex-row lg:items-end lg:justify-between lg:px-8">
-          <div className="space-y-3">
-            <div className="flex flex-wrap items-center gap-3">
-              <Button variant="ghost" size="sm" onClick={onBackToDashboard}>
-                <ArrowLeft />
-                Dashboard
-              </Button>
-              <Badge variant="outline" className="rounded-full px-3 py-1">
-                Natural language query
-              </Badge>
-            </div>
-            <div className="space-y-2">
-              <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-                Ask a question about your data.
-              </h1>
-              <p className="max-w-2xl text-base leading-7 text-muted-foreground">
-                The query is extracted into a structured schema, resolved against
-                the vector index, and executed as SQL against the database.
-              </p>
-            </div>
+    <div className={`flex flex-col gap-8 ${isPeek ? "p-8" : "mx-auto max-w-6xl px-4 py-12"}`}>
+      {/* Search Section */}
+      <section className="space-y-6 text-center">
+        {!isPeek && (
+          <div className="space-y-2">
+            <h1 className="text-4xl font-bold tracking-tight">Ask your data anything.</h1>
+            <p className="text-lg text-muted-foreground">TinyBI translates your natural language into powerful insights.</p>
           </div>
-        </div>
-      </section>
-
-      <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.9fr)]">
-        <Card className="border-border/70 bg-card/80">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Search className="size-4" />
-              Query
-            </CardTitle>
-            <CardDescription>
-              Enter a natural language question and press Submit.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="flex gap-3">
+        )}
+        
+        <form onSubmit={handleSubmit} className="relative mx-auto max-w-3xl">
+          <div className="relative group">
+            <div className="absolute inset-0 -m-1 rounded-[2rem] bg-gradient-to-r from-primary/20 to-primary/10 opacity-0 blur-xl transition-opacity group-focus-within:opacity-100" />
+            <div className="relative flex items-center gap-3 rounded-[1.5rem] border border-border bg-card p-2 shadow-sm transition-all focus-within:ring-2 focus-within:ring-primary/20">
+              <Search className="ml-4 size-5 text-muted-foreground" />
               <Input
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
-                placeholder="average buyer waiting time by provider in Singapore"
-                className="flex-1"
+                placeholder="How many orders were placed last month in Germany?"
+                className="flex-1 border-none bg-transparent text-lg shadow-none focus-visible:ring-0"
                 disabled={queryState === "loading"}
               />
-              <Button type="submit" disabled={queryState === "loading" || !question.trim()}>
-                {queryState === "loading" ? <Send className="animate-pulse" /> : <Send />}
-                Submit
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border/70 bg-card/80">
-          <CardHeader>
-            <CardTitle>Status</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between rounded-2xl border border-border/80 bg-muted/50 px-4 py-3">
-              <span className="text-sm font-medium">State</span>
-              <Badge
-                variant={
-                  queryState === "success"
-                    ? "default"
-                    : queryState === "error"
-                      ? "destructive"
-                      : "outline"
-                }
+              <Button 
+                type="submit" 
+                size="lg"
+                disabled={queryState === "loading" || !question.trim()}
+                className="rounded-xl px-6"
               >
-                {queryState}
-              </Badge>
+                {queryState === "loading" ? <Send className="animate-pulse" /> : "Submit"}
+              </Button>
             </div>
-            {errorMessage && (
-              <div className="rounded-2xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
-                {errorMessage}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          </div>
+        </form>
       </section>
 
-      {result && (
-        <section className="space-y-4">
-          <Card className="border-border/70 bg-card/80">
-            <CardHeader>
-              <CardTitle>Generated SQL</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <pre className="overflow-auto rounded-2xl bg-muted px-4 py-3 text-sm leading-6 whitespace-pre-wrap text-muted-foreground">
-                {result.sql}
-              </pre>
-            </CardContent>
-          </Card>
+      {/* Results Section */}
+      <AnimatePresence mode="wait">
+        {queryState === "loading" && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex flex-col items-center justify-center py-20 gap-4"
+          >
+            <div className="flex gap-1">
+              {[0, 1, 2].map((i) => (
+                <motion.div
+                  key={i}
+                  animate={{ scale: [1, 1.5, 1], opacity: [0.3, 1, 0.3] }}
+                  transition={{ repeat: Infinity, duration: 1, delay: i * 0.2 }}
+                  className="size-3 rounded-full bg-primary"
+                />
+              ))}
+            </div>
+            <p className="text-sm font-medium text-muted-foreground animate-pulse">Consulting the oracle...</p>
+          </motion.div>
+        )}
 
-          {result.data.length > 0 ? (
-            <Card className="border-border/70 bg-card/80">
-              <CardHeader>
-                <CardTitle>Results</CardTitle>
-                <CardDescription>
-                  {result.data.length} row{result.data.length === 1 ? "" : "s"} returned.
-                </CardDescription>
+        {queryState === "error" && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="rounded-2xl border border-destructive/20 bg-destructive/5 p-6 text-center"
+          >
+            <p className="text-destructive font-medium">{errorMessage}</p>
+          </motion.div>
+        )}
+
+        {result && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="grid gap-6 lg:grid-cols-2"
+          >
+            {/* SQL Pane */}
+            <Card className="overflow-hidden border-border bg-card/50">
+              <CardHeader className="flex flex-row items-center gap-2 border-b border-border/50 py-3">
+                <Code className="size-4 text-primary" />
+                <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Generated SQL</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div
-                  className={`overflow-auto rounded-2xl border border-border/70 ${resultsExpanded ? "" : "max-h-80"}`}
-                >
+              <CardContent className="p-0">
+                <pre className="p-6 font-mono text-sm leading-relaxed text-foreground whitespace-pre-wrap">
+                  {result.sql}
+                </pre>
+              </CardContent>
+            </Card>
+
+            {/* Explanation Pane */}
+            <Card className="overflow-hidden border-border bg-card/50">
+              <CardHeader className="flex flex-row items-center gap-2 border-b border-border/50 py-3">
+                <Sparkles className="size-4 text-primary" />
+                <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">AI Insight</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <p className="text-sm leading-relaxed text-muted-foreground italic">
+                  {result.explanation || "No additional insights provided."}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Data Table */}
+            <Card className="lg:col-span-2 overflow-hidden border-border">
+              <CardHeader className="flex flex-row items-center justify-between gap-2 border-b border-border/50 py-4">
+                <div className="flex items-center gap-2">
+                  <TableIcon className="size-4 text-primary" />
+                  <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Results</CardTitle>
+                </div>
+                <Badge variant="secondary">{result.data.length} Rows</Badge>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className={`overflow-auto ${resultsExpanded ? "" : "max-h-[400px]"}`}>
                   <Table>
-                    <TableHeader>
+                    <TableHeader className="bg-muted/30">
                       <TableRow>
                         {columns.map((col) => (
-                          <TableHead key={col}>{col}</TableHead>
+                          <TableHead key={col} className="font-bold text-foreground">{col}</TableHead>
                         ))}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {result.data.map((row, rowIndex) => (
-                        <TableRow key={rowIndex}>
+                      {result.data.map((row, i) => (
+                        <TableRow key={i} className="hover:bg-muted/20">
                           {columns.map((col) => (
-                            <TableCell key={col}>
-                              {String(row[col] ?? "")}
-                            </TableCell>
+                            <TableCell key={col}>{String(row[col] ?? "")}</TableCell>
                           ))}
                         </TableRow>
                       ))}
@@ -198,49 +191,17 @@ export function QueryPage({ onBackToDashboard }: QueryPageProps) {
                   </Table>
                 </div>
                 {result.data.length > 10 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setResultsExpanded(!resultsExpanded)}
-                  >
-                    {resultsExpanded ? (
-                      <>
-                        <ChevronUp /> Show less
-                      </>
-                    ) : (
-                      <>
-                        <ChevronDown /> Show all {result.data.length} rows
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex justify-center p-4 border-t border-border/50">
+                    <Button variant="ghost" size="sm" onClick={() => setResultsExpanded(!resultsExpanded)}>
+                      {resultsExpanded ? <><ChevronUp className="mr-2" /> Show Less</> : <><ChevronDown className="mr-2" /> Show All Rows</>}
+                    </Button>
+                  </div>
                 )}
               </CardContent>
             </Card>
-          ) : (
-            <Card className="border-border/70 bg-card/80">
-              <CardContent className="py-8 text-center text-muted-foreground">
-                Query returned no results.
-              </CardContent>
-            </Card>
-          )}
-
-          {result.explanation && (
-            <Card className="border-border/70 bg-card/80">
-              <CardHeader>
-                <CardTitle>Explanation</CardTitle>
-                <CardDescription>
-                  AI-generated insight based on the query results.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <pre className="overflow-auto rounded-2xl bg-muted px-4 py-3 text-sm leading-6 whitespace-pre-wrap text-muted-foreground">
-                  {result.explanation}
-                </pre>
-              </CardContent>
-            </Card>
-          )}
-        </section>
-      )}
-    </main>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   )
 }

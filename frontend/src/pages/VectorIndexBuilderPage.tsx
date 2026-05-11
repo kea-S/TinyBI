@@ -1,1050 +1,708 @@
-import { useEffect, useState } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import {
-  Download,
-  ArrowLeft,
-  BookCopy,
+  ReactFlow,
+  Controls,
+  Background,
+  applyNodeChanges,
+  applyEdgeChanges,
+  ReactFlowProvider,
+  useReactFlow,
+  type Node,
+  type Edge,
+  type OnNodesChange,
+  type OnEdgesChange,
+  type OnConnect,
+  Panel,
+  MarkerType,
+} from "@xyflow/react"
+import "@xyflow/react/dist/style.css"
+import { motion, AnimatePresence } from "framer-motion"
+import { 
+  Plus, 
+  Save, 
+  Trash2, 
+  X, 
+  Search, 
+  Database, 
   Braces,
-  Database,
-  Layers3,
-  Plus,
-  Save,
-  Send,
-  Trash2,
+  Layout
 } from "lucide-react"
+import ELK, { type ElkNode } from "elkjs/lib/elk.bundled.js"
 
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
-import {
+import { Separator } from "@/components/ui/separator"
+import { TableNode, type TableNodeData } from "@/components/builder/TableNode"
+import { type TableDraft, type ColumnDraft } from "@/App"
+import { 
+  submitDefaultVectorIndexEntries, 
   fetchCurrentVectorIndexEntries,
-  submitDefaultVectorIndexEntries,
-  type BatchColumnVectorIndexResponse,
-  type ColumnVectorIndexEntryRequest,
+  type ColumnVectorIndexEntryRequest 
 } from "@/lib/api"
+import { QueryPage } from "./QueryPage"
 
-type TableDraft = {
-  id: string
-  name: string
-  columns: ColumnDraft[]
-}
+const elk = new ELK()
 
-type ColumnDraft = {
-  id: string
-  columnName: string
-  sourceKey: string
-  description: string
-  dataFormat: string
-  statisticalType: string
-  categoricalValues: CategoricalValue[]
-  aliasesText: string
-  sampleValuesText: string
-  payloadText: string
-  references: string
-}
-
-type CategoricalValue = {
-  id: string
-  dbValue: string
-  synonymsText: string
-}
-
-type SubmitState = "idle" | "submitting" | "success" | "error"
-type LoadState = "idle" | "loading" | "error"
-
-const defaultPayloadText = '{\n  "is_groupable": true\n}'
-
-function sanitisePayload(payload: Record<string, unknown> | null | undefined) {
-  if (!payload || Array.isArray(payload)) {
-    return {}
-  }
-
-  const { data_type: _legacyDataType, statistical_type: _st, categorical_values: _cv, ...rest } = payload
-  return rest
-}
-
-function createId(prefix: string) {
-  return `${prefix}-${Math.random().toString(36).slice(2, 10)}`
-}
-
-function createEmptyColumn(): ColumnDraft {
-  return {
-    id: createId("column"),
-    columnName: "",
-    sourceKey: "",
-    description: "",
-    dataFormat: "",
-    statisticalType: "nominal",
-    categoricalValues: [],
-    aliasesText: "",
-    sampleValuesText: "",
-    payloadText: defaultPayloadText,
-    references: "",
-  }
-}
-
-function createEmptyTable(): TableDraft {
-  return {
-    id: createId("table"),
-    name: "",
-    columns: [createEmptyColumn()],
-  }
-}
-
-function parseCommaSeparatedList(value: string) {
-  return value
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean)
-}
-
-function buildTablesFromEntries(entries: ColumnVectorIndexEntryRequest[]): TableDraft[] {
-  const tablesByName = new Map<string, TableDraft>()
-
-  for (const entry of entries) {
-    const existingTable = tablesByName.get(entry.table_name)
-    const table =
-      existingTable ??
-      {
-        id: createId("table"),
-        name: entry.table_name,
-        columns: [],
-      }
-
-    const categoricalValues: CategoricalValue[] = []
-    if (entry.categorical_values) {
-      for (const [dbValue, synonyms] of Object.entries(entry.categorical_values)) {
-        categoricalValues.push({
-          id: createId("cat"),
-          dbValue,
-          synonymsText: synonyms.join(", "),
-        })
-      }
-    }
-
-    table.columns.push({
-      id: createId("column"),
-      columnName: entry.column_name,
-      sourceKey: entry.source_key,
-      description: entry.description ?? "",
-      dataFormat: entry.data_format ?? "",
-      statisticalType: entry.statistical_type ?? "nominal",
-      categoricalValues,
-      aliasesText: entry.aliases.join(", "),
-      sampleValuesText: entry.sample_values.join(", "),
-      payloadText: JSON.stringify(sanitisePayload(entry.payload), null, 2),
-      references: entry.references ?? "",
-    })
-
-    tablesByName.set(entry.table_name, table)
-  }
-
-  const tables = [...tablesByName.values()]
-  return tables.length > 0 ? tables : [createEmptyTable()]
+const nodeTypes = {
+  table: TableNode,
 }
 
 type VectorIndexBuilderPageProps = {
-  onBackToDashboard: () => void
+  tables: TableDraft[]
+  setTables: React.Dispatch<React.SetStateAction<TableDraft[]>>
+  isVisible?: boolean
 }
 
-export function VectorIndexBuilderPage({
-  onBackToDashboard,
-}: VectorIndexBuilderPageProps) {
-  const [tables, setTables] = useState<TableDraft[]>([createEmptyTable()])
-  const [selectedTableId, setSelectedTableId] = useState(tables[0].id)
-  const [selectedColumnId, setSelectedColumnId] = useState(tables[0].columns[0].id)
-  const [submitState, setSubmitState] = useState<SubmitState>("idle")
-  const [loadState, setLoadState] = useState<LoadState>("idle")
-  const [submitMessage, setSubmitMessage] = useState(
-    "No batch submitted yet. Build out your tables and linked columns first."
-  )
-  const [submitResponse, setSubmitResponse] =
-    useState<BatchColumnVectorIndexResponse | null>(null)
-  const [existingColumns, setExistingColumns] = useState<ColumnVectorIndexEntryRequest[]>([])
+function VectorIndexBuilderPageInner({ tables, setTables, isVisible }: VectorIndexBuilderPageProps) {
+  const { fitView } = useReactFlow()
+  const [nodes, setNodes] = useState<Node<TableNodeData>[]>([])
+  const [edges, setEdges] = useState<Edge[]>([])
+  const [selectedTableId, setSelectedTableId] = useState<string | null>(null)
+  const [selectedColumnId, setSelectedColumnId] = useState<string | null>(null)
+  const [isPeekOpen, setIsPeekOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [syncedEntries, setSyncedEntries] = useState<ColumnVectorIndexEntryRequest[]>([])
+  const [isReady, setIsReady] = useState(false)
 
+  // Fetch current state to determine "synced" status for edges
   useEffect(() => {
-    fetchCurrentVectorIndexEntries().then((result) => {
-      if (typeof result !== "string") {
-        setExistingColumns(result)
-      }
+    fetchCurrentVectorIndexEntries().then((res) => {
+      if (Array.isArray(res)) setSyncedEntries(res)
     })
   }, [])
 
-  const selectedTable =
-    tables.find((table) => table.id === selectedTableId) ?? tables[0] ?? null
-  const selectedColumn =
-    selectedTable?.columns.find((column) => column.id === selectedColumnId) ??
-    selectedTable?.columns[0] ??
-    null
+  // Auto-layout + fitView the first time the builder tab becomes visible with data
+  const hasAutoLayouted = useRef(false)
+  useEffect(() => {
+    if (!hasAutoLayouted.current && isVisible && tables.length > 1 && syncedEntries.length > 0) {
+      hasAutoLayouted.current = true
+      handleAutoLayout(tables).then(() => {
+        setTimeout(() => {
+          fitView({ padding: 0.2 })
+          setIsReady(true)
+        }, 150)
+      })
+    }
+  }, [isVisible, tables, syncedEntries, fitView])
 
-  function ensureSelectedIds(nextTables: TableDraft[]) {
-    const nextSelectedTable =
-      nextTables.find((table) => table.id === selectedTableId) ?? nextTables[0] ?? null
-    const nextSelectedColumn =
-      nextSelectedTable?.columns.find((column) => column.id === selectedColumnId) ??
-      nextSelectedTable?.columns[0] ??
-      null
+  // Map tables to React Flow nodes/edges
+  useEffect(() => {
+    const newNodes: Node<TableNodeData>[] = tables.map((t) => ({
+      id: t.id,
+      type: "table",
+      position: { x: t.x ?? 0, y: t.y ?? 0 },
+      data: {
+        name: t.name,
+        columns: t.columns.map((c) => ({ id: c.id, columnName: c.columnName })),
+        isSelected: selectedTableId === t.id,
+      },
+    }))
+    setNodes(newNodes)
 
-    setSelectedTableId(nextSelectedTable?.id ?? "")
-    setSelectedColumnId(nextSelectedColumn?.id ?? "")
-  }
+    const newEdges: Edge[] = []
+    tables.forEach((t) => {
+      t.columns.forEach((c) => {
+        if (c.references) {
+          const [refTable, refCol] = c.references.split(".")
+          const targetTable = tables.find((tab) => tab.name === refTable)
+          if (targetTable) {
+            const targetColumn = targetTable.columns.find((col) => col.columnName === refCol)
+            if (targetColumn) {
+              // Check if this reference is already synced in the backend
+              const isSynced = syncedEntries.some(
+                (se) => se.table_name === t.name && 
+                  se.column_name === c.columnName && 
+                  se.references === c.references
+              )
 
-  function updateTables(updater: (current: TableDraft[]) => TableDraft[]) {
-    setTables((current) => {
-      const nextTables = updater(current)
-      ensureSelectedIds(nextTables)
-      return nextTables
+              newEdges.push({
+                id: `edge-${c.id}-${targetColumn.id}`,
+                source: t.id,
+                sourceHandle: `${c.id}-source`,
+                target: targetTable.id,
+                targetHandle: `${targetColumn.id}-target`,
+                reconnectable: true,
+                animated: !isSynced,
+                style: { 
+                  stroke: isSynced ? "#0f172a" : "#94a3b8",
+                  strokeDasharray: isSynced ? "" : "5,5",
+                  strokeWidth: 4
+                },
+                markerEnd: {
+                  type: MarkerType.ArrowClosed,
+                  color: isSynced ? "#0f172a" : "#94a3b8",
+                },
+              })
+            }
+          }
+        }
+      })
     })
-  }
+    setEdges(newEdges)
+  }, [tables, selectedTableId, syncedEntries])
 
-  function handleAddTable() {
-    const newTable = createEmptyTable()
+  const onNodesChange: OnNodesChange<Node<TableNodeData>> = useCallback(
+    (changes) => {
+      setNodes((nds) => applyNodeChanges(changes, nds))
+      changes.forEach((change) => {
+        if (change.type === "position" && change.position) {
+          setTables((current) =>
+            current.map((t) =>
+              t.id === change.id ? { ...t, x: change.position!.x, y: change.position!.y } : t
+            )
+          )
+        }
+      })
+    },
+    [setTables]
+  )
+
+  const onEdgesChange: OnEdgesChange = useCallback(
+    (changes) => setEdges((eds) => applyEdgeChanges(changes, eds)),
+    []
+  )
+
+  const onConnect: OnConnect = useCallback(
+    (connection) => {
+      const sourceTable = tables.find((t) => t.id === connection.source)
+      const targetTable = tables.find((t) => t.id === connection.target)
+
+      if (sourceTable && targetTable && connection.sourceHandle && connection.targetHandle) {
+        // IDs are simple colId-source or colId-target
+        const sourceColId = connection.sourceHandle.replace("-source", "")
+        const targetColId = connection.targetHandle.replace("-target", "")
+
+        const targetCol = targetTable.columns.find((c) => c.id === targetColId)
+
+        if (targetCol) {
+          setTables((current) =>
+            current.map((t) => {
+              if (t.id !== sourceTable.id) return t
+              return {
+                ...t,
+                columns: t.columns.map((c) =>
+                  c.id === sourceColId ? { ...c, references: `${targetTable.name}.${targetCol.columnName}` } : c
+                ),
+              }
+            })
+          )
+        }
+      }
+    },
+    [tables, setTables]
+  )
+
+  const onReconnect = useCallback(
+    (oldEdge: Edge, newConnection: any) => {
+      const newSourceTable = tables.find((t) => t.id === newConnection.source)
+      const newTargetTable = tables.find((t) => t.id === newConnection.target)
+
+      if (
+        !newSourceTable ||
+          !newTargetTable ||
+          !newConnection.sourceHandle ||
+          !newConnection.targetHandle
+      )
+        return
+
+      const oldSourceColId = oldEdge.sourceHandle?.replace("-source", "")
+      const newSourceColId = newConnection.sourceHandle.replace("-source", "")
+      const newTargetColId = newConnection.targetHandle.replace("-target", "")
+
+      const newTargetCol = newTargetTable.columns.find((c) => c.id === newTargetColId)
+      if (!newTargetCol) return
+
+      const newReference = `${newTargetTable.name}.${newTargetCol.columnName}`
+
+      // Block if another column on the same source table already references this target.
+      // Exclude the old source column since it will be cleared.
+      const isSameTable = oldEdge.source === newConnection.source
+      const wouldDuplicate = newSourceTable.columns.some(
+        (c) =>
+          c.id !== newSourceColId &&
+            !(isSameTable && c.id === oldSourceColId) &&
+            c.references === newReference
+      )
+      if (wouldDuplicate) return
+
+      setTables((current) =>
+        current.map((t) => {
+          if (t.id === oldEdge.source && oldSourceColId) {
+            // Clear old source column reference
+            t = {
+              ...t,
+              columns: t.columns.map((c) =>
+                c.id === oldSourceColId ? { ...c, references: "" } : c
+              ),
+            }
+          }
+          if (t.id === newConnection.source) {
+            // Set new source column reference
+            t = {
+              ...t,
+              columns: t.columns.map((c) =>
+                c.id === newSourceColId ? { ...c, references: newReference } : c
+              ),
+            }
+          }
+          return t
+        })
+      )
+    },
+    [tables, setTables]
+  )
+
+  const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
+    setIsPeekOpen(false) // Mutex: Close peek when selecting table
+    setSelectedTableId(node.id)
+    const table = tables.find(t => t.id === node.id)
+    if (table && table.columns.length > 0) {
+      setSelectedColumnId(table.columns[0].id)
+    }
+  }, [tables])
+
+
+  const handleAddTable = () => {
+    const id = `table-${Math.random().toString(36).slice(2, 10)}`
+    const newTable: TableDraft = {
+      id,
+      name: "new_table",
+      x: Math.random() * 400,
+      y: Math.random() * 400,
+      columns: [
+        {
+          id: `column-${Math.random().toString(36).slice(2, 10)}`,
+          columnName: "id",
+          sourceKey: "",
+          description: "",
+          dataFormat: "",
+          statisticalType: "identifier",
+          categoricalValues: [],
+          aliasesText: "",
+          sampleValuesText: "",
+          payloadText: '{\n  "is_groupable": false\n}',
+          references: "",
+        },
+      ],
+    }
     setTables((current) => [...current, newTable])
-    setSelectedTableId(newTable.id)
+    setSelectedTableId(id)
     setSelectedColumnId(newTable.columns[0].id)
   }
 
-  function handleRemoveTable(tableId: string) {
-    updateTables((current) => {
-      if (current.length === 1) {
-        return [createEmptyTable()]
-      }
-
-      return current.filter((table) => table.id !== tableId)
-    })
+  const handleDeleteTable = (id: string) => {
+    setTables((current) => current.filter(t => t.id !== id))
+    if (selectedTableId === id) {
+      setSelectedTableId(null)
+      setSelectedColumnId(null)
+    }
   }
 
-  function handleUpdateTableName(tableId: string, name: string) {
-    updateTables((current) =>
-      current.map((table) => (table.id === tableId ? { ...table, name } : table))
-    )
-  }
+  const selectedTable = tables.find((t) => t.id === selectedTableId)
+  const selectedColumn = selectedTable?.columns.find((c) => c.id === selectedColumnId)
 
-  function handleAddColumn(tableId: string) {
-    const newColumn = createEmptyColumn()
-    updateTables((current) =>
-      current.map((table) =>
-        table.id === tableId
-          ? { ...table, columns: [...table.columns, newColumn] }
-          : table
-      )
-    )
-    setSelectedTableId(tableId)
-    setSelectedColumnId(newColumn.id)
-  }
-
-  function handleRemoveColumn(tableId: string, columnId: string) {
-    updateTables((current) =>
-      current.map((table) => {
-        if (table.id !== tableId) {
-          return table
-        }
-
-        if (table.columns.length === 1) {
-          return { ...table, columns: [createEmptyColumn()] }
-        }
-
+  const handleUpdateColumn = (field: keyof ColumnDraft, value: any) => {
+    if (!selectedTableId || !selectedColumnId) return
+    setTables((current) =>
+      current.map((t) => {
+        if (t.id !== selectedTableId) return t
         return {
-          ...table,
-          columns: table.columns.filter((column) => column.id !== columnId),
-        }
-      })
-    )
-  }
-
-  function updateColumnField(
-    tableId: string,
-    columnId: string,
-    field: keyof ColumnDraft,
-    value: unknown
-  ) {
-    updateTables((current) =>
-      current.map((table) => {
-        if (table.id !== tableId) {
-          return table
-        }
-
-        return {
-          ...table,
-          columns: table.columns.map((column) =>
-            column.id === columnId ? { ...column, [field]: value } : column
+          ...t,
+          columns: t.columns.map((c) =>
+            c.id === selectedColumnId ? { ...c, [field]: value } : c
           ),
         }
       })
     )
   }
 
-  function addCategoricalValue(tableId: string, columnId: string) {
-    updateTables((current) =>
-      current.map((table) => {
-        if (table.id !== tableId) return table
-        return {
-          ...table,
-          columns: table.columns.map((column) => {
-            if (column.id !== columnId) return column
-            return {
-              ...column,
-              categoricalValues: [
-                ...column.categoricalValues,
-                { id: createId("cat"), dbValue: "", synonymsText: "" },
-              ],
-            }
-          }),
-        }
-      })
-    )
-  }
+  const handleAutoLayout = useCallback(async (targetTables: TableDraft[]) => {
+    const elkNodes: ElkNode[] = targetTables.map((t) => ({
+      id: t.id,
+      width: 250,
+      height: 100 + (t.columns.length * 40),
+    }))
 
-  function updateCategoricalValue(
-    tableId: string,
-    columnId: string,
-    catId: string,
-    field: keyof CategoricalValue,
-    value: string
-  ) {
-    updateTables((current) =>
-      current.map((table) => {
-        if (table.id !== tableId) return table
-        return {
-          ...table,
-          columns: table.columns.map((column) => {
-            if (column.id !== columnId) return column
-            return {
-              ...column,
-              categoricalValues: column.categoricalValues.map((cat) =>
-                cat.id === catId ? { ...cat, [field]: value } : cat
-              ),
-            }
-          }),
-        }
-      })
-    )
-  }
-
-  function removeCategoricalValue(tableId: string, columnId: string, catId: string) {
-    updateTables((current) =>
-      current.map((table) => {
-        if (table.id !== tableId) return table
-        return {
-          ...table,
-          columns: table.columns.map((column) => {
-            if (column.id !== columnId) return column
-            return {
-              ...column,
-              categoricalValues: column.categoricalValues.filter((cat) => cat.id !== catId),
-            }
-          }),
-        }
-      })
-    )
-  }
-
-  function buildRequestEntries() {
-    const entries: ColumnVectorIndexEntryRequest[] = []
-    let nextEntryId = 1
-
-    for (const table of tables) {
-      const tableName = table.name.trim()
-      if (!tableName) {
-        throw new Error("Each table needs a name before you can submit the index batch.")
-      }
-
-      for (const column of table.columns) {
-        const columnName = column.columnName.trim()
-        if (!columnName) {
-          throw new Error(`Table "${tableName}" has a column without a column name.`)
-        }
-
-        let payload: Record<string, unknown> = {}
-        const trimmedPayload = column.payloadText.trim()
-        if (trimmedPayload) {
-          try {
-            const parsedPayload = JSON.parse(trimmedPayload) as unknown
-            if (
-              !parsedPayload ||
-              Array.isArray(parsedPayload) ||
-              typeof parsedPayload !== "object"
-            ) {
-              throw new Error("Payload must be a JSON object.")
-            }
-            payload = sanitisePayload(parsedPayload as Record<string, unknown>)
-          } catch (error) {
-            if (error instanceof Error && error.message === "Payload must be a JSON object.") {
-              throw error
-            }
-
-            throw new Error(
-              `Payload JSON is invalid for ${tableName}.${columnName}.`
-            )
+    const elkEdges: any[] = []
+    targetTables.forEach((t) => {
+      t.columns.forEach((c) => {
+        if (c.references) {
+          const refTable = c.references.split(".")[0]
+          const targetTable = targetTables.find((tab) => tab.name === refTable)
+          if (targetTable) {
+            elkEdges.push({
+              id: `elk-edge-${c.id}`,
+              sources: [t.id],
+              targets: [targetTable.id],
+            })
           }
         }
+      })
+    })
 
-        const sourceKey =
-          column.sourceKey.trim() || `${tableName}.${columnName}`
+    const graph = await elk.layout({
+      id: "root",
+      layoutOptions: {
+        "elk.algorithm": "layered",
+        "elk.direction": "RIGHT",
+        "elk.spacing.nodeNode": "100",
+        "elk.layered.spacing.edgeNodeBetweenLayers": "100",
+      },
+      children: elkNodes,
+      edges: elkEdges,
+    })
 
-        const categorical_values: Record<string, string[]> = {}
-        const categoricalTypes = ["nominal", "ordinal", "categorical"]
-        if (categoricalTypes.includes(column.statisticalType)) {
-          for (const row of column.categoricalValues) {
-            const dbVal = row.dbValue.trim()
-            if (dbVal) {
-              categorical_values[dbVal] = parseCommaSeparatedList(row.synonymsText)
-            }
+    if (graph.children) {
+      setTables((current) => {
+        const next = current.map((t) => {
+          const node = graph.children?.find((n) => n.id === t.id)
+          if (node && node.x !== undefined && node.y !== undefined) {
+            return { ...t, x: node.x, y: node.y }
           }
-        }
-
-        entries.push({
-          entry_id: nextEntryId,
-          table_name: tableName,
-          column_name: columnName,
-          source_key: sourceKey,
-          description: column.description.trim() || null,
-          data_format: column.dataFormat.trim() || null,
-          statistical_type: column.statisticalType,
-          categorical_values: Object.keys(categorical_values).length > 0 ? categorical_values : undefined,
-          aliases: parseCommaSeparatedList(column.aliasesText),
-          sample_values: parseCommaSeparatedList(column.sampleValuesText),
-          payload,
-          references: column.references.trim() || null,
+          return t
         })
-
-        nextEntryId += 1
-      }
+        return next
+      })
     }
+  }, [setTables])
 
-    if (entries.length === 0) {
-      throw new Error("Add at least one column entry before submitting.")
-    }
-
-    return entries
-  }
-
-  async function handleSubmit() {
-    setSubmitState("submitting")
-    setSubmitResponse(null)
-
+  const handleSaveIndex = async () => {
+    setIsSubmitting(true)
     try {
-      const entries = buildRequestEntries()
-      const response = await submitDefaultVectorIndexEntries({ entries })
+      const entries: ColumnVectorIndexEntryRequest[] = []
+      tables.forEach((t) => {
+        t.columns.forEach((c) => {
+          entries.push({
+            entry_id: entries.length + 1,
+            table_name: t.name,
+            column_name: c.columnName,
+            source_key: c.sourceKey || `${t.name}.${c.columnName}`,
+            description: c.description || null,
+            data_format: c.dataFormat || null,
+            statistical_type: c.statisticalType,
+            aliases: c.aliasesText.split(",").map(a => a.trim()).filter(Boolean),
+            sample_values: c.sampleValuesText.split(",").map(a => a.trim()).filter(Boolean),
+            payload: JSON.parse(c.payloadText),
+            references: c.references || null,
+          })
+        })
+      })
+      await submitDefaultVectorIndexEntries({ entries })
 
-      if (typeof response === "string") {
-        throw new Error("Expected a JSON response from the vector index API.")
-      }
+      // Update local sync state
+      setSyncedEntries(entries)
 
-      setSubmitState("success")
-      setSubmitResponse(response)
-      setSubmitMessage(
-        `Indexed ${response.entry_count} columns across ${response.table_names.length} tables with ${response.embedding_model}.`
-      )
-    } catch (error) {
-      setSubmitState("error")
-      setSubmitMessage(
-        error instanceof Error ? error.message : "Unable to submit the vector index batch."
-      )
+      // Trigger auto-layout on save
+      await handleAutoLayout(tables)
+
+      alert("Index saved and layout optimized!")
+    } catch (e) {
+      console.error(e)
+      alert("Failed to save index.")
+    } finally {
+      setIsSubmitting(false)
     }
   }
-
-  async function handleLoadCurrentIndex() {
-    setLoadState("loading")
-
-    try {
-      const response = await fetchCurrentVectorIndexEntries()
-      if (typeof response === "string") {
-        throw new Error("Expected a JSON response when loading the current index.")
-      }
-
-      const nextTables = buildTablesFromEntries(response)
-      setTables(nextTables)
-      setSelectedTableId(nextTables[0]?.id ?? "")
-      setSelectedColumnId(nextTables[0]?.columns[0]?.id ?? "")
-      setLoadState("idle")
-
-      if (response.length === 0) {
-        setSubmitMessage("No persisted index was found yet. You are editing a fresh draft.")
-        setSubmitState("idle")
-        setSubmitResponse(null)
-        return
-      }
-
-      setSubmitState("success")
-      setSubmitResponse(null)
-      setSubmitMessage(`Loaded ${response.length} persisted entries into the editor.`)
-    } catch (error) {
-      setLoadState("error")
-      setSubmitState("error")
-      setSubmitMessage(
-        error instanceof Error ? error.message : "Unable to load the current vector index."
-      )
-    }
-  }
-
-  const totalColumns = tables.reduce((count, table) => count + table.columns.length, 0)
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[1600px] flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
-      <section className="overflow-hidden rounded-[2rem] border border-border/70 bg-card/88 shadow-sm backdrop-blur">
-        <div className="flex flex-col gap-5 px-6 py-6 lg:flex-row lg:items-end lg:justify-between lg:px-8">
-          <div className="space-y-3">
-            <div className="flex flex-wrap items-center gap-3">
-              <Button variant="ghost" size="sm" onClick={onBackToDashboard}>
-                <ArrowLeft />
-                Dashboard
-              </Button>
-              <Badge variant="outline" className="rounded-full px-3 py-1">
-                Default embedder
-              </Badge>
-              <Badge className="rounded-full px-3 py-1">nomic-embed-text</Badge>
-            </div>
-            <div className="space-y-2">
-              <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-                Build column vectors by table, then submit one batch.
-              </h1>
-              <p className="max-w-3xl text-base leading-7 text-muted-foreground">
-                Create a table on the left, attach linked columns on the right, and send
-                the flattened `ColumnVectorIndexEntry` list to the default FastAPI endpoint
-                once the draft is complete.
-              </p>
-            </div>
-          </div>
+    <div className="relative h-full w-full">
+      <div
+        className={`h-full w-full transition-opacity duration-500 ${
+          isReady ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onReconnect={onReconnect}
+          onNodeClick={onNodeClick}
+          nodeTypes={nodeTypes}
+          connectionLineStyle={{ stroke: "#0f172a", strokeWidth: 3, strokeDasharray: "5,5" }}
+          fitView
+        >
+        <Background color="#cbd5e1" gap={20} />
+        <Controls />
+        <Panel position="top-right" style={{ marginRight: (isPeekOpen || selectedTableId) ? 420 : 20 }} className="flex gap-2 transition-all duration-300">
+          <Button onClick={handleAddTable} className="shadow-lg shadow-primary/20">
+            <Plus className="mr-2 size-4" /> Add Table
+          </Button>
+          <Button 
+            variant="default" 
+            onClick={handleSaveIndex} 
+            disabled={isSubmitting}
+            className="shadow-lg shadow-primary/20"
+          >
+            {isSubmitting ? <Save className="mr-2 size-4 animate-spin" /> : <Save className="mr-2 size-4" />}
+            Save Index
+          </Button>
+          <Button 
+            variant="secondary" 
+            onClick={() => {
+              setSelectedTableId(null) // Mutex: Close table editor when opening peek
+              setIsPeekOpen(true)
+            }}
+            className="shadow-lg"
+          >
+            <Search className="mr-2 size-4" /> Peek Query
+          </Button>
+          <Button variant="outline" size="icon" onClick={() => handleAutoLayout(tables)} title="Auto-Layout">
+            <Layout className="size-4" />
+          </Button>
+        </Panel>
+        </ReactFlow>
+      </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="rounded-2xl border border-border/80 bg-background/70 px-4 py-3 text-sm text-muted-foreground">
-              {tables.length} tables · {totalColumns} columns
-            </div>
-            <Button
-              variant="outline"
-              onClick={handleLoadCurrentIndex}
-              disabled={loadState === "loading"}
-            >
-              <Download />
-              {loadState === "loading" ? "Loading current index" : "Load current index"}
-            </Button>
-            <Button onClick={handleSubmit} disabled={submitState === "submitting"}>
-              {submitState === "submitting" ? <Save className="animate-pulse" /> : <Send />}
-              Submit index batch
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      <section className="grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)_360px]">
-        <Card className="border-border/70 bg-card/82">
-          <CardHeader>
-            <CardTitle>Tables</CardTitle>
-            <CardDescription>
-              Each table groups the columns that will later flatten into index entries.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Button className="w-full justify-center" variant="outline" onClick={handleAddTable}>
-              <Plus />
-              Add table
-            </Button>
-            <div className="space-y-3">
-              {tables.map((table, index) => {
-                const isSelected = table.id === selectedTableId
-
-                return (
-                  <button
-                    key={table.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedTableId(table.id)
-                      setSelectedColumnId(table.columns[0]?.id ?? "")
-                    }}
-                    className={`w-full rounded-2xl border p-4 text-left transition ${
-                      isSelected
-                        ? "border-primary/40 bg-primary/8 shadow-sm"
-                        : "border-border/80 bg-background/55 hover:bg-muted/55"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="space-y-1">
-                        <p className="text-xs font-medium uppercase tracking-[0.24em] text-muted-foreground">
-                          Table {index + 1}
-                        </p>
-                        <p className="font-medium text-foreground">
-                          {table.name.trim() || "Untitled table"}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {table.columns.length} linked column
-                          {table.columns.length === 1 ? "" : "s"}
-                        </p>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={(event) => {
-                          event.stopPropagation()
-                          handleRemoveTable(table.id)
-                        }}
-                      >
-                        <Trash2 />
-                      </Button>
-                    </div>
-                  </button>
-                )
-              })}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border/70 bg-card/82">
-          <CardHeader className="gap-4 border-b border-border/70 pb-4">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="space-y-1">
-                <CardTitle className="flex items-center gap-2">
-                  <Database className="size-4" />
-                  Table workspace
-                </CardTitle>
-                <CardDescription>
-                  Pick a table, define its name, then edit the linked column metadata below.
-                </CardDescription>
-              </div>
-              {selectedTable ? (
-                <Button variant="outline" size="sm" onClick={() => handleAddColumn(selectedTable.id)}>
-                  <Plus />
-                  Add column
-                </Button>
-              ) : null}
-            </div>
-
-            {selectedTable ? (
-              <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px]">
-                <label className="space-y-2">
-                  <span className="text-sm font-medium text-foreground">Table name</span>
-                  <Input
-                    value={selectedTable.name}
-                    onChange={(event) =>
-                      handleUpdateTableName(selectedTable.id, event.target.value)
-                    }
-                    placeholder="orders"
-                  />
-                </label>
-                <div className="rounded-2xl border border-dashed border-border/80 bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-                  Every column in this table inherits the same `table_name` when the batch is built.
+      {/* Right Sidebar Editor */}
+      <AnimatePresence>
+        {selectedTable && (
+          <motion.aside
+            initial={{ x: 400, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: 400, opacity: 0 }}
+            transition={{ type: "spring", damping: 20, stiffness: 100 }}
+            className="absolute inset-y-0 right-0 z-30 w-[400px] border-l border-border bg-white dark:bg-slate-900 opacity-100 shadow-2xl"
+          >
+            <div className="flex h-full flex-col">
+              <div className="flex items-center justify-between border-b border-border p-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Database className="size-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold tracking-tight">Table Editor</h2>
+                    <p className="text-xs text-muted-foreground uppercase tracking-widest">Configuration</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" onClick={() => handleDeleteTable(selectedTable.id)} title="Delete Table">
+                    <Trash2 className="size-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => setSelectedTableId(null)}>
+                    <X className="size-5" />
+                  </Button>
                 </div>
               </div>
-            ) : null}
-          </CardHeader>
 
-          <CardContent className="space-y-6 pt-5">
-            {selectedTable ? (
-              <>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-foreground">Columns for this table</p>
-                      <p className="text-sm text-muted-foreground">
-                        Select a column to edit its `ColumnVectorIndexEntry` fields.
-                      </p>
-                    </div>
-                    <Badge variant="outline">{selectedTable.columns.length} total</Badge>
-                  </div>
-
-                  <div className="grid gap-2 md:grid-cols-2">
-                    {selectedTable.columns.map((column, index) => {
-                      const isSelected = column.id === selectedColumnId
-
-                      return (
-                        <button
-                          key={column.id}
-                          type="button"
-                          onClick={() => setSelectedColumnId(column.id)}
-                          className={`rounded-2xl border p-3 text-left transition ${
-                            isSelected
-                              ? "border-primary/40 bg-primary/8"
-                              : "border-border/80 bg-background/60 hover:bg-muted/50"
-                          }`}
-                        >
-                          <div className="flex items-center justify-between gap-3">
-                            <div>
-                              <p className="text-xs font-medium uppercase tracking-[0.24em] text-muted-foreground">
-                                Column {index + 1}
-                              </p>
-                              <p className="font-medium text-foreground">
-                                {column.columnName.trim() || "Untitled column"}
-                              </p>
-                              {column.references && (
-                                <p className="text-xs text-muted-foreground">
-                                  → {column.references}
-                                </p>
-                              )}
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon-sm"
-                              onClick={(event) => {
-                                event.stopPropagation()
-                                handleRemoveColumn(selectedTable.id, column.id)
-                              }}
-                            >
-                              <Trash2 />
-                            </Button>
-                          </div>
-                        </button>
-                      )
-                    })}
-                  </div>
+              <div className="flex-1 overflow-y-auto p-6 space-y-8">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">Table Name</label>
+                  <Input 
+                    value={selectedTable.name} 
+                    onChange={(e) => setTables(current => current.map(t => t.id === selectedTable.id ? { ...t, name: e.target.value } : t))}
+                  />
+                  <Button variant="destructive" className="w-full mt-2 h-8 text-xs" onClick={() => handleDeleteTable(selectedTable.id)}>
+                    Delete Table
+                  </Button>
                 </div>
 
                 <Separator />
 
-                {selectedColumn ? (
-                  <div className="space-y-5">
-                    <div className="space-y-1">
-                      <p className="text-lg font-medium text-foreground">Selected column</p>
-                      <p className="text-sm text-muted-foreground">
-                        This form maps directly to a `ColumnVectorIndexEntry` once submitted.
-                      </p>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-semibold">Columns</label>
+                    <Button variant="outline" size="sm" onClick={() => {
+                      const id = `column-${Math.random().toString(36).slice(2, 10)}`
+                      setTables(current => current.map(t => t.id === selectedTable.id ? { ...t, columns: [...t.columns, {
+                        id,
+                        columnName: "new_column",
+                        sourceKey: "",
+                        description: "",
+                        dataFormat: "",
+                        statisticalType: "nominal",
+                        categoricalValues: [],
+                        aliasesText: "",
+                        sampleValuesText: "",
+                        payloadText: '{\n  "is_groupable": true\n}',
+                        references: "",
+                      }]} : t))
+                      setSelectedColumnId(id)
+                    }}>
+                      <Plus className="mr-1 size-3" /> Add
+                    </Button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedTable.columns.map((col) => (
+                      <button
+                        key={col.id}
+                        onClick={() => setSelectedColumnId(col.id)}
+                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+selectedColumnId === col.id 
+? "bg-primary text-primary-foreground" 
+: "bg-muted text-muted-foreground hover:bg-muted/80"
+}`}
+                      >
+                        {col.columnName || "Untitled"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {selectedColumn && (
+                  <motion.div 
+                    key={selectedColumn.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="space-y-6 pt-4"
+                  >
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-bold text-primary">Column Settings</h3>
+                      <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" onClick={() => {
+                        setTables(current => current.map(t => {
+                          if (t.id !== selectedTableId) return t
+                          const nextCols = t.columns.filter(c => c.id !== selectedColumnId)
+                          return { ...t, columns: nextCols.length > 0 ? nextCols : t.columns }
+                        }))
+                        setSelectedColumnId(selectedTable.columns.find(c => c.id !== selectedColumnId)?.id ?? null)
+                      }}>
+                        <Trash2 className="size-4" />
+                      </Button>
                     </div>
 
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <label className="space-y-2">
-                        <span className="text-sm font-medium">Column name</span>
-                        <Input
-                          value={selectedColumn.columnName}
-                          onChange={(event) =>
-                            updateColumnField(
-                              selectedTable.id,
-                              selectedColumn.id,
-                              "columnName",
-                              event.target.value
-                            )
-                          }
-                          placeholder="customer_city"
+                    <div className="grid gap-4">
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium uppercase text-muted-foreground" htmlFor="col-name">Column Name</label>
+                        <Input 
+                          id="col-name"
+                          value={selectedColumn.columnName} 
+                          onChange={(e) => handleUpdateColumn("columnName", e.target.value)}
                         />
-                      </label>
-                      <label className="space-y-2">
-                        <span className="text-sm font-medium">Source key</span>
-                        <Input
-                          value={selectedColumn.sourceKey}
-                          onChange={(event) =>
-                            updateColumnField(
-                              selectedTable.id,
-                              selectedColumn.id,
-                              "sourceKey",
-                              event.target.value
-                            )
-                          }
-                          placeholder={
-                            selectedTable.name && selectedColumn.columnName
-                              ? `${selectedTable.name}.${selectedColumn.columnName}`
-                              : "orders.customer_city"
-                          }
-                        />
-                      </label>
-                    </div>
-
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <label className="space-y-2">
-                        <span className="text-sm font-medium">Data format</span>
-                        <Input
-                          value={selectedColumn.dataFormat}
-                          onChange={(event) =>
-                            updateColumnField(
-                              selectedTable.id,
-                              selectedColumn.id,
-                              "dataFormat",
-                              event.target.value
-                            )
-                          }
-                          placeholder="date, currency, percentage..."
-                        />
-                      </label>
-                      <label className="space-y-2">
-                        <span className="text-sm font-medium">Statistical type</span>
-                        <select
-                          value={selectedColumn.statisticalType}
-                          onChange={(event) =>
-                            updateColumnField(
-                              selectedTable.id,
-                              selectedColumn.id,
-                              "statisticalType",
-                              event.target.value
-                            )
-                          }
-                          className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                        >
-                          <option value="nominal">nominal (categorical)</option>
-                          <option value="ordinal">ordinal (ordered categorical)</option>
-                          <option value="categorical">categorical (generic)</option>
-                          <option value="temporal">temporal (dates, times)</option>
-                          <option value="identifier">identifier (IDs, keys, serials)</option>
-                          <option value="continuous">continuous (numeric)</option>
-                          <option value="discrete">discrete (numeric counts)</option>
-                          <option value="quantitative">quantitative (numeric general)</option>
-                        </select>
-                      </label>
-                    </div>
-
-                    {["nominal", "ordinal", "categorical"].includes(selectedColumn.statisticalType) && (
-                      <div className="space-y-3 rounded-2xl border border-dashed border-border/80 bg-muted/30 p-4">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium">Categories & Synonyms</span>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={() => addCategoricalValue(selectedTable.id, selectedColumn.id)}
-                          >
-                            <Plus className="mr-1 size-3" /> Add category
-                          </Button>
-                        </div>
-                        
-                        {selectedColumn.categoricalValues.length === 0 ? (
-                          <p className="py-2 text-center text-xs text-muted-foreground">
-                            No categories defined. Synonyms help resolve user queries.
-                          </p>
-                        ) : (
-                          <div className="space-y-2">
-                            {selectedColumn.categoricalValues.map((cat) => (
-                              <div key={cat.id} className="flex gap-2">
-                                <Input
-                                  value={cat.dbValue}
-                                  onChange={(e) => updateCategoricalValue(selectedTable.id, selectedColumn.id, cat.id, "dbValue", e.target.value)}
-                                  placeholder="DB Value (e.g. M)"
-                                  className="w-1/3"
-                                />
-                                <Input
-                                  value={cat.synonymsText}
-                                  onChange={(e) => updateCategoricalValue(selectedTable.id, selectedColumn.id, cat.id, "synonymsText", e.target.value)}
-                                  placeholder="Synonyms (e.g. male, man)"
-                                  className="flex-1"
-                                />
-                                <Button
-                                  variant="ghost"
-                                  size="icon-sm"
-                                  onClick={() => removeCategoricalValue(selectedTable.id, selectedColumn.id, cat.id)}
-                                >
-                                  <Trash2 className="size-3" />
-                                </Button>
-                              </div>
-                            ))}
-                          </div>
-                        )}
                       </div>
-                    )}
-
-                    {(() => {
-                      const allColumns = [
-                        ...existingColumns.map((c) => c.source_key),
-                        ...tables.flatMap((t) =>
-                          t.columns
-                            .filter((c) => c.sourceKey && c.sourceKey !== selectedColumn.sourceKey)
-                            .map((c) => c.sourceKey)
-                        ),
-                      ].filter((v, i, a) => a.indexOf(v) === i && v)
-
-                      return (
-                        <label className="space-y-2">
-                          <span className="text-sm font-medium">References (FK)</span>
-                          <select
-                            value={selectedColumn.references}
-                            onChange={(event) =>
-                              updateColumnField(
-                                selectedTable.id,
-                                selectedColumn.id,
-                                "references",
-                                event.target.value
-                              )
-                            }
-                            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                          >
-                            <option value="">No reference</option>
-                            {allColumns.map((sourceKey) => (
-                              <option key={sourceKey} value={sourceKey}>
-                                {sourceKey}
-                              </option>
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium uppercase text-muted-foreground" htmlFor="stat-type">Statistical Type</label>
+                        <select
+                          id="stat-type"
+                          value={selectedColumn.statisticalType}
+                          onChange={(e) => handleUpdateColumn("statisticalType", e.target.value)}
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
+                        >
+                          <option value="nominal">Nominal (Categorical)</option>
+                          <option value="ordinal">Ordinal</option>
+                          <option value="categorical">Categorical</option>
+                          <option value="temporal">Temporal</option>
+                          <option value="identifier">Identifier</option>
+                          <option value="continuous">Continuous</option>
+                          <option value="discrete">Discrete</option>
+                          <option value="quantitative">Quantitative</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium uppercase text-muted-foreground" htmlFor="data-format">Data Format</label>
+                        <Input 
+                          id="data-format"
+                          value={selectedColumn.dataFormat} 
+                          onChange={(e) => handleUpdateColumn("dataFormat", e.target.value)}
+                          placeholder="e.g. date, currency, iso_country_code"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium uppercase text-muted-foreground" htmlFor="ref-fk">References (FK)</label>
+                        <select
+                          id="ref-fk"
+                          value={selectedColumn.references}
+                          onChange={(e) => handleUpdateColumn("references", e.target.value)}
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
+                        >
+                          <option value="">No reference</option>
+                          {tables.flatMap(t => t.columns.map(c => ({ 
+                            label: `${t.name}.${c.columnName}`, 
+                            value: `${t.name}.${c.columnName}` 
+                          }))).filter(opt => opt.value !== `${selectedTable.name}.${selectedColumn.columnName}`).map(opt => (
+                              <option key={opt.value} value={opt.value}>{opt.label}</option>
                             ))}
-                          </select>
-                        </label>
-                      )
-                    })()}
+                        </select>
+                      </div>
+                    </div>
 
-                    <label className="space-y-2">
-                      <span className="text-sm font-medium">Description</span>
-                      <Textarea
-                        value={selectedColumn.description}
-                        onChange={(event) =>
-                          updateColumnField(
-                            selectedTable.id,
-                            selectedColumn.id,
-                            "description",
-                            event.target.value
-                          )
-                        }
-                        placeholder="City where the customer received the parcel."
-                        className="min-h-28"
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium uppercase text-muted-foreground" htmlFor="col-desc">Description</label>
+                      <Textarea 
+                        id="col-desc"
+                        value={selectedColumn.description} 
+                        onChange={(e) => handleUpdateColumn("description", e.target.value)}
+                        className="min-h-[100px]"
+                        placeholder="What is this column for?"
                       />
-                    </label>
-
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <label className="space-y-2">
-                        <span className="text-sm font-medium">Aliases</span>
-                        <Input
-                          value={selectedColumn.aliasesText}
-                          onChange={(event) =>
-                            updateColumnField(
-                              selectedTable.id,
-                              selectedColumn.id,
-                              "aliasesText",
-                              event.target.value
-                            )
-                          }
-                          placeholder="city, customer city, destination city"
-                        />
-                      </label>
-                      <label className="space-y-2">
-                        <span className="text-sm font-medium">Sample values</span>
-                        <Input
-                          value={selectedColumn.sampleValuesText}
-                          onChange={(event) =>
-                            updateColumnField(
-                              selectedTable.id,
-                              selectedColumn.id,
-                              "sampleValuesText",
-                              event.target.value
-                            )
-                          }
-                          placeholder="Berlin, Munich, Warsaw"
-                        />
-                      </label>
                     </div>
 
-                    <label className="space-y-2">
-                      <span className="flex items-center gap-2 text-sm font-medium">
-                        <Braces className="size-4" />
-                        Payload JSON
-                      </span>
-                      <Textarea
-                        value={selectedColumn.payloadText}
-                        onChange={(event) =>
-                          updateColumnField(
-                            selectedTable.id,
-                            selectedColumn.id,
-                            "payloadText",
-                            event.target.value
-                          )
-                        }
-                        className="min-h-40 font-mono text-sm"
-                        spellCheck={false}
+                    <div className="grid gap-4">
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium uppercase text-muted-foreground" htmlFor="col-aliases">Aliases</label>
+                        <Input 
+                          id="col-aliases"
+                          value={selectedColumn.aliasesText} 
+                          onChange={(e) => handleUpdateColumn("aliasesText", e.target.value)}
+                          placeholder="city, location"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium uppercase text-muted-foreground" htmlFor="col-samples">Sample Values</label>
+                        <Input 
+                          id="col-samples"
+                          value={selectedColumn.sampleValuesText} 
+                          onChange={(e) => handleUpdateColumn("sampleValuesText", e.target.value)}
+                          placeholder="Berlin, London"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-2 text-xs font-medium uppercase text-muted-foreground" htmlFor="col-payload">
+                        <Braces className="size-3" /> Payload JSON
+                      </label>
+                      <Textarea 
+                        id="col-payload"
+                        value={selectedColumn.payloadText} 
+                        onChange={(e) => handleUpdateColumn("payloadText", e.target.value)}
+                        className="font-mono text-xs"
                       />
-                    </label>
-                  </div>
-                ) : null}
-              </>
-            ) : (
-              <div className="rounded-2xl border border-dashed border-border/80 bg-muted/40 p-6 text-sm text-muted-foreground">
-                Add a table to start building the index batch.
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <div className="space-y-4">
-          <Card className="border-border/70 bg-card/82">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Layers3 className="size-4" />
-                Batch preview
-              </CardTitle>
-              <CardDescription>
-                Submission always goes to the default backend route and uses the current default embedder.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-                <div className="rounded-2xl border border-border/80 bg-muted/45 p-4">
-                  <p className="text-xs font-medium uppercase tracking-[0.24em] text-muted-foreground">
-                    API target
-                  </p>
-                  <p className="mt-2 font-medium text-foreground">
-                    POST /vector/index-entries/batch
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-border/80 bg-muted/45 p-4">
-                  <p className="text-xs font-medium uppercase tracking-[0.24em] text-muted-foreground">
-                    Generated entries
-                  </p>
-                  <p className="mt-2 font-medium text-foreground">{totalColumns}</p>
-                </div>
-                <div className="rounded-2xl border border-border/80 bg-muted/45 p-4">
-                  <p className="text-xs font-medium uppercase tracking-[0.24em] text-muted-foreground">
-                    Recovery flow
-                  </p>
-                  <p className="mt-2 font-medium text-foreground">
-                    Load current index, edit, then resubmit the whole batch
-                  </p>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-3">
-                {tables.map((table) => (
-                  <div key={table.id} className="rounded-2xl border border-border/70 bg-background/65 p-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="font-medium text-foreground">
-                        {table.name.trim() || "Untitled table"}
-                      </p>
-                      <Badge variant="outline">{table.columns.length} columns</Badge>
                     </div>
-                    <div className="mt-3 space-y-2">
-                      {table.columns.map((column) => (
-                        <div key={column.id} className="rounded-xl bg-muted/45 px-3 py-2 text-sm text-muted-foreground">
-                          {(column.columnName || "Untitled column").trim() || "Untitled column"}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                  </motion.div>
+                )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </motion.aside>
+        )}
+      </AnimatePresence>
 
-          <Card className="border-border/70 bg-card/82">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BookCopy className="size-4" />
-                Submission status
-              </CardTitle>
-              <CardDescription>
-                Backend response after the batch is flattened and posted.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Badge
-                variant={
-                  submitState === "success"
-                    ? "default"
-                    : submitState === "error"
-                      ? "destructive"
-                      : "outline"
-                }
-              >
-                {submitState}
-              </Badge>
-              <div className="rounded-2xl bg-muted px-4 py-3 text-sm leading-6 text-muted-foreground">
-                {submitMessage}
+      {/* Peek Query Panel */}
+      <AnimatePresence>
+        {isPeekOpen && (
+          <motion.div
+            initial={{ x: "100%", opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: "100%", opacity: 0 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="absolute inset-y-0 right-0 z-50 w-[400px] border-l border-border bg-white dark:bg-slate-900 opacity-100 shadow-2xl overflow-hidden"
+          >
+            <div className="flex h-full flex-col">
+              <div className="flex items-center justify-between border-b border-border bg-muted/30 px-8 py-6">
+                <div className="flex items-center gap-3">
+                  <Search className="size-5 text-primary" />
+                  <h2 className="text-xl font-bold tracking-tight">Peek Query</h2>
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => setIsPeekOpen(false)}>
+                  <X className="size-6" />
+                </Button>
               </div>
-              {submitResponse ? (
-                <pre className="overflow-auto rounded-2xl bg-muted px-4 py-3 text-sm leading-6 whitespace-pre-wrap text-muted-foreground">
-                  {JSON.stringify(submitResponse, null, 2)}
-                </pre>
-              ) : null}
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-    </main>
+              <div className="flex-1 overflow-y-auto">
+                <QueryPage isPeek />
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   )
 }
 
+export function VectorIndexBuilderPage(props: VectorIndexBuilderPageProps) {
+  return (
+    <ReactFlowProvider>
+      <VectorIndexBuilderPageInner {...props} />
+    </ReactFlowProvider>
+  )
+}
