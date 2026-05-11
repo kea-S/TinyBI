@@ -1,8 +1,10 @@
 # TinyBI
 
+https://github.com/user-attachments/assets/ef863c27-7b77-49b3-8f8c-684482d04a33
+
 Natural-language-to-SQL analytics pipeline: ask a business question in plain English, get back an SQL query, a result table, and an AI-generated explanation.
 
-https://github.com/user-attachments/assets/cb99aeeb-8042-45b4-b035-0dec7fbd5d59
+https://github.com/user-attachments/assets/beb64c96-c296-4536-b1c1-3189945a2dcc
 
 ## Architecture
 
