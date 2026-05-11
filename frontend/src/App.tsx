@@ -190,11 +190,7 @@ function App() {
             />
           </nav>
           
-          <div className="mt-auto pt-8">
-            <div className="size-10 rounded-full bg-muted flex items-center justify-center">
-              <span className="text-xs font-bold text-muted-foreground">TB</span>
-            </div>
-          </div>
+
         </aside>
 
         {/* Main Content Area */}

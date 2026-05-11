@@ -1,5 +1,5 @@
-import { useState } from "react"
-import { Search, Send, Code, Table as TableIcon, Sparkles, ChevronDown, ChevronUp } from "lucide-react"
+import { useState, useRef, useCallback } from "react"
+import { Search, Send, Code, Table as TableIcon, Sparkles } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
 import { Badge } from "@/components/ui/badge"
@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Table,
   TableBody,
@@ -30,12 +30,21 @@ type QueryPageProps = {
   isPeek?: boolean
 }
 
+const MAX_TEXTAREA_HEIGHT = 120
+
 export function QueryPage({ isPeek = false }: QueryPageProps) {
   const [question, setQuestion] = useState("")
   const [queryState, setQueryState] = useState<QueryState>("idle")
   const [errorMessage, setErrorMessage] = useState("")
   const [result, setResult] = useState<QueryResponse | null>(null)
-  const [resultsExpanded, setResultsExpanded] = useState(false)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  const autoResize = useCallback(() => {
+    const el = textareaRef.current
+    if (!el) return
+    el.style.height = "auto"
+    el.style.height = Math.min(el.scrollHeight, MAX_TEXTAREA_HEIGHT) + "px"
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -44,7 +53,6 @@ export function QueryPage({ isPeek = false }: QueryPageProps) {
     setQueryState("loading")
     setResult(null)
     setErrorMessage("")
-    setResultsExpanded(false)
 
     try {
       const response = await submitQuery({ question: question.trim() })
@@ -60,7 +68,7 @@ export function QueryPage({ isPeek = false }: QueryPageProps) {
   const columns = result?.data?.length ? Object.keys(result.data[0]) : []
 
   return (
-    <div className={`flex flex-col gap-8 ${isPeek ? "p-8" : "mx-auto max-w-6xl px-4 py-12"}`}>
+    <div className={`flex flex-col gap-8 h-full overflow-y-auto ${isPeek ? "p-8" : "mx-auto max-w-6xl px-4 py-12"}`}>
       {/* Search Section */}
       <section className="space-y-6 text-center">
         {!isPeek && (
@@ -73,13 +81,18 @@ export function QueryPage({ isPeek = false }: QueryPageProps) {
         <form onSubmit={handleSubmit} className="relative mx-auto max-w-3xl">
           <div className="relative group">
             <div className="absolute inset-0 -m-1 rounded-[2rem] bg-gradient-to-r from-primary/20 to-primary/10 opacity-0 blur-xl transition-opacity group-focus-within:opacity-100" />
-            <div className="relative flex items-center gap-3 rounded-[1.5rem] border border-border bg-card p-2 shadow-sm transition-all focus-within:ring-2 focus-within:ring-primary/20">
-              <Search className="ml-4 size-5 text-muted-foreground" />
-              <Input
+            <div className="relative flex items-start gap-3 rounded-[1.5rem] border border-border bg-card p-2 shadow-sm transition-all focus-within:ring-2 focus-within:ring-primary/20">
+              <Search className="ml-4 mt-3 size-5 text-muted-foreground shrink-0" />
+              <Textarea
+                ref={textareaRef}
                 value={question}
-                onChange={(e) => setQuestion(e.target.value)}
+                onChange={(e) => {
+                  setQuestion(e.target.value)
+                  autoResize()
+                }}
                 placeholder="How many orders were placed last month in Germany?"
-                className="flex-1 border-none bg-transparent text-lg shadow-none focus-visible:ring-0"
+                rows={1}
+                className="flex-1 min-h-[40px] max-h-[120px] border-none bg-transparent text-lg shadow-none focus-visible:ring-0 resize-none overflow-y-auto py-2"
                 disabled={queryState === "loading"}
               />
               <Button 
@@ -114,7 +127,7 @@ export function QueryPage({ isPeek = false }: QueryPageProps) {
                 />
               ))}
             </div>
-            <p className="text-sm font-medium text-muted-foreground animate-pulse">Consulting the oracle...</p>
+            <p className="text-sm font-medium text-muted-foreground animate-pulse">Querying database...</p>
           </motion.div>
         )}
 
@@ -147,22 +160,9 @@ export function QueryPage({ isPeek = false }: QueryPageProps) {
               </CardContent>
             </Card>
 
-            {/* Explanation Pane */}
-            <Card className="overflow-hidden border-border bg-card/50">
-              <CardHeader className="flex flex-row items-center gap-2 border-b border-border/50 py-3">
-                <Sparkles className="size-4 text-primary" />
-                <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">AI Insight</CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <p className="text-sm leading-relaxed text-muted-foreground italic">
-                  {result.explanation || "No additional insights provided."}
-                </p>
-              </CardContent>
-            </Card>
-
             {/* Data Table */}
-            <Card className="lg:col-span-2 overflow-hidden border-border">
-              <CardHeader className="flex flex-row items-center justify-between gap-2 border-b border-border/50 py-4">
+            <Card className="overflow-hidden border-border">
+              <CardHeader className="flex flex-row items-center justify-between gap-2 border-b border-border/50 py-3">
                 <div className="flex items-center gap-2">
                   <TableIcon className="size-4 text-primary" />
                   <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Results</CardTitle>
@@ -170,9 +170,9 @@ export function QueryPage({ isPeek = false }: QueryPageProps) {
                 <Badge variant="secondary">{result.data.length} Rows</Badge>
               </CardHeader>
               <CardContent className="p-0">
-                <div className={`overflow-auto ${resultsExpanded ? "" : "max-h-[400px]"}`}>
+                <div className="overflow-x-auto overflow-y-auto max-h-[500px]">
                   <Table>
-                    <TableHeader className="bg-muted/30">
+                    <TableHeader className="bg-muted/30 sticky top-0">
                       <TableRow>
                         {columns.map((col) => (
                           <TableHead key={col} className="font-bold text-foreground">{col}</TableHead>
@@ -190,13 +190,19 @@ export function QueryPage({ isPeek = false }: QueryPageProps) {
                     </TableBody>
                   </Table>
                 </div>
-                {result.data.length > 10 && (
-                  <div className="flex justify-center p-4 border-t border-border/50">
-                    <Button variant="ghost" size="sm" onClick={() => setResultsExpanded(!resultsExpanded)}>
-                      {resultsExpanded ? <><ChevronUp className="mr-2" /> Show Less</> : <><ChevronDown className="mr-2" /> Show All Rows</>}
-                    </Button>
-                  </div>
-                )}
+              </CardContent>
+            </Card>
+
+            {/* AI Insight Pane */}
+            <Card className="lg:col-span-2 overflow-hidden border-border bg-card/50">
+              <CardHeader className="flex flex-row items-center gap-2 border-b border-border/50 py-3">
+                <Sparkles className="size-4 text-primary" />
+                <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">AI Insight</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <p className="text-sm leading-relaxed text-muted-foreground italic">
+                  {result.explanation || "No additional insights provided."}
+                </p>
               </CardContent>
             </Card>
           </motion.div>
