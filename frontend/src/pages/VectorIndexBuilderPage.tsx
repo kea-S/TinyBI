@@ -48,6 +48,8 @@ const nodeTypes = {
   table: TableNode,
 }
 
+
+
 type VectorIndexBuilderPageProps = {
   tables: TableDraft[]
   setTables: React.Dispatch<React.SetStateAction<TableDraft[]>>
@@ -64,6 +66,10 @@ function VectorIndexBuilderPageInner({ tables, setTables, isVisible }: VectorInd
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [syncedEntries, setSyncedEntries] = useState<ColumnVectorIndexEntryRequest[]>([])
   const [isReady, setIsReady] = useState(false)
+  const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null)
+  const selectedEdgeIdRef = useRef<string | null>(null)
+  const edgesRef = useRef<Edge[]>([])
+  const [pendingDeletions, setPendingDeletions] = useState<Set<string>>(new Set())
 
   // Fetch current state to determine "synced" status for edges
   useEffect(() => {
@@ -85,6 +91,30 @@ function VectorIndexBuilderPageInner({ tables, setTables, isVisible }: VectorInd
       })
     }
   }, [isVisible, tables, syncedEntries, fitView])
+
+  // Global Delete key handler for edge deletion — uses refs to avoid re-registration
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const currentEdgeId = selectedEdgeIdRef.current
+      if (!currentEdgeId) return
+      if (event.key !== "Delete" && event.key !== "Backspace") return
+      const edge = edgesRef.current.find((e) => e.id === currentEdgeId)
+      if (edge?.sourceHandle) {
+        const sourceColId = edge.sourceHandle.replace("-source", "")
+        setPendingDeletions((prev) => {
+          const next = new Set(prev)
+          if (next.has(sourceColId)) {
+            next.delete(sourceColId)
+          } else {
+            next.add(sourceColId)
+          }
+          return next
+        })
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [])
 
   // Map tables to React Flow nodes/edges
   useEffect(() => {
@@ -109,38 +139,63 @@ function VectorIndexBuilderPageInner({ tables, setTables, isVisible }: VectorInd
           if (targetTable) {
             const targetColumn = targetTable.columns.find((col) => col.columnName === refCol)
             if (targetColumn) {
-              // Check if this reference is already synced in the backend
+              const edgeId = `edge-${c.id}-${targetColumn.id}`
+              const isDeleted = pendingDeletions.has(c.id)
               const isSynced = syncedEntries.some(
-                (se) => se.table_name === t.name && 
-                  se.column_name === c.columnName && 
+                (se) => se.table_name === t.name &&
+                  se.column_name === c.columnName &&
                   se.references === c.references
               )
 
-              newEdges.push({
-                id: `edge-${c.id}-${targetColumn.id}`,
-                source: t.id,
-                sourceHandle: `${c.id}-source`,
-                target: targetTable.id,
-                targetHandle: `${targetColumn.id}-target`,
-                reconnectable: true,
-                animated: !isSynced,
-                style: { 
-                  stroke: isSynced ? "#0f172a" : "#94a3b8",
-                  strokeDasharray: isSynced ? "" : "5,5",
-                  strokeWidth: 4
-                },
-                markerEnd: {
-                  type: MarkerType.ArrowClosed,
-                  color: isSynced ? "#0f172a" : "#94a3b8",
-                },
-              })
+              if (isDeleted) {
+                newEdges.push({
+                  id: edgeId,
+                  source: t.id,
+                  sourceHandle: `${c.id}-source`,
+                  target: targetTable.id,
+                  targetHandle: `${targetColumn.id}-target`,
+                  reconnectable: false,
+                  selected: selectedEdgeId === edgeId,
+                  animated: true,
+                  style: {
+                    stroke: "#ef4444",
+                    strokeDasharray: "5,5",
+                    strokeWidth: 4,
+                  },
+                  markerEnd: {
+                    type: MarkerType.ArrowClosed,
+                    color: "#ef4444",
+                  },
+                })
+              } else {
+                newEdges.push({
+                  id: edgeId,
+                  source: t.id,
+                  sourceHandle: `${c.id}-source`,
+                  target: targetTable.id,
+                  targetHandle: `${targetColumn.id}-target`,
+                  reconnectable: true,
+                  selected: selectedEdgeId === edgeId,
+                  animated: !isSynced,
+                  style: {
+                    stroke: isSynced ? "#0f172a" : "#94a3b8",
+                    strokeDasharray: isSynced ? "" : "5,5",
+                    strokeWidth: 4,
+                  },
+                  markerEnd: {
+                    type: MarkerType.ArrowClosed,
+                    color: isSynced ? "#0f172a" : "#94a3b8",
+                  },
+                })
+              }
             }
           }
         }
       })
     })
     setEdges(newEdges)
-  }, [tables, selectedTableId, syncedEntries])
+    edgesRef.current = newEdges
+  }, [tables, selectedTableId, syncedEntries, selectedEdgeId, pendingDeletions])
 
   const onNodesChange: OnNodesChange<Node<TableNodeData>> = useCallback(
     (changes) => {
@@ -255,6 +310,8 @@ function VectorIndexBuilderPageInner({ tables, setTables, isVisible }: VectorInd
 
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
     setIsPeekOpen(false) // Mutex: Close peek when selecting table
+    setSelectedEdgeId(null)
+    selectedEdgeIdRef.current = null
     setSelectedTableId(node.id)
     const table = tables.find(t => t.id === node.id)
     if (table && table.columns.length > 0) {
@@ -262,6 +319,17 @@ function VectorIndexBuilderPageInner({ tables, setTables, isVisible }: VectorInd
     }
   }, [tables])
 
+  const onPaneClick = useCallback(() => {
+    setSelectedEdgeId(null)
+    selectedEdgeIdRef.current = null
+  }, [])
+
+  const onEdgeClick = useCallback((_: React.MouseEvent, edge: Edge) => {
+    setSelectedTableId(null)
+    setSelectedColumnId(null)
+    setSelectedEdgeId(edge.id)
+    selectedEdgeIdRef.current = edge.id
+  }, [])
 
   const handleAddTable = () => {
     const id = `table-${Math.random().toString(36).slice(2, 10)}`
@@ -370,8 +438,20 @@ function VectorIndexBuilderPageInner({ tables, setTables, isVisible }: VectorInd
   const handleSaveIndex = async () => {
     setIsSubmitting(true)
     try {
+      // Apply pending deletions before building entries
+      let tablesToSave = tables
+      if (pendingDeletions.size > 0) {
+        tablesToSave = tables.map((t) => ({
+          ...t,
+          columns: t.columns.map((c) =>
+            pendingDeletions.has(c.id) ? { ...c, references: "" } : c
+          ),
+        }))
+        setTables(tablesToSave)
+      }
+
       const entries: ColumnVectorIndexEntryRequest[] = []
-      tables.forEach((t) => {
+      tablesToSave.forEach((t) => {
         t.columns.forEach((c) => {
           entries.push({
             entry_id: entries.length + 1,
@@ -393,8 +473,11 @@ function VectorIndexBuilderPageInner({ tables, setTables, isVisible }: VectorInd
       // Update local sync state
       setSyncedEntries(entries)
 
+      // Clear pending deletions
+      setPendingDeletions(new Set())
+
       // Trigger auto-layout on save
-      await handleAutoLayout(tables)
+      await handleAutoLayout(tablesToSave)
 
       alert("Index saved and layout optimized!")
     } catch (e) {
@@ -420,8 +503,11 @@ function VectorIndexBuilderPageInner({ tables, setTables, isVisible }: VectorInd
           onConnect={onConnect}
           onReconnect={onReconnect}
           onNodeClick={onNodeClick}
+          onEdgeClick={onEdgeClick}
+          onPaneClick={onPaneClick}
           nodeTypes={nodeTypes}
           connectionLineStyle={{ stroke: "#0f172a", strokeWidth: 3, strokeDasharray: "5,5" }}
+          deleteKeyCode={null}
           fitView
         >
         <Background color="#cbd5e1" gap={20} />

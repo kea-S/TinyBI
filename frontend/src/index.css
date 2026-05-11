@@ -107,4 +107,8 @@
   #root {
     @apply min-h-screen;
   }
+
+  .react-flow__edge.selected .react-flow__edge-path {
+    filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.7));
+  }
 }

@@ -40,7 +40,11 @@ vi.mock('@xyflow/react', () => ({
   ReactFlow: vi.fn((props) => {
     capturedReactFlowProps = props
     return (
-      <div data-testid="react-flow">
+      <div
+        data-testid="react-flow"
+        tabIndex={0}
+        onKeyDown={(e) => props.onKeyDown?.(e)}
+      >
         {props.children}
         <button
           data-testid="mock-node-click"
@@ -48,6 +52,18 @@ vi.mock('@xyflow/react', () => ({
         >
           Select Table 1
         </button>
+        {/* Render mock edges with clickable triggers */}
+        {props.edges?.map((edge: any) => (
+          <button
+            key={edge.id}
+            data-testid={`mock-edge-${edge.id}`}
+            onClick={(e) => props.onEdgeClick?.(e, edge)}
+            data-selected={edge.selected}
+            data-style={JSON.stringify(edge.style)}
+          >
+            Edge {edge.id}
+          </button>
+        ))}
       </div>
     )
   }),
@@ -534,5 +550,216 @@ describe('Edge Reconnecting Bug Fixes (Red Phase)', () => {
 
     // Should be blocked - setTables should NOT be called
     expect(setTables).not.toHaveBeenCalled()
+  })
+})
+
+// ------------------------------------------------------------------
+// RED PHASE: Edge Deletion
+// ------------------------------------------------------------------
+describe('Edge Deletion (Red Phase)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    capturedReactFlowProps = null
+    vi.mocked(api.fetchCurrentVectorIndexEntries).mockResolvedValue([])
+  })
+
+  const tablesWithEdge: TableDraft[] = [
+    {
+      id: 't1',
+      name: 'orders',
+      x: 0, y: 0,
+      columns: [
+        {
+          id: 'c1',
+          columnName: 'customer_id',
+          sourceKey: 'orders.customer_id',
+          description: '',
+          dataFormat: '',
+          statisticalType: 'identifier',
+          categoricalValues: [],
+          aliasesText: '',
+          sampleValuesText: '',
+          payloadText: '{}',
+          references: 'customers.id',
+        },
+      ],
+    },
+    {
+      id: 't2',
+      name: 'customers',
+      x: 0, y: 0,
+      columns: [
+        {
+          id: 'c2',
+          columnName: 'id',
+          sourceKey: 'customers.id',
+          description: '',
+          dataFormat: '',
+          statisticalType: 'identifier',
+          categoricalValues: [],
+          aliasesText: '',
+          sampleValuesText: '',
+          payloadText: '{}',
+          references: '',
+        },
+      ],
+    },
+  ]
+
+  it('ED-1: clicking an edge selects it', () => {
+    render(<VectorIndexBuilderPage tables={tablesWithEdge} setTables={vi.fn()} />)
+
+    const edgeEl = screen.getByTestId('mock-edge-edge-c1-c2')
+    fireEvent.click(edgeEl)
+
+    // The edge should have been passed to onEdgeClick and marked selected
+    expect(edgeEl).toHaveAttribute('data-selected', 'true')
+  })
+
+  it('ED-2: selected edge without pending deletion keeps standard style', () => {
+    render(<VectorIndexBuilderPage tables={tablesWithEdge} setTables={vi.fn()} />)
+
+    const edgeEl = screen.getByTestId('mock-edge-edge-c1-c2')
+    fireEvent.click(edgeEl)
+
+    // Should NOT be red — it's selected but not marked for deletion
+    const style = JSON.parse(edgeEl.getAttribute('data-style') || '{}')
+    expect(style.stroke).not.toBe('#ef4444')
+  })
+
+  it('ED-3: pressing Delete on selected edge marks source column for deletion', () => {
+    render(<VectorIndexBuilderPage tables={tablesWithEdge} setTables={vi.fn()} />)
+
+    const flowContainer = screen.getByTestId('react-flow')
+    const edgeEl = screen.getByTestId('mock-edge-edge-c1-c2')
+
+    // Select edge
+    fireEvent.click(edgeEl)
+
+    // Press Delete
+    fireEvent.keyDown(flowContainer, { key: 'Delete', code: 'Delete' })
+
+    // Re-render check: edge should now be red dashed (pending deletion)
+    const updatedEdge = screen.getByTestId('mock-edge-edge-c1-c2')
+    const style = JSON.parse(updatedEdge.getAttribute('data-style') || '{}')
+    expect(style.stroke).toBe('#ef4444')
+    expect(style.strokeDasharray).toBe('5,5')
+  })
+
+  it('ED-4: edge with pending deletion renders red dashed', () => {
+    const { rerender } = render(
+      <VectorIndexBuilderPage tables={tablesWithEdge} setTables={vi.fn()} />
+    )
+
+    const flowContainer = screen.getByTestId('react-flow')
+    const edgeEl = screen.getByTestId('mock-edge-edge-c1-c2')
+
+    // Select and delete
+    fireEvent.click(edgeEl)
+    fireEvent.keyDown(flowContainer, { key: 'Delete', code: 'Delete' })
+
+    // Force re-render to pick up new edge styles
+    rerender(<VectorIndexBuilderPage tables={tablesWithEdge} setTables={vi.fn()} />)
+
+    const updatedEdge = screen.getByTestId('mock-edge-edge-c1-c2')
+    const style = JSON.parse(updatedEdge.getAttribute('data-style') || '{}')
+    expect(style.stroke).toBe('#ef4444')
+    expect(style.strokeDasharray).toBe('5,5')
+  })
+
+  it('ED-5: pressing Delete again on same edge restores original style', () => {
+    const { rerender } = render(
+      <VectorIndexBuilderPage tables={tablesWithEdge} setTables={vi.fn()} />
+    )
+
+    const flowContainer = screen.getByTestId('react-flow')
+    const edgeEl = screen.getByTestId('mock-edge-edge-c1-c2')
+
+    // Select, delete, undelete
+    fireEvent.click(edgeEl)
+    fireEvent.keyDown(flowContainer, { key: 'Delete', code: 'Delete' })
+    rerender(<VectorIndexBuilderPage tables={tablesWithEdge} setTables={vi.fn()} />)
+
+    fireEvent.keyDown(flowContainer, { key: 'Delete', code: 'Delete' })
+    rerender(<VectorIndexBuilderPage tables={tablesWithEdge} setTables={vi.fn()} />)
+
+    const updatedEdge = screen.getByTestId('mock-edge-edge-c1-c2')
+    const style = JSON.parse(updatedEdge.getAttribute('data-style') || '{}')
+    expect(style.stroke).not.toBe('#ef4444')
+  })
+
+  it('ED-6: pressing Delete with no edge selected does nothing', () => {
+    render(<VectorIndexBuilderPage tables={tablesWithEdge} setTables={vi.fn()} />)
+
+    const flowContainer = screen.getByTestId('react-flow')
+    const edgeEl = screen.getByTestId('mock-edge-edge-c1-c2')
+
+    // Press Delete without selecting anything
+    fireEvent.keyDown(flowContainer, { key: 'Delete', code: 'Delete' })
+
+    // Edge should still be standard style (not red)
+    const style = JSON.parse(edgeEl.getAttribute('data-style') || '{}')
+    expect(style.stroke).not.toBe('#ef4444')
+  })
+
+  it('ED-7: Save Index clears pending deletions and submits without deleted refs', async () => {
+    vi.mocked(api.submitDefaultVectorIndexEntries).mockResolvedValue({} as any)
+    const setTables = vi.fn()
+
+    const { rerender } = render(
+      <VectorIndexBuilderPage tables={tablesWithEdge} setTables={setTables} />
+    )
+
+    const flowContainer = screen.getByTestId('react-flow')
+    const edgeEl = screen.getByTestId('mock-edge-edge-c1-c2')
+
+    // Select and mark for deletion
+    fireEvent.click(edgeEl)
+    fireEvent.keyDown(flowContainer, { key: 'Delete', code: 'Delete' })
+    rerender(<VectorIndexBuilderPage tables={tablesWithEdge} setTables={setTables} />)
+
+    // Save
+    const saveBtn = screen.getByRole('button', { name: /Save Index/i })
+    fireEvent.click(saveBtn)
+
+    await waitFor(() => {
+      expect(api.submitDefaultVectorIndexEntries).toHaveBeenCalled()
+    })
+
+    // Check submitted entries don't include the deleted reference
+    const submitted = (api.submitDefaultVectorIndexEntries as any).mock.calls[0][0]
+    const entries = submitted.entries
+    const deletedEntry = entries.find(
+      (e: any) => e.table_name === 'orders' && e.column_name === 'customer_id'
+    )
+    expect(deletedEntry.references).toBeNull()
+  })
+
+  it('ED-8: after Save Index, deleted edges disappear from canvas', async () => {
+    vi.mocked(api.submitDefaultVectorIndexEntries).mockResolvedValue({} as any)
+    const setTables = vi.fn()
+
+    const { rerender } = render(
+      <VectorIndexBuilderPage tables={tablesWithEdge} setTables={setTables} />
+    )
+
+    const flowContainer = screen.getByTestId('react-flow')
+    const edgeEl = screen.getByTestId('mock-edge-edge-c1-c2')
+
+    // Select and mark for deletion
+    fireEvent.click(edgeEl)
+    fireEvent.keyDown(flowContainer, { key: 'Delete', code: 'Delete' })
+    rerender(<VectorIndexBuilderPage tables={tablesWithEdge} setTables={setTables} />)
+
+    // Save
+    const saveBtn = screen.getByRole('button', { name: /Save Index/i })
+    fireEvent.click(saveBtn)
+
+    await waitFor(() => {
+      expect(api.submitDefaultVectorIndexEntries).toHaveBeenCalled()
+    })
+
+    // After save, the edge should have been removed (setTables should have been called)
+    expect(setTables).toHaveBeenCalled()
   })
 })
