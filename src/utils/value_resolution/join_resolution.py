@@ -3,14 +3,13 @@ from src.utils.pydantic_models import (
     FinalEntries,
     FinalJoins,
     JoinStep,
-    ColumnVectorIndexEntry,
 )
 from src.utils.value_resolution.db_schema_graph import pick_anchor_table, build_schema_graph
 
 
 def resolve_joins(
-        selected_entries: FinalEntries,
-        schema_graph: nx.Graph
+    selected_entries: FinalEntries,
+    schema_graph: nx.Graph
 ) -> FinalJoins:
     """
     Receive column cleaned entries and find the join path between each.
@@ -26,7 +25,7 @@ def resolve_joins(
         metric_table=metric_table,
         filter_tables=filter_tables
     )
-    
+
     if not anchor_table:
         return FinalJoins(from_table="", joins=[])
 
@@ -43,20 +42,20 @@ def resolve_joins(
     for target_table in required_tables:
         if target_table == anchor_table or target_table in seen_tables:
             continue
-        
+
         # If target table is not in graph, it can't be reached
         if target_table not in schema_graph:
             continue
 
         try:
             path = nx.shortest_path(schema_graph, source=anchor_table, target=target_table)
-            
+
             # Add steps for the path
             for i in range(len(path) - 1):
                 u, v = path[i], path[i+1]
                 if v in seen_tables:
                     continue
-                
+
                 edge_data = schema_graph.get_edge_data(u, v)
                 final_join_steps.append(JoinStep(
                     table=v,
@@ -69,4 +68,3 @@ def resolve_joins(
             continue
 
     return FinalJoins(from_table=anchor_table, joins=final_join_steps)
-

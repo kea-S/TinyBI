@@ -203,7 +203,3 @@ def map_join(final_joins: FinalJoins) -> str:
         join_clauses.append(f"LEFT JOIN {step.table} ON {step.on_clause}")
 
     return "\n".join(join_clauses)
-
-
-
-

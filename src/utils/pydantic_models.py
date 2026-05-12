@@ -257,16 +257,6 @@ class QuerySchema(BaseModel):
         ge=1, le=100
     )
 
-    limit: Optional[int] = Field(
-        None,
-        description="""
-        The number of rows to return (e.g., 'top 5' -> 5).
-
-        To be mapped to the SQL LIMIT clause
-        """,
-        ge=1, le=100
-    )
-
 
 class ColumnVectorIndexEntry(BaseModel):
     model_config = ConfigDict(extra="forbid")

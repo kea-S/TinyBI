@@ -15,15 +15,13 @@ MIN_CONFIDENCE = 0.5
 
 
 def resolve_columns(
-        candidates: CandidateEntries,
-        schema_graph: nx.Graph
+    candidates: CandidateEntries,
+    schema_graph: nx.Graph
 ) -> FinalEntries:
     """
     Pick the best column for each intent, ensuring they all connect to a central anchor table.
     """
-    
-    # 1. Determine the Anchor Table
-    # We use high-confidence candidates to guess the "center" of the query.
+
     potential_subjects = [r.entry.table_name for r in candidates.subject_entries if r.score >= MIN_CONFIDENCE]
     potential_metrics = [r.entry.table_name for r in candidates.metric_entries if r.score >= MIN_CONFIDENCE]
     potential_filters = []
@@ -58,14 +56,14 @@ def resolve_columns(
 
     # 2. Resolve Subjects (All that are connected)
     subject_entries_final = [
-        r.entry for r in candidates.subject_entries 
+        r.entry for r in candidates.subject_entries
         if r.score >= MIN_CONFIDENCE and is_reachable(r.entry.table_name)
     ]
 
     # 3. Resolve Metric (Highest scoring connected)
     metric_entry_final = None
     valid_metrics = [
-        r for r in candidates.metric_entries 
+        r for r in candidates.metric_entries
         if r.score >= MIN_CONFIDENCE and is_reachable(r.entry.table_name)
     ]
     if valid_metrics:
@@ -76,11 +74,11 @@ def resolve_columns(
     for filter_intent, filter_group in candidates.filter_entries.items():
         # Sort by score descending to try best candidates first
         sorted_group = sorted(filter_group, key=lambda r: r.score, reverse=True)
-        
+
         for r in sorted_group:
             if r.score < MIN_CONFIDENCE:
                 break
-            
+
             if is_reachable(r.entry.table_name):
                 resolved_intent = resolve_filter_literals(filter_intent, r.entry)
                 if resolved_intent is not None:

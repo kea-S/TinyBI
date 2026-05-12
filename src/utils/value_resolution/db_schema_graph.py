@@ -3,6 +3,7 @@ from typing import List, Optional
 from collections import Counter
 from src.utils.pydantic_models import ColumnVectorIndexEntry
 
+
 def build_schema_graph(entries: List[ColumnVectorIndexEntry]) -> nx.Graph:
     """
     Build an undirected graph of table relationships from column metadata.
@@ -20,6 +21,7 @@ def build_schema_graph(entries: List[ColumnVectorIndexEntry]) -> nx.Graph:
             except Exception:
                 continue
     return G
+
 
 def pick_anchor_table(
     subject_tables: List[str],
