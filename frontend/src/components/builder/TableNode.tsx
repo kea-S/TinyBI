@@ -26,7 +26,8 @@ export const TableNode = memo(({ data }: NodeProps<Node<TableNodeData>>) => {
               type="target"
               position={Position.Left}
               id={`${col.id}-target`}
-              className="!size-4 !bg-primary border-2 border-white dark:border-slate-900 hover:!scale-125 transition-transform"
+              className="!size-3 !bg-primary hover:!scale-125 transition-transform"
+              style={{ border: "none", outline: "none", boxShadow: "none" }}
             />
             
             <span className="text-xs font-medium text-foreground">{col.columnName || 'Untitled Column'}</span>
@@ -35,8 +36,8 @@ export const TableNode = memo(({ data }: NodeProps<Node<TableNodeData>>) => {
               type="source"
               position={Position.Right}
               id={`${col.id}-source`}
-              className="!size-4 !bg-primary !rounded-none border-none hover:!scale-125 transition-transform"
-              style={{ clipPath: 'polygon(0 0, 100% 50%, 0 100%)' }}
+              className="!size-3.5 !bg-primary !rounded-none hover:!scale-125 transition-transform"
+              style={{ border: "none", outline: "none", boxShadow: "none", clipPath: "polygon(0 0, 100% 50%, 0 100%)" }}
             />
           </div>
         ))}

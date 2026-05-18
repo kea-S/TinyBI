@@ -385,6 +385,63 @@ function VectorIndexBuilderPageInner({ tables, setTables, isVisible }: VectorInd
     )
   }
 
+  const handleAddCategoricalValue = () => {
+    if (!selectedTableId || !selectedColumnId) return
+    const id = `cat-${Math.random().toString(36).slice(2, 10)}`
+    setTables((current) =>
+      current.map((t) => {
+        if (t.id !== selectedTableId) return t
+        return {
+          ...t,
+          columns: t.columns.map((c) =>
+            c.id === selectedColumnId
+              ? { ...c, categoricalValues: [...c.categoricalValues, { id, dbValue: "", synonymsText: "" }] }
+              : c
+          ),
+        }
+      })
+    )
+  }
+
+  const handleUpdateCategoricalValue = (catId: string, field: "dbValue" | "synonymsText", value: string) => {
+    if (!selectedTableId || !selectedColumnId) return
+    setTables((current) =>
+      current.map((t) => {
+        if (t.id !== selectedTableId) return t
+        return {
+          ...t,
+          columns: t.columns.map((c) =>
+            c.id === selectedColumnId
+              ? {
+                  ...c,
+                  categoricalValues: c.categoricalValues.map((cv) =>
+                    cv.id === catId ? { ...cv, [field]: value } : cv
+                  ),
+                }
+              : c
+          ),
+        }
+      })
+    )
+  }
+
+  const handleDeleteCategoricalValue = (catId: string) => {
+    if (!selectedTableId || !selectedColumnId) return
+    setTables((current) =>
+      current.map((t) => {
+        if (t.id !== selectedTableId) return t
+        return {
+          ...t,
+          columns: t.columns.map((c) =>
+            c.id === selectedColumnId
+              ? { ...c, categoricalValues: c.categoricalValues.filter((cv) => cv.id !== catId) }
+              : c
+          ),
+        }
+      })
+    )
+  }
+
   const handleAutoLayout = useCallback(async (targetTables: TableDraft[]) => {
     const elkNodes: ElkNode[] = targetTables.map((t) => ({
       id: t.id,
@@ -580,9 +637,6 @@ function VectorIndexBuilderPageInner({ tables, setTables, isVisible }: VectorInd
                     value={selectedTable.name} 
                     onChange={(e) => setTables(current => current.map(t => t.id === selectedTable.id ? { ...t, name: e.target.value } : t))}
                   />
-                  <Button variant="destructive" className="w-full mt-2 h-8 text-xs" onClick={() => handleDeleteTable(selectedTable.id)}>
-                    Delete Table
-                  </Button>
                 </div>
 
                 <Separator />
@@ -675,6 +729,52 @@ selectedColumnId === col.id
                           <option value="quantitative">Quantitative</option>
                         </select>
                       </div>
+
+                      <Separator />
+
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-medium uppercase text-muted-foreground">Categorical Values</label>
+                          <Button variant="outline" size="sm" onClick={handleAddCategoricalValue}>
+                            <Plus className="mr-1 size-3" /> Add
+                          </Button>
+                        </div>
+                        {selectedColumn.categoricalValues.length === 0 ? (
+                          <p className="text-xs text-muted-foreground italic">No categorical values defined.</p>
+                        ) : (
+                          <div className="space-y-2 max-h-[180px] overflow-y-auto">
+                            {selectedColumn.categoricalValues.map((cv) => (
+                              <div key={cv.id} className="flex items-start gap-1.5 rounded-md border border-border bg-muted/30 p-2">
+                                <div className="flex-1 space-y-1.5">
+                                  <Input
+                                    className="h-7 text-xs"
+                                    placeholder="DB value"
+                                    value={cv.dbValue}
+                                    onChange={(e) => handleUpdateCategoricalValue(cv.id, "dbValue", e.target.value)}
+                                  />
+                                  <Input
+                                    className="h-7 text-xs"
+                                    placeholder="Synonyms (comma separated)"
+                                    value={cv.synonymsText}
+                                    onChange={(e) => handleUpdateCategoricalValue(cv.id, "synonymsText", e.target.value)}
+                                  />
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="mt-0.5 size-6 shrink-0 text-destructive hover:bg-destructive/10"
+                                  onClick={() => handleDeleteCategoricalValue(cv.id)}
+                                >
+                                  <Trash2 className="size-3.5" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <Separator />
+
                       <div className="space-y-2">
                         <label className="text-xs font-medium uppercase text-muted-foreground" htmlFor="data-format">Data Format</label>
                         <Input 
