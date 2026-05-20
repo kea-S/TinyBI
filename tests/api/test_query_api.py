@@ -1,154 +1,71 @@
 import pytest
-
-pytest.importorskip("fastapi")
-
+import pandas as pd
 from fastapi.testclient import TestClient
 from unittest.mock import AsyncMock, patch
-import pandas as pd
 
 from src.api.main import create_app
-from src.api.routes import query as query_routes
-from src.utils.pydantic_models import (
-    ColumnVectorIndexEntry,
-    FinalEntries,
-    FilterIntent,
-    QuerySchema,
-)
 
+@pytest.fixture
+def client():
+    return TestClient(create_app())
 
-class FakeExtractor:
-    def __init__(self, result):
-        self._result = result
-
-    async def ainvoke(self, question):
-        return self._result
-
-
-def _fake_final_entries():
-    return FinalEntries(
-        subject_entries=[
-            ColumnVectorIndexEntry(
-                entry_id=0,
-                table_name="orders",
-                column_name="provider",
-                source_key="orders.provider",
-            )
-        ],
-        metric_entry=ColumnVectorIndexEntry(
-            entry_id=1,
-            table_name="orders",
-            column_name="order_value",
-            source_key="orders.order_value",
-        ),
-        filter_entries={},
-    )
-
-
-def test_query_endpoint_returns_sql_and_data(monkeypatch):
-    expected_schema = QuerySchema(
-        subject="provider",
-        metric_hint="order value",
-        aggregation="sum",
-    )
-
+@pytest.mark.anyio
+async def test_query_endpoint_success(client, monkeypatch):
     fake_df = pd.DataFrame({"provider": ["SPX"], "total": [100]})
+    fake_result = {
+        "output": "Here are the providers.",
+        "sql": "SELECT provider, SUM(order_value) FROM orders GROUP BY provider",
+        "data": fake_df.to_dict(orient="records")
+    }
 
-    monkeypatch.setattr(
-        query_routes, "get_extractor",
-        lambda model, local: FakeExtractor(expected_schema),
-    )
-    monkeypatch.setattr(
-        query_routes, "query_tool",
-        lambda structured_query, dataset_path=None: (fake_df, "SELECT provider FROM orders"),
-    )
+    async def mock_run_agent(messages, llm):
+        return fake_result
 
-    client = TestClient(create_app())
-    response = client.post("/query", json={"question": "show me providers by order value"})
+    monkeypatch.setattr("src.api.routes.query.run_agent", mock_run_agent)
+
+    response = client.post("/query", json={
+        "messages": [{"role": "user", "content": "show me providers"}]
+    })
 
     assert response.status_code == 200
     body = response.json()
-    assert "sql" in body
-    assert body["sql"] == "SELECT provider FROM orders"
-    assert "data" in body
+    assert body["message"] == "Here are the providers."
+    assert body["sql"] == "SELECT provider, SUM(order_value) FROM orders GROUP BY provider"
     assert len(body["data"]) == 1
 
+@pytest.mark.anyio
+async def test_query_endpoint_no_data(client, monkeypatch):
+    fake_result = {
+        "output": "I couldn't find any data.",
+        "sql": None,
+        "data": None
+    }
 
-def test_query_endpoint_with_filters(monkeypatch):
-    fi = FilterIntent(
-        attribute_hint="provider",
-        operator="IN",
-        raw_value_text=("DB Schenker", "SPX"),
-    )
-    expected_schema = QuerySchema(
-        subject="provider",
-        metric_hint="order value",
-        aggregation="sum",
-        filters=[fi],
-    )
+    async def mock_run_agent(messages, llm):
+        return fake_result
 
-    fake_df = pd.DataFrame({"provider": ["DB Schenker", "SPX"], "total": [50, 150]})
+    monkeypatch.setattr("src.api.routes.query.run_agent", mock_run_agent)
 
-    monkeypatch.setattr(
-        query_routes, "get_extractor",
-        lambda model, local: FakeExtractor(expected_schema),
-    )
-    monkeypatch.setattr(
-        query_routes, "query_tool",
-        lambda structured_query, dataset_path=None: (
-            fake_df,
-            "SELECT provider, SUM(order_value) FROM orders WHERE provider IN ('DB Schenker', 'SPX') GROUP BY provider",
-        ),
-    )
-
-    client = TestClient(create_app())
-    response = client.post("/query", json={"question": "show DB Schenker and SPX order values"})
+    response = client.post("/query", json={
+        "messages": [{"role": "user", "content": "hello"}]
+    })
 
     assert response.status_code == 200
     body = response.json()
-    assert "WHERE" in body["sql"]
-    assert len(body["data"]) == 2
+    assert body["message"] == "I couldn't find any data."
+    assert body["sql"] is None
+    assert body["data"] is None
 
+@pytest.mark.anyio
+async def test_query_endpoint_error(client, monkeypatch):
+    async def mock_run_agent_fail(messages, llm):
+        raise RuntimeError("Agent failed")
 
+    monkeypatch.setattr("src.api.routes.query.run_agent", mock_run_agent_fail)
 
-def test_query_endpoint_returns_explanation_none_when_disabled(monkeypatch):
-    expected_schema = QuerySchema(
-        subject="provider",
-        metric_hint="order value",
-        aggregation="sum",
-    )
-
-    fake_df = pd.DataFrame({"provider": ["SPX"], "total": [100]})
-
-    monkeypatch.setattr(
-        query_routes, "get_extractor",
-        lambda model, local: FakeExtractor(expected_schema),
-    )
-    monkeypatch.setattr(
-        query_routes, "query_tool",
-        lambda structured_query, dataset_path=None: (fake_df, "SELECT provider FROM orders"),
-    )
-
-    client = TestClient(create_app())
-    response = client.post("/query", json={"question": "show me providers by order value"})
-
-    assert response.status_code == 200
-    body = response.json()
-    assert "sql" in body
-    assert "data" in body
-    assert body["explanation"] is None
-
-
-def test_query_endpoint_handles_extractor_error(monkeypatch):
-    class FailingExtractor:
-        async def ainvoke(self, question):
-            raise RuntimeError("LLM service unavailable")
-
-    monkeypatch.setattr(
-        query_routes, "get_extractor",
-        lambda model, local: FailingExtractor(),
-    )
-
-    client = TestClient(create_app())
-    response = client.post("/query", json={"question": "anything"})
+    response = client.post("/query", json={
+        "messages": [{"role": "user", "content": "error"}]
+    })
 
     assert response.status_code == 500
+    assert "Agent failed" in response.json()["detail"]

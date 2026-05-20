@@ -1,68 +1,63 @@
 import logging
+from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException, status
-# from langchain_core.messages import AIMessage
 from pydantic import BaseModel
+from langchain_core.messages import HumanMessage, AIMessage
 
-# from src.llms.explainer import get_explainer
-from src.llms.extractor import get_extractor
-from src.tools.query_tool import query_tool
-from src.utils.models import LOCAL_GRANITE4
-from src.utils.pydantic_models import QuerySchema
+from src.llms.agent import run_agent
+from src.utils.models import get_local_llm, get_remote_llm, REMOTE_LLAMA_8B, LOCAL_GRANITE4
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/query", tags=["query"])
 
 
+class Message(BaseModel):
+    role: str
+    content: str
+
+
 class QueryRequest(BaseModel):
-    question: str
-    model: str | None = None
+    messages: List[Message]
+    model: Optional[str] = None
     local: bool = False
 
 
 class QueryResponse(BaseModel):
-    sql: str
-    data: list[dict]
-    explanation: str | None = None
+    message: str
+    sql: Optional[str] = None
+    data: Optional[List[dict]] = None
 
 
 @router.post("", response_model=QueryResponse, status_code=status.HTTP_200_OK)
 async def query_endpoint(request: QueryRequest):
     try:
-        extractor = get_extractor(LOCAL_GRANITE4, True)
-        query_schema: QuerySchema = await extractor.ainvoke(request.question)
-        logger.info("Extracted schema: %s", query_schema.model_dump(mode="json"))
-    except Exception as exc:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to extract query schema: {exc}",
+        if request.local:
+            llm = get_local_llm(request.model or LOCAL_GRANITE4)
+        else:
+            llm = get_remote_llm(request.model or REMOTE_LLAMA_8B)
+
+        # Convert history to LangChain messages
+        messages = []
+        for msg in request.messages:
+            if msg.role == "user":
+                messages.append(HumanMessage(content=msg.content))
+            else:
+                messages.append(AIMessage(content=msg.content))
+
+        result = await run_agent(messages, llm)
+
+        return QueryResponse(
+            message=result["output"],
+            sql=result.get("sql"),
+            data=result.get("data")
         )
 
-    try:
-        df, sql = query_tool(query_schema)
     except Exception as exc:
+        logger.exception("Failed to process agentic query")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to execute query: {exc}",
+            detail=f"Failed to process query: {exc}",
         )
 
-    # -------------------------------------------------------
-    # Explainer disabled.
-    # try:
-    #     explainer = get_explainer(LOCAL_GRANITE4, True)
-    #     explainer_input = (
-    #         f"user_message: {request.question}\n\n"
-    #         f"executed_sql: {sql}\n\n"
-    #         f"data_result: {df.to_markdown()}\n\n"
-    #     )
-    #     explanation = await explainer.ainvoke(explainer_input)
-    #     if isinstance(explanation, AIMessage):
-    #         explanation = explanation.content
-    # except Exception as exc:
-    #     logger.warning("Explainer failed — returning result without explanation: %s", exc)
-    #     explanation = None
-    # -------------------------------------------------------
-    explanation = None
-
-    return QueryResponse(sql=sql, data=df.to_dict(orient="records"), explanation=explanation)

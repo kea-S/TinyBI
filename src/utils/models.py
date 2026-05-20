@@ -13,6 +13,7 @@ LANGCHAIN = "langchain"
 # models to be experimented with
 REMOTE_GPT_4o = "gpt-4o"
 REMOTE_GPT_OSS_LARGE = "openai/gpt-oss-120b"
+REMOTE_LLAMA_8B = "llama-3.1-8b-instant"
 LOCAL_GEMMA3 = "gemma3:4b"
 LOCAL_GEMMA4 = "gemma4:e4b"
 LOCAL_LLAMA = "llama3.2:3b"
@@ -42,6 +43,8 @@ EMBEDDING_MODELS_BY_KEY = {
 def get_remote_llm(name: str):
     if name == REMOTE_GPT_4o:
         return ChatOpenAI(model=REMOTE_GPT_4o)
+    elif name == REMOTE_LLAMA_8B:
+        return ChatGroq(model=REMOTE_LLAMA_8B)
     else:
         return ChatGroq(model=REMOTE_GPT_OSS_LARGE)
 
@@ -76,3 +79,5 @@ def get_embedding_model_name_from_key(key: str) -> str:
         raise ValueError(
             f"Unsupported embedding model key '{key}'. Supported keys: {supported_keys}"
         ) from exc
+
+

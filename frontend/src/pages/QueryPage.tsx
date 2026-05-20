@@ -48,14 +48,17 @@ export function QueryPage({ isPeek = false }: QueryPageProps) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!question.trim()) return
+    const trimmedQuestion = question.trim()
+    if (!trimmedQuestion) return
 
     setQueryState("loading")
     setResult(null)
     setErrorMessage("")
 
     try {
-      const response = await submitQuery({ question: question.trim() })
+      const response = await submitQuery({ 
+        messages: [{ role: "user", content: trimmedQuestion }] 
+      })
       if (typeof response === "string") throw new Error("Invalid API response")
       setResult(response)
       setQueryState("success")
@@ -147,52 +150,6 @@ export function QueryPage({ isPeek = false }: QueryPageProps) {
             animate={{ opacity: 1, y: 0 }}
             className="grid gap-6 lg:grid-cols-2"
           >
-            {/* SQL Pane */}
-            <Card className="overflow-hidden border-border bg-card/50">
-              <CardHeader className="flex flex-row items-center gap-2 border-b border-border/50 py-3">
-                <Code className="size-4 text-primary" />
-                <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Generated SQL</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <pre className="p-6 font-mono text-sm leading-relaxed text-foreground whitespace-pre-wrap">
-                  {result.sql}
-                </pre>
-              </CardContent>
-            </Card>
-
-            {/* Data Table */}
-            <Card className="overflow-hidden border-border">
-              <CardHeader className="flex flex-row items-center justify-between gap-2 border-b border-border/50 py-3">
-                <div className="flex items-center gap-2">
-                  <TableIcon className="size-4 text-primary" />
-                  <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Results</CardTitle>
-                </div>
-                <Badge variant="secondary">{result.data.length} Rows</Badge>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto overflow-y-auto max-h-[500px]">
-                  <Table>
-                    <TableHeader className="bg-muted/30 sticky top-0">
-                      <TableRow>
-                        {columns.map((col) => (
-                          <TableHead key={col} className="font-bold text-foreground">{col}</TableHead>
-                        ))}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {result.data.map((row, i) => (
-                        <TableRow key={i} className="hover:bg-muted/20">
-                          {columns.map((col) => (
-                            <TableCell key={col}>{String(row[col] ?? "")}</TableCell>
-                          ))}
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-
             {/* AI Insight Pane */}
             <Card className="lg:col-span-2 overflow-hidden border-border bg-card/50">
               <CardHeader className="flex flex-row items-center gap-2 border-b border-border/50 py-3">
@@ -201,13 +158,65 @@ export function QueryPage({ isPeek = false }: QueryPageProps) {
               </CardHeader>
               <CardContent className="p-6">
                 <p className="text-sm leading-relaxed text-muted-foreground italic">
-                  {result.explanation || "No additional insights provided."}
+                  {result.message || "No additional insights provided."}
                 </p>
               </CardContent>
             </Card>
+
+            {/* SQL Pane */}
+            {result.sql && (
+              <Card className="overflow-hidden border-border bg-card/50">
+                <CardHeader className="flex flex-row items-center gap-2 border-b border-border/50 py-3">
+                  <Code className="size-4 text-primary" />
+                  <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Generated SQL</CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <pre className="p-6 font-mono text-sm leading-relaxed text-foreground whitespace-pre-wrap">
+                    {result.sql}
+                  </pre>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Data Table */}
+            {result.data && (
+              <Card className="overflow-hidden border-border">
+                <CardHeader className="flex flex-row items-center justify-between gap-2 border-b border-border/50 py-3">
+                  <div className="flex items-center gap-2">
+                    <TableIcon className="size-4 text-primary" />
+                    <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Results</CardTitle>
+                  </div>
+                  <Badge variant="secondary">{result.data.length} Rows</Badge>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto overflow-y-auto max-h-[500px]">
+                    <Table>
+                      <TableHeader className="bg-muted/30 sticky top-0">
+                        <TableRow>
+                          {columns.map((col) => (
+                            <TableHead key={col} className="font-bold text-foreground">{col}</TableHead>
+                          ))}
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {result.data.map((row, i) => (
+                          <TableRow key={i} className="hover:bg-muted/20">
+                            {columns.map((col) => (
+                              <TableCell key={col}>{String(row[col] ?? "")}</TableCell>
+                            ))}
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
     </div>
   )
 }
+
+

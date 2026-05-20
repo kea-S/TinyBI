@@ -1,4 +1,5 @@
 import logging
+from typing import Optional, List, Any
 
 from src.utils.database import global_database
 from src.config import SQLITE_DATA_PATH, TABLE_DATA_PATH
@@ -17,12 +18,45 @@ import src.utils.sql_normaliser as nrm
 logger = logging.getLogger(__name__)
 
 
-def query_tool(structured_query: QuerySchema,
-               duckdb_path: str = TABLE_DATA_PATH,
-               sqlite_path: str = SQLITE_DATA_PATH):
+from langchain_core.tools import tool
+
+@tool(response_format="content_and_artifact")
+def query_tool(
+    subject: str,
+    metric_hint: str,
+    aggregation: Optional[str] = None,
+    filters: List[dict] = [],
+    sort_on: str = "subject",
+    ordering: str = "asc",
+    limit: Optional[int] = None,
+    duckdb_path: str = TABLE_DATA_PATH,
+    sqlite_path: str = SQLITE_DATA_PATH
+):
     """
-    Resolve canonical locations for deterministic SQL filters
+    Execute a query against the database.
+    
+    Args:
+        subject: Semantic descriptor for what each result row is about (e.g. 'buyer country').
+        metric_hint: Semantic descriptor for the measure to analyze (e.g. 'order value').
+        aggregation: Analytic transformation (avg, sum, count, min, max).
+        filters: List of filters, each with attribute_hint, operator, and raw_value_text.
+        sort_on: Dimension to sort by ('subject' or 'metric_hint').
+        ordering: Sort direction ('asc' or 'desc').
+        limit: Number of rows to return.
     """
+    from src.utils.pydantic_models import FilterIntent
+
+    # Reconstruct QuerySchema
+    filter_intents = [FilterIntent(**f) for f in filters]
+    structured_query = QuerySchema(
+        subject=subject,
+        metric_hint=metric_hint,
+        aggregation=aggregation,
+        filters=filter_intents,
+        sort_on=sort_on,
+        ordering=ordering,
+        limit=limit
+    )
 
     global_database.setup_database(duckdb_path, sqlite_path)
     vector_controller = VectorController(DEFAULT_EMBEDDING_MODEL)
@@ -99,5 +133,16 @@ def query_tool(structured_query: QuerySchema,
 
     global_database.close_connection()
 
-    return df, sql
+    agent_summary = (
+        f"SQL executed successfully.\n"
+        f"SQL: {sql}\n"
+        f"Data result (top 5 rows):\n{df.head(5).to_markdown() if not df.empty else 'No data found.'}"
+    )
+
+    return agent_summary, (df, sql)
+
+
+
+
+
 

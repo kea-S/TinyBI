@@ -102,16 +102,21 @@ export function fetchCurrentVectorIndexEntries() {
   return apiRequest<ColumnVectorIndexEntryRequest[]>("/vector/index-entries/current")
 }
 
+export type Message = {
+  role: "user" | "assistant"
+  content: string
+}
+
 export type QueryRequest = {
-  question: string
+  messages: Message[]
   model?: string
   local?: boolean
 }
 
 export type QueryResponse = {
-  sql: string
-  data: Record<string, unknown>[]
-  explanation?: string | null
+  message: string
+  sql?: string | null
+  data?: Record<string, unknown>[] | null
 }
 
 export function submitQuery(payload: QueryRequest) {

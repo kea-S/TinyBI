@@ -241,6 +241,9 @@ data/minidev_raw/*
 !data/minidev_raw/financial/
 data/minidev_raw/financial/financial.duckdb
 
+# Agent Handoffs
+HANDOFF.md
+
 # Frontend (Vite / React / TypeScript)
 frontend/node_modules/
 frontend/dist/
