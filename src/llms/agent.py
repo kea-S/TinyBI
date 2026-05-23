@@ -9,15 +9,18 @@ from src.tools.query_tool import query_tool
 
 logger = logging.getLogger(__name__)
 
+
 class AgentState(MessagesState):
     sql: Optional[str] = None
     data: Optional[List[dict]] = None
+
 
 def get_model_node(llm_with_tools):
     async def call_model(state: AgentState):
         response = await llm_with_tools.ainvoke(state["messages"])
         return {"messages": [response]}
     return call_model
+
 
 async def run_agent(messages: List[BaseMessage], llm: Any) -> Dict[str, Any]:
     # Bind tools

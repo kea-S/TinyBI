@@ -90,4 +90,3 @@ def resolve_columns(
         metric_entry=metric_entry_final,
         filter_entries=filter_entries_final
     )
-
