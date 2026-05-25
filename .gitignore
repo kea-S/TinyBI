@@ -241,8 +241,12 @@ data/minidev_raw/*
 !data/minidev_raw/financial/
 data/minidev_raw/financial/financial.duckdb
 
-# Agent Handoffs
+# Agentic Artifacts
 HANDOFF.md
+.antigravitycli/
+.gemini/
+MEMORY.md
+AGENT_STATE.json
 
 # Frontend (Vite / React / TypeScript)
 frontend/node_modules/
