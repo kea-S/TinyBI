@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 from langchain_core.messages import HumanMessage, AIMessage
 
-from src.llms.agent import run_agent
+from src.agent import run_agent
 from src.utils.models import get_local_llm, get_remote_llm, REMOTE_LLAMA_8B, LOCAL_GRANITE4
 
 logger = logging.getLogger(__name__)

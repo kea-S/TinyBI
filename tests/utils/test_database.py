@@ -33,9 +33,10 @@ def test_setup_converts_sqlite_to_duckdb_when_not_exists(tmp_path):
     database = Database()
     database._get_database_path = lambda _: duckdb_path.resolve()
 
-    conn = database.setup_database("ignored.duckdb", sqlite_database_dir)
+    database.setup_database("ignored.duckdb", sqlite_database_dir)
 
-    rows = conn.execute("SELECT id, provider FROM orders ORDER BY id").fetchall()
+    df = database.query("SELECT id, provider FROM orders ORDER BY id")
+    rows = [tuple(x) for x in df.values]
     assert rows == [(1, "DB Schenker"), (2, "SPX")]
     assert duckdb_path.exists()
 
@@ -56,9 +57,10 @@ def test_setup_connects_directly_when_duckdb_exists(tmp_path):
     database = Database()
     database._get_database_path = lambda _: duckdb_path.resolve()
 
-    conn = database.setup_database("ignored.duckdb", sqlite_database_dir)
+    database.setup_database("ignored.duckdb", sqlite_database_dir)
 
-    rows = conn.execute("SELECT id, provider FROM orders").fetchall()
+    df = database.query("SELECT id, provider FROM orders")
+    rows = [tuple(x) for x in df.values]
     assert rows == [(1, "Existing")]
 
     database.close_connection()

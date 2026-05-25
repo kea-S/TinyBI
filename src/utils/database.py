@@ -22,7 +22,7 @@ class Database:
 
         return absolute_path
 
-    def setup_database(self, db_path: str, sqlite_database_dir: str):
+    def setup_database(self, db_path: str, sqlite_database_dir: str) -> None:
         """
         Connect to a DuckDB file, creating it from SQLite if it doesn't exist.
 
@@ -37,7 +37,7 @@ class Database:
             self._CONN = duckdb.connect(database=str(database_path))
             self._CONN.install_extension("sqlite")
             self._CONN.load_extension("sqlite")
-            return self._CONN
+            return
 
         self._database = database_path
         self._CONN = duckdb.connect(database=str(database_path))
@@ -45,7 +45,6 @@ class Database:
         self._CONN.load_extension("sqlite")
 
         self.register_sqlitedb_as_table(sqlite_database_dir)
-        return self._CONN
 
     def get_connection(self, db_path: str | None = None):
         """Establish a singleton persistent DuckDB connection for this kernel."""
@@ -126,7 +125,7 @@ class Database:
     def query(self, sql):
         """Execute SQL on the shared connection and return a pandas DataFrame (requires pandas)."""
         if self._CONN is None:
-            raise RuntimeError("Call get_connection(db_path) before query().")
+            raise RuntimeError("Call setup_database() or get_connection(db_path) before query().")
 
         return self._CONN.execute(sql).fetchdf()
 
@@ -140,38 +139,4 @@ class Database:
 
 
 global_database = Database()
-_DEFAULT_CONN = None
 
-
-def get_connection(db_path: str | None = None):
-    """Return a shared DuckDB connection for ad hoc queries or file-backed databases."""
-    global _DEFAULT_CONN
-
-    if db_path is not None:
-        return global_database.get_connection(db_path)
-
-    if _DEFAULT_CONN is None:
-        _DEFAULT_CONN = duckdb.connect(database=":memory:")
-
-    return _DEFAULT_CONN
-
-
-def register_csv_as_view(path, view_name: str, conn):
-    csv_path = Path(path).expanduser().resolve()
-    quoted_view_name = Database._quote_identifier(view_name)
-    csv_literal = Database._quote_sql_literal(csv_path.as_posix())
-
-    conn.execute(
-        f"""
-        CREATE OR REPLACE VIEW {quoted_view_name} AS
-        SELECT *
-        FROM read_csv_auto({csv_literal}, header=True)
-        """
-    )
-
-    return view_name
-
-
-def query(sql, conn=None):
-    active_conn = conn or get_connection()
-    return active_conn.execute(sql).fetchdf()

@@ -11,6 +11,8 @@ if str(PROJECT_ROOT) not in sys.path:
 from src.utils.prompts import EXTRACTOR_PROMPT
 from src.utils.models import get_local_llm, get_remote_llm
 from src.utils.pydantic_models import QuerySchema
+from src.agent import get_sql_tool_result
+from src.eval import check_execution_accuracy
 
 
 def _get_llm(model_name: str, local: bool):
@@ -34,6 +36,9 @@ async def call_api(prompt, options, context):
         HumanMessage(content=prompt),
     ])
 
+    sql, df = get_sql_tool_result(result)
+    natural_language_answer = result["messages"][-1].content
+
     return {
         "output": result.model_dump_json(indent=2),
         "metadata": {
@@ -42,4 +47,3 @@ async def call_api(prompt, options, context):
             "parsed": json.loads(result.model_dump_json()),
         },
     }
-

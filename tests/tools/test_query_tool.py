@@ -22,6 +22,20 @@ def _mock_setup_database(monkeypatch):
     monkeypatch.setattr("src.tools.query_tool.global_database.setup_database", replacement)
 
 
+def _invoke_query_tool(query: QuerySchema):
+    """Helper to explicitly unpack QuerySchema for the LangChain tool."""
+    summary, (df, sql) = query_tool.func(
+        subject=query.subject,
+        metric_hint=query.metric_hint,
+        aggregation=query.aggregation,
+        filters=[f.model_dump() for f in query.filters] if query.filters else [],
+        sort_on=query.sort_on,
+        ordering=query.ordering,
+        limit=query.limit,
+    )
+    return df, sql
+
+
 class FakeEmbeddingModel:
     def __init__(self):
         self.document_inputs = []
@@ -74,7 +88,7 @@ class TestQueryToolBuildsValidSQL:
         _mock_setup_database(monkeypatch)
 
         query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum")
-        _, sql = query_tool(query)
+        _, sql = _invoke_query_tool(query)
 
         assert "SELECT" in sql
         assert "FROM orders" in sql
@@ -96,7 +110,7 @@ class TestQueryToolBuildsValidSQL:
         _mock_setup_database(monkeypatch)
 
         query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum", filters=[fi])
-        _, sql = query_tool(query)
+        _, sql = _invoke_query_tool(query)
 
         assert "WHERE" in sql
         assert "orders.buyer_country = 'Singapore'" in sql
@@ -113,7 +127,7 @@ class TestQueryToolBuildsValidSQL:
         _mock_setup_database(monkeypatch)
 
         query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum")
-        _, sql = query_tool(query)
+        _, sql = _invoke_query_tool(query)
 
         assert "WHERE" not in sql
 
@@ -129,7 +143,7 @@ class TestQueryToolBuildsValidSQL:
         _mock_setup_database(monkeypatch)
 
         query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum")
-        _, sql = query_tool(query)
+        _, sql = _invoke_query_tool(query)
 
         assert "GROUP BY" in sql
 
@@ -145,7 +159,7 @@ class TestQueryToolBuildsValidSQL:
         _mock_setup_database(monkeypatch)
 
         query = QuerySchema(subject="provider", metric_hint="order value")
-        _, sql = query_tool(query)
+        _, sql = _invoke_query_tool(query)
 
         assert "GROUP BY" not in sql
 
@@ -161,7 +175,7 @@ class TestQueryToolBuildsValidSQL:
         _mock_setup_database(monkeypatch)
 
         query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum", limit=5)
-        _, sql = query_tool(query)
+        _, sql = _invoke_query_tool(query)
 
         assert "LIMIT 5" in sql
 
@@ -231,7 +245,7 @@ class TestQueryToolIntegration:
             limit=5,
         )
 
-        _, sql = query_tool(query)
+        _, sql = _invoke_query_tool(query)
 
         assert "SELECT" in sql
         assert "FROM" in sql

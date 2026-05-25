@@ -13,6 +13,21 @@ def _mock_setup_database(monkeypatch):
         global_database._CONN = mock_conn
     monkeypatch.setattr("src.tools.query_tool.global_database.setup_database", replacement)
 
+
+def _invoke_query_tool(query: QuerySchema):
+    """Helper to explicitly unpack QuerySchema for the LangChain tool."""
+    summary, (df, sql) = query_tool.func(
+        subject=query.subject,
+        metric_hint=query.metric_hint,
+        aggregation=query.aggregation,
+        filters=[f.model_dump() for f in query.filters] if query.filters else [],
+        sort_on=query.sort_on,
+        ordering=query.ordering,
+        limit=query.limit,
+    )
+    return df, sql
+
+
 def _entry(table_name: str, column_name: str) -> ColumnVectorIndexEntry:
     return ColumnVectorIndexEntry(
         entry_id=1,
@@ -40,7 +55,7 @@ def test_query_tool_defaults_to_limit_1000(monkeypatch):
 
     # Query without explicit limit
     query = QuerySchema(subject="provider", metric_hint="order total")
-    _, sql = query_tool(query)
+    _, sql = _invoke_query_tool(query)
 
     assert "LIMIT 1000" in sql
 
@@ -61,7 +76,11 @@ def test_query_tool_respects_explicit_limit(monkeypatch):
 
     # Query with explicit limit 10
     query = QuerySchema(subject="provider", metric_hint="order total", limit=10)
-    _, sql = query_tool(query)
+    _, sql = _invoke_query_tool(query)
 
     assert "LIMIT 10" in sql
     assert "LIMIT 5" not in sql
+
+
+
+

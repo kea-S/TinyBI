@@ -18,6 +18,21 @@ def _entry(entry_id: int, table_name: str, column_name: str, references: str = N
         statistical_type="nominal",
     )
 
+
+def _invoke_query_tool(query: QuerySchema):
+    """Helper to explicitly unpack QuerySchema for the LangChain tool."""
+    summary, (df, sql) = query_tool.func(
+        subject=query.subject,
+        metric_hint=query.metric_hint,
+        aggregation=query.aggregation,
+        filters=[f.model_dump() for f in query.filters] if query.filters else [],
+        sort_on=query.sort_on,
+        ordering=query.ordering,
+        limit=query.limit,
+    )
+    return df, sql
+
+
 def _result(entry_id: int, score: float, table_name: str, column_name: str, references: str = None):
     return VectorSearchResult(
         entry=_entry(entry_id, table_name, column_name, references),
@@ -52,11 +67,12 @@ def test_query_tool_cross_table_sql_generation(mock_db, mock_vc_class):
         metric_hint="total",
         aggregation="sum"
     )
-    
+
     # 4. Run tool
-    df, sql = query_tool(query)
-    
+    df, sql = _invoke_query_tool(query)
+
     # 5. Assertions
+
     # SQL should contain a JOIN and select from both tables
     sql_lower = sql.lower()
     assert "select" in sql_lower
