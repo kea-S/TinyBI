@@ -22,7 +22,7 @@ class Database:
 
         return absolute_path
 
-    def setup_database(self, db_path: str, sqlite_database_dir: str) -> None:
+    def setup_database(self, db_path: str, sqlite_database_dir: str, read_only: bool = False) -> None:
         """
         Connect to a DuckDB file, creating it from SQLite if it doesn't exist.
 
@@ -34,19 +34,20 @@ class Database:
 
         if database_path.exists():
             self._database = database_path
-            self._CONN = duckdb.connect(database=str(database_path))
+            self._CONN = duckdb.connect(database=str(database_path), read_only=read_only)
             self._CONN.install_extension("sqlite")
             self._CONN.load_extension("sqlite")
             return
 
+        # If it doesn't exist, we must create it in read-write mode
         self._database = database_path
-        self._CONN = duckdb.connect(database=str(database_path))
+        self._CONN = duckdb.connect(database=str(database_path), read_only=False)
         self._CONN.install_extension("sqlite")
         self._CONN.load_extension("sqlite")
 
         self.register_sqlitedb_as_table(sqlite_database_dir)
 
-    def get_connection(self, db_path: str | None = None):
+    def get_connection(self, db_path: str | None = None, read_only: bool = False):
         """Establish a singleton persistent DuckDB connection for this kernel."""
         _CONN = self._CONN
 
@@ -56,7 +57,7 @@ class Database:
             database_path = self._get_database_path(db_path)
             database_str = str(database_path)
             self._database = database_path
-            self._CONN = duckdb.connect(database=database_str)
+            self._CONN = duckdb.connect(database=database_str, read_only=read_only)
 
             self._CONN.install_extension("sqlite")
             self._CONN.load_extension("sqlite")
@@ -139,4 +140,5 @@ class Database:
 
 
 global_database = Database()
+
 

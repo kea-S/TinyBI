@@ -63,4 +63,3 @@ def check_execution_accuracy(df_output: pd.DataFrame,
         return False
     finally:
         global_database.close_connection()
-

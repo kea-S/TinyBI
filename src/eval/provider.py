@@ -1,7 +1,9 @@
 import json
 import sys
 from pathlib import Path
+from datetime import date, datetime
 
+import pandas as pd
 from langchain_core.messages import HumanMessage, SystemMessage
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -11,8 +13,17 @@ if str(PROJECT_ROOT) not in sys.path:
 from src.utils.prompts import EXTRACTOR_PROMPT
 from src.utils.models import get_local_llm, get_remote_llm
 from src.utils.pydantic_models import QuerySchema
-from src.agent import get_sql_tool_result
-from src.eval import check_execution_accuracy
+from src.agent import run_agent
+from src.eval.bird_bench import check_execution_accuracy
+
+
+class BenchmarkEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, (date, datetime)):
+            return obj.isoformat()
+        if isinstance(obj, pd.Timestamp):
+            return obj.isoformat()
+        return super().default(obj)
 
 
 def _get_llm(model_name: str, local: bool):
@@ -22,7 +33,7 @@ def _get_llm(model_name: str, local: bool):
 async def call_api(prompt, options, context):
     """
     Promptfoo entrypoint, the function must be called call_api.
-    This experiment invokes the model directly with nested structured output.
+    This experiment invokes the full run_agent pipeline.
     """
 
     config = options.get("config", {})
@@ -30,20 +41,17 @@ async def call_api(prompt, options, context):
     local = config.get("local", False)
 
     llm = _get_llm(model_name, local)
-    structured_llm = llm.with_structured_output(QuerySchema)
-    result = await structured_llm.ainvoke([
-        SystemMessage(content=EXTRACTOR_PROMPT),
-        HumanMessage(content=prompt),
-    ])
-
-    sql, df = get_sql_tool_result(result)
-    natural_language_answer = result["messages"][-1].content
+    
+    # Run the full agent pipeline
+    result = await run_agent([HumanMessage(content=prompt)], llm)
 
     return {
-        "output": result.model_dump_json(indent=2),
+        "output": json.dumps(result, indent=2, cls=BenchmarkEncoder),
         "metadata": {
             "model_name": model_name,
             "local": local,
-            "parsed": json.loads(result.model_dump_json()),
+            "parsed_sql": result.get("sql"),
+            "data": result.get("data"),
         },
     }
+

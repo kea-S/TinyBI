@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import MagicMock, patch
-from src.tools.query_tool import query_tool
+from src.tools.query_tool import execute_query
 from src.utils.pydantic_models import (
     QuerySchema,
     CandidateEntries,
@@ -20,16 +20,8 @@ def _entry(entry_id: int, table_name: str, column_name: str, references: str = N
 
 
 def _invoke_query_tool(query: QuerySchema):
-    """Helper to explicitly unpack QuerySchema for the LangChain tool."""
-    summary, (df, sql) = query_tool.func(
-        subject=query.subject,
-        metric_hint=query.metric_hint,
-        aggregation=query.aggregation,
-        filters=[f.model_dump() for f in query.filters] if query.filters else [],
-        sort_on=query.sort_on,
-        ordering=query.ordering,
-        limit=query.limit,
-    )
+    """Call execute_query directly (bypasses @tool wrapper)."""
+    df, sql = execute_query(query)
     return df, sql
 
 
@@ -76,10 +68,10 @@ def test_query_tool_cross_table_sql_generation(mock_db, mock_vc_class):
     # SQL should contain a JOIN and select from both tables
     sql_lower = sql.lower()
     assert "select" in sql_lower
-    assert "from orders" in sql_lower or "from users" in sql_lower
+    assert 'from "orders"' in sql_lower or 'from "users"' in sql_lower
     assert "join" in sql_lower
-    assert "users.name" in sql_lower
-    assert "sum(orders.total)" in sql_lower or "sum(total)" in sql_lower
+    assert '"users"."name"' in sql_lower
+    assert 'sum("orders"."total")' in sql_lower or 'sum("total")' in sql_lower
     
     # Ensure database was called
     assert mock_db.query.called

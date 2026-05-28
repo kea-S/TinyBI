@@ -1,15 +1,14 @@
 from src.utils.pydantic_models import QuerySchema
 
-# from src.llms.explainer import get_explainer
 from src.llms.extractor import get_extractor
-from src.tools.query_tool import query_tool
+from src.tools.query_tool import execute_query
 
 
 async def run_pipeline(question, model, local):
     extractor = get_extractor(model, local)
     extractor_results: QuerySchema = await extractor.ainvoke(question)
 
-    resulting_df, resulting_sql_query = query_tool(extractor_results)
+    resulting_df, resulting_sql_query = execute_query(extractor_results)
 
     # -------------------------------------------------------
     # Explainer disabled.

@@ -5,7 +5,7 @@ from src.utils.pydantic_models import (
     FinalEntries,
     QuerySchema,
 )
-from src.tools.query_tool import query_tool, global_database
+from src.tools.query_tool import execute_query, global_database
 
 def _mock_setup_database(monkeypatch):
     mock_conn = MagicMock()
@@ -15,16 +15,8 @@ def _mock_setup_database(monkeypatch):
 
 
 def _invoke_query_tool(query: QuerySchema):
-    """Helper to explicitly unpack QuerySchema for the LangChain tool."""
-    summary, (df, sql) = query_tool.func(
-        subject=query.subject,
-        metric_hint=query.metric_hint,
-        aggregation=query.aggregation,
-        filters=[f.model_dump() for f in query.filters] if query.filters else [],
-        sort_on=query.sort_on,
-        ordering=query.ordering,
-        limit=query.limit,
-    )
+    """Call execute_query directly (bypasses @tool wrapper)."""
+    df, sql = execute_query(query)
     return df, sql
 
 
@@ -80,6 +72,8 @@ def test_query_tool_respects_explicit_limit(monkeypatch):
 
     assert "LIMIT 10" in sql
     assert "LIMIT 5" not in sql
+
+
 
 
 

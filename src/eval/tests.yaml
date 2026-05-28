@@ -1,0 +1,51 @@
+- vars:
+    id: bird-89
+    description: 'Difficulty: moderate'
+    query: How many accounts who choose issuance after transaction are staying in
+      East Bohemia region?
+    expected_sql: SELECT COUNT(T2.account_id) FROM district AS T1 INNER JOIN account
+      AS T2 ON T1.district_id = T2.district_id WHERE T1.A3 = 'east Bohemia' AND T2.frequency
+      = 'POPLATEK PO OBRATU'
+    difficulty: moderate
+- vars:
+    id: bird-92
+    description: 'Difficulty: simple'
+    query: List out the no. of districts that have female average salary is more than
+      6000 but less than 10000?
+    expected_sql: SELECT COUNT(DISTINCT T2.district_id)  FROM client AS T1 INNER JOIN
+      district AS T2 ON T1.district_id = T2.district_id WHERE T1.gender = 'F' AND
+      T2.A11 BETWEEN 6000 AND 10000
+    difficulty: simple
+- vars:
+    id: bird-93
+    description: 'Difficulty: moderate'
+    query: How many male customers who are living in North Bohemia have average salary
+      greater than 8000?
+    expected_sql: SELECT COUNT(T1.client_id) FROM client AS T1 INNER JOIN district
+      AS T2 ON T1.district_id = T2.district_id WHERE T1.gender = 'M' AND T2.A3 = 'north
+      Bohemia' AND T2.A11 > 8000
+    difficulty: moderate
+- vars:
+    id: bird-94
+    description: 'Difficulty: challenging'
+    query: List out the account numbers of female clients who are oldest and has lowest
+      average salary, calculate the gap between this lowest average salary with the
+      highest average salary?
+    expected_sql: SELECT T1.account_id , ( SELECT MAX(A11) - MIN(A11) FROM district
+      ) FROM account AS T1 INNER JOIN district AS T2 ON T1.district_id = T2.district_id
+      INNER JOIN disp AS T3 ON T1.account_id = T3.account_id INNER JOIN client AS
+      T4 ON T3.client_id = T4.client_id WHERE T2.district_id = ( SELECT district_id
+      FROM client WHERE gender = 'F' ORDER BY birth_date ASC LIMIT 1 ) ORDER BY T2.A11
+      DESC LIMIT 1
+    difficulty: challenging
+- vars:
+    id: bird-95
+    description: 'Difficulty: moderate'
+    query: List out the account numbers of clients who are youngest and have highest
+      average salary?
+    expected_sql: SELECT T1.account_id  FROM account AS T1 INNER JOIN disp AS T2 ON
+      T1.account_id = T2.account_id INNER JOIN client AS T3 ON T2.client_id = T3.client_id
+      INNER JOIN district AS T4 on T4.district_id = T1.district_id WHERE T2.client_id
+      = ( SELECT client_id FROM client ORDER BY birth_date DESC LIMIT 1) GROUP BY
+      T4.A11, T1.account_id
+    difficulty: moderate

@@ -231,6 +231,7 @@ class QuerySchema(BaseModel):
     sort_on: Literal["subject", "metric_hint"] = \
         Field("subject", description="""
         The dimension to sort the final output table by.
+        IMPORTANT: You MUST ONLY use 'subject' or 'metric_hint'. 
         Use 'subject' to sort the main subject of analysis (e.g. region, dates).
         Use 'metric_hint' to sort the analysed measure (e.g. count, sum).
 
@@ -242,8 +243,9 @@ class QuerySchema(BaseModel):
         Field(
         "asc",
         description="""
-        Which direction to sort_on. Default to ascending, but questions with
-        'top' generally would fall under desc.
+        Which direction to sort_on. 
+        IMPORTANT: You MUST ONLY use 'asc' or 'desc'.
+        Default to ascending, but questions with 'top' generally would fall under desc.
         """
             )
 
@@ -495,6 +497,7 @@ class FinalJoins(BaseModel):
     """
     from_table: str
     joins: list[JoinStep]
+
 
 
 

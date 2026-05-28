@@ -3,10 +3,12 @@ from typing import Optional, List, Any
 
 from src.utils.database import global_database
 from src.config import SQLITE_DATA_PATH, TABLE_DATA_PATH
+
 from src.utils.pydantic_models import (
     QuerySchema,
     CandidateEntries,
     FinalEntries,
+    FilterIntent
 )
 from src.utils.value_resolution.column_resolver import resolve_columns
 from src.utils.value_resolution.join_resolution import resolve_joins
@@ -15,50 +17,13 @@ from src.utils.rag.vector_controller import VectorController
 from src.utils.models import DEFAULT_EMBEDDING_MODEL
 import src.utils.sql_normaliser as nrm
 
+from langchain_core.tools import tool
+
 logger = logging.getLogger(__name__)
 
 
-from langchain_core.tools import tool
-
-@tool(response_format="content_and_artifact")
-def query_tool(
-    subject: str,
-    metric_hint: str,
-    aggregation: Optional[str] = None,
-    filters: List[dict] = [],
-    sort_on: str = "subject",
-    ordering: str = "asc",
-    limit: Optional[int] = None,
-    duckdb_path: str = TABLE_DATA_PATH,
-    sqlite_path: str = SQLITE_DATA_PATH
-):
-    """
-    Execute a query against the database.
-    
-    Args:
-        subject: Semantic descriptor for what each result row is about (e.g. 'buyer country').
-        metric_hint: Semantic descriptor for the measure to analyze (e.g. 'order value').
-        aggregation: Analytic transformation (avg, sum, count, min, max).
-        filters: List of filters, each with attribute_hint, operator, and raw_value_text.
-        sort_on: Dimension to sort by ('subject' or 'metric_hint').
-        ordering: Sort direction ('asc' or 'desc').
-        limit: Number of rows to return.
-    """
-    from src.utils.pydantic_models import FilterIntent
-
-    # Reconstruct QuerySchema
-    filter_intents = [FilterIntent(**f) for f in filters]
-    structured_query = QuerySchema(
-        subject=subject,
-        metric_hint=metric_hint,
-        aggregation=aggregation,
-        filters=filter_intents,
-        sort_on=sort_on,
-        ordering=ordering,
-        limit=limit
-    )
-
-    global_database.setup_database(duckdb_path, sqlite_path)
+def execute_query(structured_query: QuerySchema):
+    global_database.setup_database(TABLE_DATA_PATH, SQLITE_DATA_PATH, read_only=True)
     vector_controller = VectorController(DEFAULT_EMBEDDING_MODEL)
 
     candidate_entries: CandidateEntries = \
@@ -133,6 +98,20 @@ def query_tool(
 
     global_database.close_connection()
 
+    return df, sql
+
+
+@tool(args_schema=QuerySchema, response_format="content_and_artifact")
+def query_tool(**kwargs):
+    """
+    Execute a semantic query against the database.
+    
+    This tool resolves natural language intents into SQL by linking 
+    subjects and metrics to the underlying schema using vector search.
+    """
+    structured_query = QuerySchema(**kwargs)
+    df, sql = execute_query(structured_query)
+
     agent_summary = (
         f"SQL executed successfully.\n"
         f"SQL: {sql}\n"
@@ -140,6 +119,13 @@ def query_tool(
     )
 
     return agent_summary, (df, sql)
+
+
+
+
+
+
+
 
 
 

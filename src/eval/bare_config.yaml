@@ -11,24 +11,11 @@ providers:
       model_name: 'gpt-4o'
       local: false
 
-  # - id: python:./provider.py
-  #   label: 'Agent: gemma3'
-  #   config:
-  #     model_name: "gemma3:4b"
-  #     local: true
-
-  #   reasoning models when you turn them off are really really q bad
-  # - id: python:./provider.py
-  #   label: 'Agent: gemma4'
-  #   config:
-  #     model_name: "gemma4:e4b"
-  #     local: true
-
-  # - id: python:./provider.py
-  #   label: 'Agent: llama3.2'
-  #   config:
-  #     model_name: "llama3.2:3b"
-  #     local: true
+  - id: python:./extractor_provider.py
+    label: 'Extractor: gpt-4o'
+    config:
+      model_name: 'gpt-4o'
+      local: false
 
   - id: python:./provider.py
     label: 'Agent: granite4'
@@ -36,13 +23,19 @@ providers:
       model_name: "granite4:3b"
       local: true
 
-  # - id: python:./provider.py
-  #   label: 'Agent: phi4-mini'
-  #   config:
-  #     model_name: "phi4-mini:3.8b"
-  #     local: true
+  - id: python:./extractor_provider.py
+    label: 'Extractor: granite4'
+    config:
+      model_name: "granite4:3b"
+      local: true
   
+defaultTest:
+  assert:
+    - type: python
+      value: file://assertions.py:promptfoo_execution_accuracy
+
 tests:
+  - ./tests.yaml
   # - vars:
   #     id: example-001
   #     description: "Time series test case"

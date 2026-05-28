@@ -7,28 +7,23 @@ The goal is to frame the Text-to-SQL evaluation as a **"System Health & Monitori
 
 ## Phase 1: The "Health Check" Engine (Benchmark Baseline)
 
-- [ ] **1. Finalize BIRD Benchmarking Data**
+- [x] **1. Finalize BIRD Benchmarking Data**
   - Use the 32 extracted queries in `data/app_data/bird_financial_minidev.json`.
   - Goal: Use these as the "Gold Standard" for monitoring system accuracy.
+  - *Status: Completed. Extraction script `src/eval/generate_tests.py` implemented.*
 
-- [ ] **2. Implement Execution Accuracy (EX) Logic**
+- [x] **2. Implement Execution Accuracy (EX) Logic**
   - Use `src/eval/assertions.py` to compare LLM output vs. Gold SQL.
   - Logic: Execute both in DuckDB -> Compare DataFrames -> Return Match/Mismatch.
+  - *Status: Completed. Assertions bridge and provider integration verified with TDD.*
 
 - [ ] **3. Create the "Monitoring" API Endpoint**
   - Add a FastAPI route `GET /monitoring/health-check`.
-  - This should run the 32 queries and return a JSON summary:
-    ```json
-    {
-      "overall_accuracy": 0.72,
-      "avg_latency": 450,
-      "results": [...]
-    }
-    ```
+  - This should run the 32 queries and return a JSON summary.
 
 ---
 
-## Phase 2: The "Performance & Health" Dashboard (Frontend)
+## Phase 2: The "Performance & Health" Dashboard (Frontend) - PENDING
 
 - [ ] **1. Build the Monitoring Page (`/monitoring`)**
   - [ ] **Headline Stats:** Big cards for "Execution Accuracy", "Mean Latency", and "System Health".
@@ -42,9 +37,9 @@ The goal is to frame the Text-to-SQL evaluation as a **"System Health & Monitori
 
 ---
 
-## Phase 3: Advanced "Wow" Features
+## Phase 3: Advanced "Wow" Features - PENDING
 
-- [ ] **1. Semantic "Soft" Evaluation (RAGAS-style)**
+- [ ] **1. Semantic "Soft" Evaluation**
   - Integrate a "Semantic Match" score (using an LLM-as-a-judge) for cases where the data matches but the SQL syntax differs significantly.
 
 - [ ] **2. Auto-Charting for Results**
@@ -52,3 +47,4 @@ The goal is to frame the Text-to-SQL evaluation as a **"System Health & Monitori
 
 - [ ] **3. Self-Correction Loop**
   - Add logic to catch SQL errors, feed them back to the LLM, and attempt a second "Self-Correction" run before showing the result to the user.
+

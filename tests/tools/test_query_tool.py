@@ -11,7 +11,7 @@ from src.utils.pydantic_models import (
     FilterIntent,
     QuerySchema,
 )
-from src.tools.query_tool import query_tool, global_database
+from src.tools.query_tool import query_tool, execute_query, global_database
 from src.utils.rag.vector_controller import VectorController
 
 
@@ -23,16 +23,8 @@ def _mock_setup_database(monkeypatch):
 
 
 def _invoke_query_tool(query: QuerySchema):
-    """Helper to explicitly unpack QuerySchema for the LangChain tool."""
-    summary, (df, sql) = query_tool.func(
-        subject=query.subject,
-        metric_hint=query.metric_hint,
-        aggregation=query.aggregation,
-        filters=[f.model_dump() for f in query.filters] if query.filters else [],
-        sort_on=query.sort_on,
-        ordering=query.ordering,
-        limit=query.limit,
-    )
+    """Call execute_query directly (bypasses @tool wrapper)."""
+    df, sql = execute_query(query)
     return df, sql
 
 
@@ -91,9 +83,9 @@ class TestQueryToolBuildsValidSQL:
         _, sql = _invoke_query_tool(query)
 
         assert "SELECT" in sql
-        assert "FROM orders" in sql
-        assert "SUM(orders.order_value)" in sql
-        assert "orders.provider" in sql
+        assert 'FROM "orders"' in sql
+        assert 'SUM("orders"."order_value")' in sql
+        assert '"orders"."provider"' in sql
 
     def test_includes_where_clause_from_filters(self, monkeypatch):
         fi = FilterIntent(attribute_hint="country", operator="=", raw_value_text=("Singapore",))
@@ -113,7 +105,7 @@ class TestQueryToolBuildsValidSQL:
         _, sql = _invoke_query_tool(query)
 
         assert "WHERE" in sql
-        assert "orders.buyer_country = 'Singapore'" in sql
+        assert '"orders"."buyer_country" = \'Singapore\'' in sql
 
     def test_no_where_clause_when_no_filters(self, monkeypatch):
         entries = _base_final_entries(
@@ -178,6 +170,24 @@ class TestQueryToolBuildsValidSQL:
         _, sql = _invoke_query_tool(query)
 
         assert "LIMIT 5" in sql
+
+
+class TestExecuteQueryDirectCall:
+    def test_accepts_query_schema_directly(self, monkeypatch):
+        entries = _base_final_entries(
+            metric_entry=_entry("orders", "order_value"),
+        )
+        mock_vc = MagicMock()
+        mock_vc.run.return_value = MagicMock()
+        mock_vc.get_current_index_entries.return_value = []
+        monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
+        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda *a: entries)
+        _mock_setup_database(monkeypatch)
+
+        query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum")
+        df, sql = execute_query(query)
+
+        assert "SELECT" in sql
 
 
 class TestQueryToolIntegration:

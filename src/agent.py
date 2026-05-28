@@ -1,11 +1,12 @@
 import logging
 from typing import Annotated, Dict, List, Any, Optional, Union, Tuple
 
-from langchain_core.messages import BaseMessage, HumanMessage, ToolMessage
+from langchain_core.messages import BaseMessage, HumanMessage, ToolMessage, SystemMessage
 from langgraph.graph import StateGraph, MessagesState, START, END
 from langgraph.prebuilt import ToolNode, tools_condition
 
 from src.tools.query_tool import query_tool
+from src.utils.prompts import EXTRACTOR_PROMPT
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +65,10 @@ async def run_agent(messages: List[BaseMessage], llm: Any) -> Dict[str, Any]:
     tools = [query_tool]
     llm_with_tools = llm.bind_tools(tools)
 
+    # Define the system prompt
+    system_prompt = SystemMessage(content=EXTRACTOR_PROMPT)
+    all_messages = [system_prompt] + messages
+
     # Define the graph
     workflow = StateGraph(AgentState)
 
@@ -82,7 +87,7 @@ async def run_agent(messages: List[BaseMessage], llm: Any) -> Dict[str, Any]:
     app = workflow.compile()
 
     # Run the graph
-    final_state = await app.ainvoke({"messages": messages})
+    final_state = await app.ainvoke({"messages": all_messages})
 
     # Extract results
     agent_output = final_state["messages"][-1].content
@@ -93,4 +98,6 @@ async def run_agent(messages: List[BaseMessage], llm: Any) -> Dict[str, Any]:
         "sql": sql,
         "data": df.to_dict(orient='records') if df is not None else None
     }
+
+
 

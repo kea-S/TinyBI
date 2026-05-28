@@ -4,6 +4,16 @@ from collections import Counter
 from src.utils.pydantic_models import ColumnVectorIndexEntry
 
 
+def _quote(identifier: str) -> str:
+    """Quote a SQL identifier (table or column) using double quotes."""
+    if not identifier:
+        return ""
+    if "." in identifier:
+        parts = identifier.split(".")
+        return ".".join(f'"{p.replace('"', '""')}"' for p in parts)
+    return f'"{identifier.replace('"', '""')}"'
+
+
 def build_schema_graph(entries: List[ColumnVectorIndexEntry]) -> nx.Graph:
     """
     Build an undirected graph of table relationships from column metadata.
@@ -16,7 +26,7 @@ def build_schema_graph(entries: List[ColumnVectorIndexEntry]) -> nx.Graph:
             try:
                 # Parse references: e.g. "users.id"
                 target_table = entry.references.split(".")[0]
-                on_clause = f"{entry.source_key} = {entry.references}"
+                on_clause = f"{_quote(entry.source_key)} = {_quote(entry.references)}"
                 G.add_edge(entry.table_name, target_table, on_clause=on_clause)
             except Exception:
                 continue
@@ -43,3 +53,4 @@ def pick_anchor_table(
     table_counts = Counter(combined_tables)
     # max() picks the first encounter in tie cases, which is stable enough.
     return max(table_counts, key=table_counts.get)
+
