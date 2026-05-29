@@ -34,11 +34,10 @@ def _result(entry_id: int, score: float, table_name: str, column_name: str, refe
 @patch("src.tools.query_tool.VectorController")
 @patch("src.tools.query_tool.global_database")
 def test_query_tool_cross_table_sql_generation(mock_db, mock_vc_class):
-    # Setup mock VectorController
+    mock_db.query.return_value = MagicMock()
+
     mock_vc = mock_vc_class.return_value
     
-    # 1. Mock candidates: Subject in 'users', Metric in 'orders'
-    # Both connected via orders.user_id -> users.id
     candidates = CandidateEntries(
         subject_entries=[_result(1, 0.95, "users", "name")],
         metric_entries=[_result(2, 0.90, "orders", "total")],
@@ -46,26 +45,20 @@ def test_query_tool_cross_table_sql_generation(mock_db, mock_vc_class):
     )
     mock_vc.run.return_value = candidates
     
-    # 2. Mock all index entries for graph building
     mock_vc.get_current_index_entries.return_value = [
         _entry(1, "users", "id"),
         _entry(2, "orders", "total"),
         _entry(3, "orders", "user_id", references="users.id")
     ]
     
-    # 3. Create a structured query
     query = QuerySchema(
         subject="name",
         metric_hint="total",
         aggregation="sum"
     )
 
-    # 4. Run tool
     df, sql = _invoke_query_tool(query)
 
-    # 5. Assertions
-
-    # SQL should contain a JOIN and select from both tables
     sql_lower = sql.lower()
     assert "select" in sql_lower
     assert 'from "orders"' in sql_lower or 'from "users"' in sql_lower
@@ -73,5 +66,4 @@ def test_query_tool_cross_table_sql_generation(mock_db, mock_vc_class):
     assert '"users"."name"' in sql_lower
     assert 'sum("orders"."total")' in sql_lower or 'sum("total")' in sql_lower
     
-    # Ensure database was called
     assert mock_db.query.called

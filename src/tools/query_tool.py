@@ -23,7 +23,9 @@ logger = logging.getLogger(__name__)
 
 
 def execute_query(structured_query: QuerySchema):
-    global_database.setup_database(TABLE_DATA_PATH, SQLITE_DATA_PATH, read_only=True)
+    if global_database._database is None:
+        global_database.setup_database(TABLE_DATA_PATH, SQLITE_DATA_PATH, read_only=True)
+
     vector_controller = VectorController(DEFAULT_EMBEDDING_MODEL)
 
     candidate_entries: CandidateEntries = \
@@ -95,8 +97,6 @@ def execute_query(structured_query: QuerySchema):
     logger.info("Final SQL:\n%s", sql)
 
     df = global_database.query(sql)
-
-    global_database.close_connection()
 
     return df, sql
 

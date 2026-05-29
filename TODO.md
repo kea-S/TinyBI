@@ -48,3 +48,38 @@ The goal is to frame the Text-to-SQL evaluation as a **"System Health & Monitori
 - [ ] **3. Self-Correction Loop**
   - Add logic to catch SQL errors, feed them back to the LLM, and attempt a second "Self-Correction" run before showing the result to the user.
 
+---
+
+## Phase 4: Evaluation Pipeline Bug Fixes
+
+### H1 -- FIXED: Race condition in DB connections
+- [x] Singleton `_CONN` + per-query `close_connection()` caused "Connection already closed!" and "Call setup_database() before query()" errors under concurrent Promptfoo workers.
+- [x] Rewrote `Database` to use per-call connections. Stores only the file path, not a persistent connection. `query()` opens a fresh connection each time.
+
+### H7: NaN/Timestamp JSON serialization (quick win)
+- [ ] Add NaN handling to `BenchmarkEncoder` in `provider.py` and `extractor_provider.py`. Check `math.isnan()` / `pd.isna()` and output `null`.
+
+### H6: `loan.duration` misclassified as temporal (quick win)
+- [ ] Fix vector index metadata: change `statistical_type` from `temporal` to `discrete`. Data comes from `data/app_data/columns.json` -- update there and rebuild FAISS index.
+
+### H3: Missing columns in vector index (quick win)
+- [ ] `district.A4`-`A16` columns missing from FAISS index. Gold SQL references `district.A11` (average salary) but it doesn't exist in the index.
+- [ ] Search git history for original definitions: `git log -- data/app_data/columns.json`
+- [ ] Rebuild vector index to include all columns.
+
+### H2: Type compatibility filter (needs design discussion)
+- [ ] Vector search places string categorical values ("North Bohemia") onto numeric columns (`trans.amount`). Need a type compatibility gate in `column_resolver.py:resolve_columns()`.
+- [ ] Open question: how conservative should the gate be? Numeric comparisons like "balance > 10000" should still land on numeric columns.
+
+### H4: Empty SELECT clause (needs design discussion)
+- [ ] When LLM fails to resolve any column, SQL becomes `SELECT FROM ...` -- DuckDB Parser Error.
+- [ ] Option A: `COALESCE(1)` fallback (hides errors).
+- [ ] Option B: Raise clear error, feed back to agent for self-correction.
+
+### H5: Date operations in FilterIntent (deferred)
+- [ ] Pipeline targets "simpler" SQL. Complex queries (CTEs, STRFTIME, subqueries) intended for LLM-generated SQL path, not the structured pipeline.
+- [ ] Only add if a common high-value pattern emerges.
+
+### Other cleanup
+- [ ] `src/utils/queries.py` has unused hardcoded SQL templates -- candidate for removal.
+- [ ] `src/llms/explainer.py` is loaded but disabled in `main_pipeline.py` -- wasteful model load.

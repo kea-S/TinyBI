@@ -15,8 +15,7 @@ def test_check_execution_accuracy_matches(monkeypatch):
     # Test
     result = check_execution_accuracy(df_output, "SELECT * FROM gold")
     assert result is True
-    assert mock_db.setup_database.called
-    assert mock_db.close_connection.called
+    assert mock_db.query.called
 
 def test_check_execution_accuracy_mismatch_content(monkeypatch):
     # Setup

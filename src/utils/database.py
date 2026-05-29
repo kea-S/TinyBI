@@ -1,12 +1,14 @@
+import logging
 import duckdb
 from pathlib import Path
 from src.config import DATA_PATH
 
+logger = logging.getLogger(__name__)
+
 
 class Database:
     def __init__(self):
-        self._CONN = None
-        self._database = None
+        self._database: Path | None = None
 
     @staticmethod
     def _quote_identifier(identifier: str) -> str:
@@ -22,58 +24,49 @@ class Database:
 
         return absolute_path
 
+    def _open_connection(self, read_only: bool = False) -> duckdb.DuckDBPyConnection:
+        if self._database is None:
+            raise RuntimeError("Call setup_database() before query().")
+        conn = duckdb.connect(database=str(self._database), read_only=read_only)
+        conn.install_extension("sqlite")
+        conn.load_extension("sqlite")
+        return conn
+
     def setup_database(self, db_path: str, sqlite_database_dir: str, read_only: bool = False) -> None:
         """
-        Connect to a DuckDB file, creating it from SQLite if it doesn't exist.
+        Resolve the DuckDB file path, creating it from SQLite if it doesn't exist.
 
-        If ``db_path`` points to an existing DuckDB file, connects directly.
-        Otherwise, finds the SQLite file in ``sqlite_database_dir``,
-        converts it to DuckDB via ``register_sqlitedb_as_table``, then connects.
+        After this call, ``self._database`` is set. No persistent connection is held;
+        ``query()`` opens a fresh connection per call.
         """
         database_path = self._get_database_path(db_path)
+        self._database = database_path
 
         if database_path.exists():
-            self._database = database_path
-            self._CONN = duckdb.connect(database=str(database_path), read_only=read_only)
-            self._CONN.install_extension("sqlite")
-            self._CONN.load_extension("sqlite")
+            conn = self._open_connection(read_only=read_only)
+            try:
+                conn.execute("SELECT 1")
+            finally:
+                conn.close()
             return
 
-        # If it doesn't exist, we must create it in read-write mode
-        self._database = database_path
-        self._CONN = duckdb.connect(database=str(database_path), read_only=False)
-        self._CONN.install_extension("sqlite")
-        self._CONN.load_extension("sqlite")
-
-        self.register_sqlitedb_as_table(sqlite_database_dir)
+        conn = duckdb.connect(database=str(database_path), read_only=False)
+        conn.install_extension("sqlite")
+        conn.load_extension("sqlite")
+        try:
+            self._register_sqlitedb_as_table(conn, sqlite_database_dir)
+        finally:
+            conn.close()
 
     def get_connection(self, db_path: str | None = None, read_only: bool = False):
-        """Establish a singleton persistent DuckDB connection for this kernel."""
-        _CONN = self._CONN
+        """Open a new connection. Kept for backward compatibility."""
+        if db_path is not None:
+            self._database = self._get_database_path(db_path)
+        return self._open_connection(read_only=read_only)
 
-        if _CONN is None:
-            if db_path is None:
-                raise ValueError("db_path is required when opening a Database connection")
-            database_path = self._get_database_path(db_path)
-            database_str = str(database_path)
-            self._database = database_path
-            self._CONN = duckdb.connect(database=database_str, read_only=read_only)
-
-            self._CONN.install_extension("sqlite")
-            self._CONN.load_extension("sqlite")
-
-        return self._CONN
-
-    def register_sqlitedb_as_table(self, sqlite_database_path):
-        """
-        Import all tables from the SQLite database located in database_parent_dir
-        into the current DuckDB database. Expects exactly one *.sqlite file and
-        a database_description/ subdirectory in database_parent_dir.
-        """
-        if self._CONN is None:
-            raise RuntimeError(
-                "Call get_connection(db_path) before register_sqlitedb_as_table()."
-            )
+    def _register_sqlitedb_as_table(self, conn, sqlite_database_path):
+        if self._database is None:
+            raise RuntimeError("Call setup_database() before register_sqlitedb_as_table().")
 
         database_parent_dir = Path(sqlite_database_path).expanduser().resolve()
         database_description_path = database_parent_dir / "database_description"
@@ -113,7 +106,7 @@ class Database:
             quoted_table_name = self._quote_identifier(table_name)
             table_literal = self._quote_sql_literal(table_name)
 
-            self._CONN.execute(
+            conn.execute(
                 f"""
                 CREATE OR REPLACE TABLE {quoted_table_name} AS
                 SELECT *
@@ -121,22 +114,25 @@ class Database:
                 """
             )
 
-        return self._database
+    def register_sqlitedb_as_table(self, sqlite_database_path):
+        """Import all tables from SQLite. Kept for backward compatibility."""
+        conn = self._open_connection(read_only=False)
+        try:
+            self._register_sqlitedb_as_table(conn, sqlite_database_path)
+        finally:
+            conn.close()
 
-    def query(self, sql):
-        """Execute SQL on the shared connection and return a pandas DataFrame (requires pandas)."""
-        if self._CONN is None:
-            raise RuntimeError("Call setup_database() or get_connection(db_path) before query().")
-
-        return self._CONN.execute(sql).fetchdf()
+    def query(self, sql: str, read_only: bool = True):
+        """Execute SQL using a fresh connection and return a pandas DataFrame."""
+        conn = self._open_connection(read_only=read_only)
+        try:
+            return conn.execute(sql).fetchdf()
+        finally:
+            conn.close()
 
     def close_connection(self):
-        """Close the shared connection (optional)."""
-        _CONN = self._CONN
-
-        if _CONN is not None:
-            _CONN.close()
-            self._CONN = None
+        """No-op. Kept for backward compatibility."""
+        pass
 
 
 global_database = Database()

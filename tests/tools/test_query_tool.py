@@ -11,15 +11,8 @@ from src.utils.pydantic_models import (
     FilterIntent,
     QuerySchema,
 )
-from src.tools.query_tool import query_tool, execute_query, global_database
+from src.tools.query_tool import query_tool, execute_query
 from src.utils.rag.vector_controller import VectorController
-
-
-def _mock_setup_database(monkeypatch):
-    mock_conn = MagicMock()
-    def replacement(*a, **kw):
-        global_database._CONN = mock_conn
-    monkeypatch.setattr("src.tools.query_tool.global_database.setup_database", replacement)
 
 
 def _invoke_query_tool(query: QuerySchema):
@@ -77,7 +70,7 @@ class TestQueryToolBuildsValidSQL:
         mock_vc.get_current_index_entries.return_value = []
         monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
         monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda *a: entries)
-        _mock_setup_database(monkeypatch)
+        monkeypatch.setattr("src.tools.query_tool.global_database.query", lambda sql: pd.DataFrame())
 
         query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum")
         _, sql = _invoke_query_tool(query)
@@ -99,7 +92,7 @@ class TestQueryToolBuildsValidSQL:
         mock_vc.get_current_index_entries.return_value = []
         monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
         monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda *a: entries)
-        _mock_setup_database(monkeypatch)
+        monkeypatch.setattr("src.tools.query_tool.global_database.query", lambda sql: pd.DataFrame())
 
         query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum", filters=[fi])
         _, sql = _invoke_query_tool(query)
@@ -116,7 +109,7 @@ class TestQueryToolBuildsValidSQL:
         mock_vc.get_current_index_entries.return_value = []
         monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
         monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda *a: entries)
-        _mock_setup_database(monkeypatch)
+        monkeypatch.setattr("src.tools.query_tool.global_database.query", lambda sql: pd.DataFrame())
 
         query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum")
         _, sql = _invoke_query_tool(query)
@@ -132,7 +125,7 @@ class TestQueryToolBuildsValidSQL:
         mock_vc.get_current_index_entries.return_value = []
         monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
         monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda *a: entries)
-        _mock_setup_database(monkeypatch)
+        monkeypatch.setattr("src.tools.query_tool.global_database.query", lambda sql: pd.DataFrame())
 
         query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum")
         _, sql = _invoke_query_tool(query)
@@ -148,7 +141,7 @@ class TestQueryToolBuildsValidSQL:
         mock_vc.get_current_index_entries.return_value = []
         monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
         monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda *a: entries)
-        _mock_setup_database(monkeypatch)
+        monkeypatch.setattr("src.tools.query_tool.global_database.query", lambda sql: pd.DataFrame())
 
         query = QuerySchema(subject="provider", metric_hint="order value")
         _, sql = _invoke_query_tool(query)
@@ -164,7 +157,7 @@ class TestQueryToolBuildsValidSQL:
         mock_vc.get_current_index_entries.return_value = []
         monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
         monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda *a: entries)
-        _mock_setup_database(monkeypatch)
+        monkeypatch.setattr("src.tools.query_tool.global_database.query", lambda sql: pd.DataFrame())
 
         query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum", limit=5)
         _, sql = _invoke_query_tool(query)
@@ -182,7 +175,7 @@ class TestExecuteQueryDirectCall:
         mock_vc.get_current_index_entries.return_value = []
         monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
         monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda *a: entries)
-        _mock_setup_database(monkeypatch)
+        monkeypatch.setattr("src.tools.query_tool.global_database.query", lambda sql: pd.DataFrame())
 
         query = QuerySchema(subject="provider", metric_hint="order value", aggregation="sum")
         df, sql = execute_query(query)
@@ -237,8 +230,6 @@ class TestQueryToolIntegration:
             lambda *a, **kw: controller,
         )
         monkeypatch.setattr("src.tools.query_tool.global_database.query", lambda sql: pd.DataFrame())
-        _mock_setup_database(monkeypatch)
-        monkeypatch.setattr("src.tools.query_tool.global_database.close_connection", lambda: None)
 
         fi = FilterIntent(
             attribute_hint="provider",
