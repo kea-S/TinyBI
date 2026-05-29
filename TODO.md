@@ -71,10 +71,10 @@ The goal is to frame the Text-to-SQL evaluation as a **"System Health & Monitori
 - [ ] Vector search places string categorical values ("North Bohemia") onto numeric columns (`trans.amount`). Need a type compatibility gate in `column_resolver.py:resolve_columns()`.
 - [ ] Open question: how conservative should the gate be? Numeric comparisons like "balance > 10000" should still land on numeric columns.
 
-### H4: Empty SELECT clause (needs design discussion)
-- [ ] When LLM fails to resolve any column, SQL becomes `SELECT FROM ...` -- DuckDB Parser Error.
-- [ ] Option A: `COALESCE(1)` fallback (hides errors).
-- [ ] Option B: Raise clear error, feed back to agent for self-correction.
+### H4: Empty SELECT clause -- FIXED
+- [x] When LLM fails to resolve any column, SQL becomes `SELECT FROM ...` -- DuckDB Parser Error.
+- [x] Chose Option B: Raise clear error, feed back to agent for self-correction.
+- [x] Guard added in `src/tools/query_tool.py:73-78`.
 
 ### H5: Date operations in FilterIntent (deferred)
 - [ ] Pipeline targets "simpler" SQL. Complex queries (CTEs, STRFTIME, subqueries) intended for LLM-generated SQL path, not the structured pipeline.

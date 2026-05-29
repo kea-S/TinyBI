@@ -1,4 +1,5 @@
 import json
+import math
 import sys
 from pathlib import Path
 from datetime import date, datetime
@@ -17,9 +18,33 @@ class BenchmarkEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, (date, datetime)):
             return obj.isoformat()
+        if isinstance(obj, float) and (math.isnan(obj) or math.isinf(obj)):
+            return None
+        try:
+            if pd.isna(obj):
+                return None
+        except (TypeError, ValueError):
+            pass
         if isinstance(obj, pd.Timestamp):
             return obj.isoformat()
         return super().default(obj)
+
+    def _sanitize(self, obj):
+        if isinstance(obj, float) and (math.isnan(obj) or math.isinf(obj)):
+            return None
+        try:
+            if pd.isna(obj):
+                return None
+        except (TypeError, ValueError):
+            pass
+        if isinstance(obj, dict):
+            return {k: self._sanitize(v) for k, v in obj.items()}
+        if isinstance(obj, list):
+            return [self._sanitize(v) for v in obj]
+        return obj
+
+    def encode(self, o):
+        return super().encode(self._sanitize(o))
 
 
 def _get_llm(model_name: str, local: bool):

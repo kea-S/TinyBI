@@ -70,6 +70,12 @@ def execute_query(structured_query: QuerySchema):
     if metric_clause:
         select_parts.append(metric_clause)
     select_clause = ", ".join(select_parts)
+    if not select_clause:
+        raise ValueError(
+            "No columns could be resolved for the SELECT clause. "
+            "Please rephrase your question to specify what you want to see "
+            "(e.g. a subject, metric, or both)."
+        )
 
     sql_parts = [
         f"SELECT {select_clause}",

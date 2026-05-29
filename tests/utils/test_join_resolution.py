@@ -41,7 +41,7 @@ class TestResolveJoins:
         assert result.from_table == "sales"
         assert len(result.joins) == 1
         assert result.joins[0].table == "users"
-        assert result.joins[0].on_clause == "sales.user_id = users.id"
+        assert result.joins[0].on_clause == '"sales"."user_id" = "users"."id"'
 
     def test_resolve_joins_multi_hop_connection(self, sample_entries, schema_graph):
         # sales -> users -> companies

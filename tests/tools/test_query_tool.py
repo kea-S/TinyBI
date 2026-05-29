@@ -8,7 +8,9 @@ import pytest
 from src.utils.pydantic_models import (
     ColumnVectorIndexEntry,
     FinalEntries,
+    FinalJoins,
     FilterIntent,
+    JoinStep,
     QuerySchema,
 )
 from src.tools.query_tool import query_tool, execute_query
@@ -147,6 +149,28 @@ class TestQueryToolBuildsValidSQL:
         _, sql = _invoke_query_tool(query)
 
         assert "GROUP BY" not in sql
+
+    def test_raises_when_no_subject_or_metric_resolved(self, monkeypatch):
+        entries = FinalEntries(
+            subject_entries=[],
+            metric_entry=None,
+            filter_entries={},
+        )
+        joins = FinalJoins(from_table="orders", joins=[])
+        mock_vc = MagicMock()
+        mock_vc.run.return_value = MagicMock()
+        mock_vc.get_current_index_entries.return_value = []
+        monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
+        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda *a: entries)
+        monkeypatch.setattr("src.tools.query_tool.resolve_joins", lambda *a: joins)
+        db_mock = MagicMock()
+        monkeypatch.setattr("src.tools.query_tool.global_database", db_mock)
+
+        query = QuerySchema(subject="provider", metric_hint="order value")
+        with pytest.raises(ValueError, match="No columns could be resolved"):
+            _invoke_query_tool(query)
+
+        db_mock.query.assert_not_called()
 
     def test_limit_applied(self, monkeypatch):
         entries = _base_final_entries(

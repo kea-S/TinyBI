@@ -518,6 +518,14 @@ function VectorIndexBuilderPageInner({ tables, setTables, isVisible }: VectorInd
             description: c.description || null,
             data_format: c.dataFormat || null,
             statistical_type: c.statisticalType,
+            categorical_values: Object.fromEntries(
+              c.categoricalValues
+                .filter(cv => cv.dbValue.trim() !== "")
+                .map(cv => [
+                  cv.dbValue.trim(),
+                  cv.synonymsText.split(",").map(s => s.trim()).filter(Boolean),
+                ])
+            ),
             aliases: c.aliasesText.split(",").map(a => a.trim()).filter(Boolean),
             sample_values: c.sampleValuesText.split(",").map(a => a.trim()).filter(Boolean),
             payload: JSON.parse(c.payloadText),

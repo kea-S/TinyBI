@@ -576,6 +576,318 @@
   },
   {
     "entry_id": 20,
+    "table_name": "district",
+    "column_name": "A4",
+    "source_key": "district.A4",
+    "description": "number of inhabitants in the district.",
+    "data_format": "str",
+    "statistical_type": "discrete",
+    "categorical_values": {},
+    "aliases": [
+      "number of inhabitants"
+    ],
+    "sample_values": [
+      "1204953",
+      "88884",
+      "75232",
+      "149893",
+      "95616"
+    ],
+    "payload": {
+      "is_groupable": false
+    },
+    "references": null
+  },
+  {
+    "entry_id": 21,
+    "table_name": "district",
+    "column_name": "A5",
+    "source_key": "district.A5",
+    "description": "no. of municipalities with inhabitants less than 499. municipality < district < region.",
+    "data_format": "str",
+    "statistical_type": "discrete",
+    "categorical_values": {},
+    "aliases": [
+      "no. of municipalities with inhabitants < 499"
+    ],
+    "sample_values": [
+      "0",
+      "80",
+      "55",
+      "63",
+      "65"
+    ],
+    "payload": {
+      "is_groupable": false
+    },
+    "references": null
+  },
+  {
+    "entry_id": 22,
+    "table_name": "district",
+    "column_name": "A6",
+    "source_key": "district.A6",
+    "description": "no. of municipalities with inhabitants between 500 and 1999. municipality < district < region.",
+    "data_format": "str",
+    "statistical_type": "discrete",
+    "categorical_values": {},
+    "aliases": [
+      "no. of municipalities with inhabitants 500-1999"
+    ],
+    "sample_values": [
+      "0",
+      "26",
+      "29",
+      "30",
+      "23"
+    ],
+    "payload": {
+      "is_groupable": false
+    },
+    "references": null
+  },
+  {
+    "entry_id": 23,
+    "table_name": "district",
+    "column_name": "A7",
+    "source_key": "district.A7",
+    "description": "no. of municipalities with inhabitants between 2000 and 9999. municipality < district < region.",
+    "data_format": "str",
+    "statistical_type": "discrete",
+    "categorical_values": {},
+    "aliases": [
+      "no. of municipalities with inhabitants 2000-9999"
+    ],
+    "sample_values": [
+      "0",
+      "6",
+      "4",
+      "1",
+      "7"
+    ],
+    "payload": {
+      "is_groupable": false
+    },
+    "references": null
+  },
+  {
+    "entry_id": 24,
+    "table_name": "district",
+    "column_name": "A8",
+    "source_key": "district.A8",
+    "description": "no. of municipalities with inhabitants greater than 10000. municipality < district < region.",
+    "data_format": "int64",
+    "statistical_type": "discrete",
+    "categorical_values": {},
+    "aliases": [
+      "no. of municipalities with inhabitants > 10000"
+    ],
+    "sample_values": [
+      "1",
+      "2",
+      "3",
+      "0",
+      "4"
+    ],
+    "payload": {
+      "is_groupable": false
+    },
+    "references": null
+  },
+  {
+    "entry_id": 25,
+    "table_name": "district",
+    "column_name": "A9",
+    "source_key": "district.A9",
+    "description": "number of cities in the district.",
+    "data_format": "int64",
+    "statistical_type": "discrete",
+    "categorical_values": {},
+    "aliases": [
+      "no. of cities"
+    ],
+    "sample_values": [
+      "1",
+      "5",
+      "6",
+      "4",
+      "8"
+    ],
+    "payload": {
+      "is_groupable": false
+    },
+    "references": null
+  },
+  {
+    "entry_id": 26,
+    "table_name": "district",
+    "column_name": "A10",
+    "source_key": "district.A10",
+    "description": "ratio of urban inhabitants in the district.",
+    "data_format": "float64",
+    "statistical_type": "continuous",
+    "categorical_values": {},
+    "aliases": [
+      "ratio of urban inhabitants"
+    ],
+    "sample_values": [
+      "100.0",
+      "46.7",
+      "41.7",
+      "67.4",
+      "51.4"
+    ],
+    "payload": {
+      "is_groupable": false
+    },
+    "references": null
+  },
+  {
+    "entry_id": 27,
+    "table_name": "district",
+    "column_name": "A11",
+    "source_key": "district.A11",
+    "description": "average salary in the district.",
+    "data_format": "int64",
+    "statistical_type": "discrete",
+    "categorical_values": {},
+    "aliases": [
+      "average salary"
+    ],
+    "sample_values": [
+      "12541",
+      "8507",
+      "8980",
+      "9753",
+      "9307"
+    ],
+    "payload": {
+      "is_groupable": false
+    },
+    "references": null
+  },
+  {
+    "entry_id": 28,
+    "table_name": "district",
+    "column_name": "A12",
+    "source_key": "district.A12",
+    "description": "unemployment rate in the district for 1995.",
+    "data_format": "float64",
+    "statistical_type": "continuous",
+    "categorical_values": {},
+    "aliases": [
+      "unemployment rate 1995"
+    ],
+    "sample_values": [
+      "0.2",
+      "1.6",
+      "1.9",
+      "4.6",
+      "3.8"
+    ],
+    "payload": {
+      "is_groupable": false
+    },
+    "references": null
+  },
+  {
+    "entry_id": 29,
+    "table_name": "district",
+    "column_name": "A13",
+    "source_key": "district.A13",
+    "description": "unemployment rate in the district for 1996.",
+    "data_format": "float64",
+    "statistical_type": "continuous",
+    "categorical_values": {},
+    "aliases": [
+      "unemployment rate 1996"
+    ],
+    "sample_values": [
+      "0.43",
+      "1.85",
+      "2.21",
+      "5.05",
+      "4.43"
+    ],
+    "payload": {
+      "is_groupable": false
+    },
+    "references": null
+  },
+  {
+    "entry_id": 30,
+    "table_name": "district",
+    "column_name": "A14",
+    "source_key": "district.A14",
+    "description": "no. of entrepreneurs per 1000 inhabitants in the district.",
+    "data_format": "int64",
+    "statistical_type": "discrete",
+    "categorical_values": {},
+    "aliases": [
+      "no. of entrepreneurs per 1000 inhabitants"
+    ],
+    "sample_values": [
+      "167",
+      "132",
+      "111",
+      "109",
+      "118"
+    ],
+    "payload": {
+      "is_groupable": false
+    },
+    "references": null
+  },
+  {
+    "entry_id": 31,
+    "table_name": "district",
+    "column_name": "A15",
+    "source_key": "district.A15",
+    "description": "no. of committed crimes in the district for 1995.",
+    "data_format": "int64",
+    "statistical_type": "discrete",
+    "categorical_values": {},
+    "aliases": [
+      "no. of committed crimes 1995"
+    ],
+    "sample_values": [
+      "85677",
+      "2159",
+      "2824",
+      "5244",
+      "2616"
+    ],
+    "payload": {
+      "is_groupable": false
+    },
+    "references": null
+  },
+  {
+    "entry_id": 32,
+    "table_name": "district",
+    "column_name": "A16",
+    "source_key": "district.A16",
+    "description": "no. of committed crimes in the district for 1996.",
+    "data_format": "int64",
+    "statistical_type": "discrete",
+    "categorical_values": {},
+    "aliases": [
+      "no. of committed crimes 1996"
+    ],
+    "sample_values": [
+      "99107",
+      "2674",
+      "2813",
+      "5892",
+      "3040"
+    ],
+    "payload": {
+      "is_groupable": false
+    },
+    "references": null
+  },
+  {
+    "entry_id": 33,
     "table_name": "loan",
     "column_name": "loan_id",
     "source_key": "loan.loan_id",
@@ -599,7 +911,7 @@
     "references": null
   },
   {
-    "entry_id": 21,
+    "entry_id": 34,
     "table_name": "loan",
     "column_name": "account_id",
     "source_key": "loan.account_id",
@@ -623,7 +935,7 @@
     "references": "account.account_id"
   },
   {
-    "entry_id": 22,
+    "entry_id": 35,
     "table_name": "loan",
     "column_name": "date",
     "source_key": "loan.date",
@@ -645,7 +957,7 @@
     "references": null
   },
   {
-    "entry_id": 23,
+    "entry_id": 36,
     "table_name": "loan",
     "column_name": "amount",
     "source_key": "loan.amount",
@@ -667,13 +979,13 @@
     "references": null
   },
   {
-    "entry_id": 24,
+    "entry_id": 37,
     "table_name": "loan",
     "column_name": "duration",
     "source_key": "loan.duration",
     "description": "loan duration. Unit: month",
     "data_format": "int64",
-    "statistical_type": "temporal",
+    "statistical_type": "discrete",
     "categorical_values": {},
     "aliases": [
       "loan duration"
@@ -691,7 +1003,7 @@
     "references": null
   },
   {
-    "entry_id": 25,
+    "entry_id": 38,
     "table_name": "loan",
     "column_name": "payments",
     "source_key": "loan.payments",
@@ -715,7 +1027,7 @@
     "references": null
   },
   {
-    "entry_id": 26,
+    "entry_id": 39,
     "table_name": "loan",
     "column_name": "status",
     "source_key": "loan.status",
@@ -751,7 +1063,7 @@
     "references": null
   },
   {
-    "entry_id": 27,
+    "entry_id": 40,
     "table_name": "order",
     "column_name": "order_id",
     "source_key": "order.order_id",
@@ -775,7 +1087,7 @@
     "references": null
   },
   {
-    "entry_id": 28,
+    "entry_id": 41,
     "table_name": "order",
     "column_name": "account_id",
     "source_key": "order.account_id",
@@ -799,7 +1111,7 @@
     "references": "account.account_id"
   },
   {
-    "entry_id": 29,
+    "entry_id": 42,
     "table_name": "order",
     "column_name": "bank_to",
     "source_key": "order.bank_to",
@@ -838,7 +1150,7 @@
     "references": null
   },
   {
-    "entry_id": 30,
+    "entry_id": 43,
     "table_name": "order",
     "column_name": "amount",
     "source_key": "order.amount",
@@ -862,7 +1174,7 @@
     "references": null
   },
   {
-    "entry_id": 31,
+    "entry_id": 44,
     "table_name": "order",
     "column_name": "k_symbol",
     "source_key": "order.k_symbol",
@@ -901,7 +1213,7 @@
     "references": null
   },
   {
-    "entry_id": 32,
+    "entry_id": 45,
     "table_name": "trans",
     "column_name": "trans_id",
     "source_key": "trans.trans_id",
@@ -925,7 +1237,7 @@
     "references": null
   },
   {
-    "entry_id": 33,
+    "entry_id": 46,
     "table_name": "trans",
     "column_name": "account_id",
     "source_key": "trans.account_id",
@@ -949,7 +1261,7 @@
     "references": "account.account_id"
   },
   {
-    "entry_id": 34,
+    "entry_id": 47,
     "table_name": "trans",
     "column_name": "date",
     "source_key": "trans.date",
@@ -973,7 +1285,7 @@
     "references": null
   },
   {
-    "entry_id": 35,
+    "entry_id": 48,
     "table_name": "trans",
     "column_name": "type",
     "source_key": "trans.type",
@@ -1005,7 +1317,7 @@
     "references": null
   },
   {
-    "entry_id": 36,
+    "entry_id": 49,
     "table_name": "trans",
     "column_name": "operation",
     "source_key": "trans.operation",
@@ -1045,7 +1357,7 @@
     "references": null
   },
   {
-    "entry_id": 37,
+    "entry_id": 50,
     "table_name": "trans",
     "column_name": "amount",
     "source_key": "trans.amount",
@@ -1069,7 +1381,7 @@
     "references": null
   },
   {
-    "entry_id": 38,
+    "entry_id": 51,
     "table_name": "trans",
     "column_name": "balance",
     "source_key": "trans.balance",
@@ -1093,7 +1405,7 @@
     "references": null
   },
   {
-    "entry_id": 39,
+    "entry_id": 52,
     "table_name": "trans",
     "column_name": "k_symbol",
     "source_key": "trans.k_symbol",
@@ -1142,7 +1454,7 @@
     "references": null
   },
   {
-    "entry_id": 40,
+    "entry_id": 53,
     "table_name": "trans",
     "column_name": "bank",
     "source_key": "trans.bank",
@@ -1180,7 +1492,7 @@
     "references": null
   },
   {
-    "entry_id": 41,
+    "entry_id": 54,
     "table_name": "trans",
     "column_name": "account",
     "source_key": "trans.account",
