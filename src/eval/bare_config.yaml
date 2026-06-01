@@ -11,11 +11,11 @@ providers:
       model_name: 'deepseek/deepseek-v4-flash'
       local: false
 
-  - id: python:./extractor_provider.py
-    label: 'Extractor: deepseek-v4-flash'
-    config:
-      model_name: 'deepseek/deepseek-v4-flash'
-      local: false
+  #- id: python:./extractor_provider.py
+  #  label: 'Extractor: deepseek-v4-flash'
+  #  config:
+  #    model_name: 'deepseek/deepseek-v4-flash'
+  #    local: false
 
   #- id: python:./provider.py
   #  label: 'Agent: granite4'

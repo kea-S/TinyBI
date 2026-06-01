@@ -72,10 +72,10 @@ async def call_api(prompt, options, context):
 
     return {
         "output": json.dumps(result, indent=2, cls=BenchmarkEncoder),
-        "metadata": {
+        "metadata": BenchmarkEncoder()._sanitize({
             "model_name": model_name,
             "local": local,
             "parsed_sql": result.get("sql"),
             "data": result.get("data"),
-        },
+        }),
     }

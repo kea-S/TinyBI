@@ -52,8 +52,10 @@ class FilterIntent(BaseModel):
     raw_value_text: tuple[str, ...] = Field(
         ...,
         description="""
-            Literal values copied from the user request detailing what the user
-            intends to filter for in the target field. Always a tuple.
+            Literal, concrete values copied from the user request. Do NOT
+            include relative or comparative terms (e.g. "oldest",
+            "latest", "cheapest", "fastest") — those are ordering or
+            aggregation hints, not column values. Always a tuple.
         """,
     )
 

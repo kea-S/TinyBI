@@ -34,7 +34,15 @@ Rules:
   `operator` to null.
 - Use `negated = true` for excluding words like except, excluding, without,
   other than.
-- Copy filter values from the user's wording as literally as possible.
+- Copy filter values from the user's wording literally, but only for
+  concrete values: names, codes, numbers, categories, or explicit dates
+  (YYYY-MM-DD). Do NOT copy relative or comparative terms (e.g.
+  "oldest", "youngest", "latest", "after transaction", "before payment")
+  as filter values — resolve those into `aggregation`, `sort_on`, or
+  an explicit date/datetime instead.
+- Date values in filters MUST be explicit date strings (YYYY-MM-DD
+  format). Relative time expressions like "last year" or "this month"
+  must be translated into concrete date ranges — never passed literally.
 - If multiple values belong to one filter, use a list in `raw_value_text`.
 - If the request asks for a single overall value with no grouping, use a broad
   subject like "overall".

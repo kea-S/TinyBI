@@ -67,12 +67,12 @@ async def call_api(prompt, options, context):
                 indent=2,
                 cls=BenchmarkEncoder,
             ),
-            "metadata": {
+            "metadata": BenchmarkEncoder()._sanitize({
                 "model_name": model_name,
                 "local": local,
                 "parsed_sql": sql,
                 "data": data,
-            },
+            }),
         }
     except Exception as e:
         result = {
