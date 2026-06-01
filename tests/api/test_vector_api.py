@@ -93,7 +93,7 @@ def test_batch_insert_index_entries_endpoint(monkeypatch):
 
     assert response.status_code == 201
     assert response.json() == {
-        "embedding_model": "nomic-embed-text",
+        "embedding_model": "qwen3-embedding:0.6b",
         "entry_count": 1,
         "table_names": ["orders"],
         "vector_index_path": "/tmp/columns.faiss",

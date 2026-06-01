@@ -1,0 +1,33 @@
+services:
+  promptfoo-view:
+    build:
+      context: .
+    image: tinybi-promptfoo:latest
+    ports:
+      - "15500:15500"
+    volumes:
+      - "./data:/app/data"
+      - "./data/promptfoo_store:/root/.promptfoo"
+    env_file: .env
+    environment:
+      - OLLAMA_HOST=http://host.docker.internal:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: ["promptfoo", "view", "--port", "15500"]
+    restart: unless-stopped
+
+  promptfoo-eval:
+    build:
+      context: .
+    image: tinybi-promptfoo:latest
+    volumes:
+      - "./src:/app/src"
+      - "./data:/app/data"
+      - "./data/promptfoo_store:/root/.promptfoo"
+    env_file: .env
+    environment:
+      - PROMPTFOO_PYTHON=/usr/local/bin/python3
+      - PYTHONPATH=/app
+      - OLLAMA_HOST=http://host.docker.internal:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

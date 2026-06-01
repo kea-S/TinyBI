@@ -66,7 +66,7 @@ async def call_api(prompt, options, context):
     local = config.get("local", False)
 
     llm = _get_llm(model_name, local)
-    
+
     # Run the full agent pipeline
     result = await run_agent([HumanMessage(content=prompt)], llm)
 
@@ -79,4 +79,3 @@ async def call_api(prompt, options, context):
             "data": result.get("data"),
         },
     }
-

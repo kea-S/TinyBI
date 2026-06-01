@@ -120,3 +120,130 @@ class TestValueResolverNewTaxonomy:
         )
         result = resolve_filter_literals(intent, entry)
         assert result.raw_value_text == ("F",)
+
+
+class TestCanResolveValueTypeCompatibility:
+    """H2: String categorical values must not bind to numeric columns."""
+
+    def test_string_value_on_continuous_rejected(self):
+        entry = make_entry(statistical_type="continuous")
+        intent = FilterIntent(
+            attribute_hint="amount",
+            operator="=",
+            raw_value_text=["North Bohemia"],
+        )
+        assert can_resolve_value(intent, entry) is False
+
+    def test_string_value_on_discrete_rejected(self):
+        entry = make_entry(statistical_type="discrete")
+        intent = FilterIntent(
+            attribute_hint="count",
+            operator="=",
+            raw_value_text=["North Bohemia"],
+        )
+        assert can_resolve_value(intent, entry) is False
+
+    def test_string_value_on_quantitative_rejected(self):
+        entry = make_entry(statistical_type="quantitative")
+        intent = FilterIntent(
+            attribute_hint="value",
+            operator="=",
+            raw_value_text=["North Bohemia"],
+        )
+        assert can_resolve_value(intent, entry) is False
+
+    def test_numeric_value_on_continuous_accepted(self):
+        entry = make_entry(statistical_type="continuous")
+        intent = FilterIntent(
+            attribute_hint="amount",
+            operator=">",
+            raw_value_text=["10000"],
+        )
+        assert can_resolve_value(intent, entry) is True
+
+    def test_numeric_value_on_discrete_accepted(self):
+        entry = make_entry(statistical_type="discrete")
+        intent = FilterIntent(
+            attribute_hint="duration",
+            operator="=",
+            raw_value_text=["12"],
+        )
+        assert can_resolve_value(intent, entry) is True
+
+    def test_numeric_value_on_quantitative_accepted(self):
+        entry = make_entry(statistical_type="quantitative")
+        intent = FilterIntent(
+            attribute_hint="balance",
+            operator=">=",
+            raw_value_text=["5000"],
+        )
+        assert can_resolve_value(intent, entry) is True
+
+    def test_float_value_on_continuous_accepted(self):
+        entry = make_entry(statistical_type="continuous")
+        intent = FilterIntent(
+            attribute_hint="rate",
+            operator="<",
+            raw_value_text=["3.14"],
+        )
+        assert can_resolve_value(intent, entry) is True
+
+    def test_negative_numeric_value_accepted(self):
+        entry = make_entry(statistical_type="continuous")
+        intent = FilterIntent(
+            attribute_hint="delta",
+            operator="<=",
+            raw_value_text=["-42.5"],
+        )
+        assert can_resolve_value(intent, entry) is True
+
+    def test_categorical_entry_with_string_value_accepted(self):
+        entry = make_entry(
+            statistical_type="nominal",
+            categorical_values={"North Bohemia": ["north bohemia"]},
+        )
+        intent = FilterIntent(
+            attribute_hint="region",
+            operator="=",
+            raw_value_text=["North Bohemia"],
+        )
+        assert can_resolve_value(intent, entry) is True
+
+    def test_categorical_entry_unrelated_value_rejected(self):
+        entry = make_entry(
+            statistical_type="categorical",
+            categorical_values={"apple": ["fruit"], "banana": ["fruit"]},
+        )
+        intent = FilterIntent(
+            attribute_hint="food",
+            operator="=",
+            raw_value_text=["car"],
+        )
+        assert can_resolve_value(intent, entry) is False
+
+    def test_temporal_entry_passthrough_unaffected(self):
+        entry = make_entry(statistical_type="temporal")
+        intent = FilterIntent(
+            attribute_hint="date",
+            operator="BETWEEN",
+            raw_value_text=["2024-01-01", "2024-12-31"],
+        )
+        assert can_resolve_value(intent, entry) is True
+
+    def test_identifier_entry_passthrough_unaffected(self):
+        entry = make_entry(statistical_type="identifier")
+        intent = FilterIntent(
+            attribute_hint="client_id",
+            operator="=",
+            raw_value_text=["ABC-123"],
+        )
+        assert can_resolve_value(intent, entry) is True
+
+    def test_mixed_numeric_and_non_numeric_values_rejected(self):
+        entry = make_entry(statistical_type="continuous")
+        intent = FilterIntent(
+            attribute_hint="amount",
+            operator="IN",
+            raw_value_text=("100", "North Bohemia"),
+        )
+        assert can_resolve_value(intent, entry) is False

@@ -110,6 +110,3 @@ class VectorController:
             metric_entries=metric_results,
             filter_entries=filter_candidates
         )
-
-
-

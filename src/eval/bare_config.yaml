@@ -6,28 +6,28 @@ evaluateOptions:
 
 providers:
   - id: python:./provider.py
-    label: 'Agent: gpt-4o'
+    label: 'Agent: deepseek-v4-flash'
     config:
-      model_name: 'gpt-4o'
+      model_name: 'deepseek/deepseek-v4-flash'
       local: false
 
   - id: python:./extractor_provider.py
-    label: 'Extractor: gpt-4o'
+    label: 'Extractor: deepseek-v4-flash'
     config:
-      model_name: 'gpt-4o'
+      model_name: 'deepseek/deepseek-v4-flash'
       local: false
 
-  - id: python:./provider.py
-    label: 'Agent: granite4'
-    config:
-      model_name: "granite4:3b"
-      local: true
+  #- id: python:./provider.py
+  #  label: 'Agent: granite4'
+  #  config:
+  #    model_name: "granite4:3b"
+  #    local: true
 
-  - id: python:./extractor_provider.py
-    label: 'Extractor: granite4'
-    config:
-      model_name: "granite4:3b"
-      local: true
+  #- id: python:./extractor_provider.py
+  #  label: 'Extractor: granite4'
+  #  config:
+  #    model_name: "granite4:3b"
+  #    local: true
   
 defaultTest:
   assert:
@@ -36,14 +36,3 @@ defaultTest:
 
 tests:
   - ./tests.yaml
-  # - vars:
-  #     id: example-001
-  #     description: "Time series test case"
-  #     query: "Time series by month of total_parcels"
-  #     ground_truth: "0104.10.10"
-
-  - vars:
-      id: example-002
-      description: "Underperforming providers test case"
-      query: "List the top 5 underperforming logistics providers by average bwt in jan"
-      ground_truth: "90.25"

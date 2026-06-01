@@ -399,6 +399,12 @@ class ColumnVectorIndexEntry(BaseModel):
             lines.append(f"Aliases: {', '.join(self.aliases)}")
         if self.sample_values:
             lines.append(f"Sample values: {', '.join(self.sample_values)}")
+        if self.statistical_type:
+            lines.append(f"Statistical type: {self.statistical_type}")
+        if self.categorical_values:
+            for db_value, synonyms in self.categorical_values.items():
+                parts = [db_value] + (synonyms or [])
+                lines.append(f"Category: {', '.join(parts)}")
 
         for key, value in self.payload.items():
             if value is None:
@@ -497,18 +503,3 @@ class FinalJoins(BaseModel):
     """
     from_table: str
     joins: list[JoinStep]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

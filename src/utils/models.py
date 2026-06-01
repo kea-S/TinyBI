@@ -1,6 +1,7 @@
 from langchain_groq import ChatGroq
 from langchain_ollama import ChatOllama, OllamaEmbeddings
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_openrouter import ChatOpenRouter
 
 from dotenv import load_dotenv
 
@@ -13,6 +14,7 @@ LANGCHAIN = "langchain"
 # models to be experimented with
 REMOTE_GPT_4o = "gpt-4o"
 REMOTE_GPT_OSS_LARGE = "openai/gpt-oss-120b"
+REMOTE_OPENROUTER = "deepseek/deepseek-v4-flash"
 REMOTE_LLAMA_8B = "llama-3.1-8b-instant"
 LOCAL_GEMMA3 = "gemma3:4b"
 LOCAL_GEMMA4 = "gemma4:e4b"
@@ -31,7 +33,7 @@ QWEN3_EMBEDDING = "qwen3-embedding:0.6b"
 BGE_M3 = "bge-m3:567m"
 OPENAI_TEXT_EMBEDDING_3_SMALL = "text-embedding-3-small"
 
-DEFAULT_EMBEDDING_MODEL = NOMIC_EMBED_TEXT
+DEFAULT_EMBEDDING_MODEL = QWEN3_EMBEDDING
 EMBEDDING_MODELS_BY_KEY = {
     "nomic": NOMIC_EMBED_TEXT,
     "qwen3": QWEN3_EMBEDDING,
@@ -45,6 +47,8 @@ def get_remote_llm(name: str):
         return ChatOpenAI(model=REMOTE_GPT_4o)
     elif name == REMOTE_LLAMA_8B:
         return ChatGroq(model=REMOTE_LLAMA_8B)
+    elif name == REMOTE_OPENROUTER:
+        return ChatOpenRouter(model=REMOTE_OPENROUTER)
     else:
         return ChatGroq(model=REMOTE_GPT_OSS_LARGE)
 
@@ -79,5 +83,3 @@ def get_embedding_model_name_from_key(key: str) -> str:
         raise ValueError(
             f"Unsupported embedding model key '{key}'. Supported keys: {supported_keys}"
         ) from exc
-
-

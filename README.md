@@ -146,6 +146,56 @@ uv run pytest -m "not integration"
 cd frontend && npm test
 ```
 
+## LLM Evaluation (promptfoo)
+
+promptfoo runs in a **Docker container** to avoid dependency issues on the host machine.
+
+### 1. Build the image
+
+```bash
+docker compose build
+```
+
+### 2. Generate test cases and prepare the database (on host)
+
+```bash
+uv run python src/eval/generate_tests.py \
+  --input data/app_data/bird_financial_minidev.json \
+  --output src/eval/tests.yaml
+
+uv run python scripts/prepare_db.py \
+  --duckdb data/intermediate/financial.duckdb \
+  --sqlite data/minidev_raw/financial/financial.sqlite
+```
+
+### 3. Run the evaluation
+
+```bash
+./scripts/eval.sh -c src/eval/bare_config.yaml --output data/app_data/eval_results.json
+```
+
+For the alternative config with manual test cases:
+
+```bash
+./scripts/eval.sh -c src/eval/heavy_config.yaml --output data/app_data/eval_results.json
+```
+
+### 4. Inspect results
+
+```bash
+# Start the web UI (runs in background)
+docker compose up promptfoo-view -d
+
+# Open the dashboard
+open http://localhost:15500
+```
+
+To stop the web UI:
+
+```bash
+docker compose down
+```
+
 ## Project structure
 
 ```

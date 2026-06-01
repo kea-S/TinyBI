@@ -6,7 +6,8 @@ from typing import Dict, List, Tuple, Optional
 from src.utils.pydantic_models import (
     FilterIntent, 
     ColumnVectorIndexEntry,
-    CATEGORICAL_TYPES
+    CATEGORICAL_TYPES,
+    QUANTITATIVE_TYPES,
 )
 
 logger = logging.getLogger(__name__)
@@ -87,6 +88,13 @@ def can_resolve_value(
     is_categorical, categories, norm_map, synonym_map, fuzzy_candidates = _get_resolution_context(index_entry)
 
     if not is_categorical:
+        if index_entry.statistical_type in QUANTITATIVE_TYPES:
+            raw_values = _as_list(filter_intent.raw_value_text)
+            for v in raw_values:
+                try:
+                    float(v)
+                except ValueError:
+                    return False
         return True
 
     if not categories and not synonym_map:

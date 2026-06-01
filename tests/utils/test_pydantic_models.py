@@ -564,3 +564,44 @@ def test_column_vector_entry_accepts_valid_categorical_values():
         categorical_values={"M": ["Male"]}
     )
     assert entry.categorical_values == {"M": ["Male"]}
+
+
+def test_to_embedding_text_includes_statistical_type():
+    entry = ColumnVectorIndexEntry(
+        entry_id=1,
+        table_name="orders",
+        column_name="order_value",
+        source_key="orders.order_value",
+        statistical_type="quantitative",
+    )
+    text = entry.to_embedding_text()
+    assert "Statistical type: quantitative" in text
+
+
+def test_to_embedding_text_includes_categorical_values():
+    entry = ColumnVectorIndexEntry(
+        entry_id=2,
+        table_name="district",
+        column_name="A3",
+        source_key="district.A3",
+        statistical_type="nominal",
+        categorical_values={"North Bohemia": ["north bohemia"], "Prague": []},
+    )
+    text = entry.to_embedding_text()
+    assert "North Bohemia" in text
+    assert "north bohemia" in text
+    assert "Prague" in text
+    assert "Category:" in text
+
+
+def test_to_embedding_text_excludes_categorical_values_for_empty():
+    entry = ColumnVectorIndexEntry(
+        entry_id=3,
+        table_name="trans",
+        column_name="amount",
+        source_key="trans.amount",
+        statistical_type="quantitative",
+        categorical_values={},
+    )
+    text = entry.to_embedding_text()
+    assert "Category:" not in text
