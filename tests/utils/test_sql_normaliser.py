@@ -68,6 +68,22 @@ class TestMapMetric:
         )
         assert map_metric(entry, "avg") == 'AVG("shipments"."bwt")'
 
+    def test_with_count_distinct_aggregation(self):
+        entry = ColumnVectorIndexEntry(
+            entry_id=1, table_name='shipments',
+            column_name='district_id', source_key='shipments.district_id',
+            statistical_type='nominal',
+        )
+        assert map_metric(entry, "count_distinct") == 'COUNT(DISTINCT "shipments"."district_id")'
+
+    def test_with_count_aggregation(self):
+        entry = ColumnVectorIndexEntry(
+            entry_id=1, table_name='shipments',
+            column_name='parcel_id', source_key='shipments.parcel_id',
+            statistical_type='quantitative',
+        )
+        assert map_metric(entry, "count") == 'COUNT("shipments"."parcel_id")'
+
     def test_without_aggregation(self):
         entry = ColumnVectorIndexEntry(
             entry_id=1, table_name='shipments',
@@ -126,6 +142,17 @@ class TestMapSortOn:
             statistical_type='quantitative',
         )
         assert map_sort_on("metric_hint", metric_entry, [], "avg") == 'AVG("shipments"."order_value")'
+
+    def test_sort_on_metric_with_count_distinct(self):
+        from src.utils.pydantic_models import ColumnVectorIndexEntry
+        metric_entry = ColumnVectorIndexEntry(
+            entry_id=1,
+            table_name='shipments',
+            column_name='district_id',
+            source_key='shipments.district_id',
+            statistical_type='nominal',
+        )
+        assert map_sort_on("metric", metric_entry, [], "count_distinct") == 'COUNT(DISTINCT "shipments"."district_id")'
 
     def test_sort_on_metric_without_aggregation(self):
         from src.utils.pydantic_models import ColumnVectorIndexEntry

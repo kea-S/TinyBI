@@ -204,7 +204,7 @@ class QuerySchema(BaseModel):
         """
     )
 
-    aggregation: Optional[Literal["avg", "sum", "count", "min", "max"]] = \
+    aggregation: Optional[Literal["avg", "sum", "count", "count_distinct", "min", "max"]] = \
         Field(
             default=None,
             description="""

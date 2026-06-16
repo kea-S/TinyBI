@@ -172,6 +172,22 @@ class TestQueryToolBuildsValidSQL:
 
         db_mock.query.assert_not_called()
 
+    def test_select_with_count_distinct_aggregation(self, monkeypatch):
+        entries = _base_final_entries(
+            metric_entry=_entry("orders", "district_id"),
+        )
+        mock_vc = MagicMock()
+        mock_vc.run.return_value = MagicMock()
+        mock_vc.get_current_index_entries.return_value = []
+        monkeypatch.setattr("src.tools.query_tool.VectorController", lambda *a, **kw: mock_vc)
+        monkeypatch.setattr("src.tools.query_tool.resolve_columns", lambda *a: entries)
+        monkeypatch.setattr("src.tools.query_tool.global_database.query", lambda sql: pd.DataFrame())
+
+        query = QuerySchema(subject="provider", metric_hint="distinct districts", aggregation="count_distinct")
+        _, sql = _invoke_query_tool(query)
+
+        assert 'COUNT(DISTINCT "orders"."district_id")' in sql
+
     def test_limit_applied(self, monkeypatch):
         entries = _base_final_entries(
             metric_entry=_entry("orders", "order_value"),

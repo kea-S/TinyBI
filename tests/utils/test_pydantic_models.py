@@ -66,6 +66,11 @@ def test_query_schema_rejects_empty_metric_hint():
         QuerySchema(subject="route", metric_hint="")
 
 
+def test_query_schema_accepts_count_distinct_aggregation():
+    q = QuerySchema(**_base_kwargs(), aggregation="count_distinct")
+    assert q.aggregation == "count_distinct"
+
+
 def test_query_schema_rejects_invalid_aggregation():
     with pytest.raises(ValidationError):
         QuerySchema(**_base_kwargs(), aggregation="median")

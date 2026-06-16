@@ -19,8 +19,11 @@ Rules:
 - Prefer "buyer country" over "country", "order status" over "status", and
   "shipment creation month" over "month" when the user wording supports it.
 - Do not invent or guess table names, joins, or exact database columns.
-- `aggregation` is only for avg, sum, count, min, or max when explicit or
-  strongly implied.
+- `aggregation` is only for avg, sum, count, count_distinct, min, or max when
+  explicit or strongly implied. Use `count` for counting records/rows (e.g.
+  "how many parcels", "number of shipments"). Use `count_distinct` for counting
+  unique values of a dimension (e.g. "how many distinct districts", "number of
+  different providers").
 - Put constraints into `filters`.
 - Put row-count requests like "top 5" or "show 10" into `limit`, not filters.
 - Use `sort_on = "metric_hint"` for ranking requests like top, highest, lowest,

@@ -4,7 +4,7 @@ from unittest.mock import patch, MagicMock
 
 
 class TestInsightScorer:
-    def test_reads_reference_answer_from_vars(self):
+    def test_reads_reference_answer_and_query_from_vars(self):
         from src.eval.insight_scorer import insight_scorer
 
         output = json.dumps({
@@ -15,24 +15,33 @@ class TestInsightScorer:
         context = {
             "vars": {
                 "id": "bird-89",
+                "query": "How many accounts are in East Bohemia?",
                 "reference_answer": "There are 4500 accounts.",
             },
         }
 
-        mock_score = 0.85
+        with patch("src.eval.insight_scorer.FactualCorrectness") as MockFactual, \
+             patch("src.eval.insight_scorer.AnswerAccuracy") as MockAccuracy:
+            factual_mock = MagicMock()
+            factual_mock.score.return_value = MagicMock(value=0.85)
+            MockFactual.return_value = factual_mock
 
-        with patch("src.eval.insight_scorer.FactualCorrectness") as MockMetric:
-            mock_instance = MagicMock()
-            mock_instance.score.return_value = MagicMock(value=mock_score)
-            MockMetric.return_value = mock_instance
+            accuracy_mock = MagicMock()
+            accuracy_mock.score.return_value = MagicMock(value=1.0)
+            MockAccuracy.return_value = accuracy_mock
 
             result = insight_scorer(output, context)
 
-            mock_instance.score.assert_called_once_with(
+            factual_mock.score.assert_called_once_with(
                 response="There are 4500 accounts in the database.",
                 reference="There are 4500 accounts.",
             )
-            assert result["score"] == mock_score
+            accuracy_mock.score.assert_called_once_with(
+                user_input="How many accounts are in East Bohemia?",
+                response="There are 4500 accounts in the database.",
+                reference="There are 4500 accounts.",
+            )
+            assert result["score"] == 1.0
 
     def test_ignores_sql_and_data_fields(self):
         from src.eval.insight_scorer import insight_scorer
@@ -49,19 +58,23 @@ class TestInsightScorer:
             },
         }
 
-        with patch("src.eval.insight_scorer.FactualCorrectness") as MockMetric:
-            mock_instance = MagicMock()
-            mock_instance.score.return_value = MagicMock(value=1.0)
-            MockMetric.return_value = mock_instance
+        with patch("src.eval.insight_scorer.FactualCorrectness") as MockFactual, \
+             patch("src.eval.insight_scorer.AnswerAccuracy") as MockAccuracy:
+            factual_mock = MagicMock()
+            factual_mock.score.return_value = MagicMock(value=1.0)
+            MockFactual.return_value = factual_mock
+
+            accuracy_mock = MagicMock()
+            accuracy_mock.score.return_value = MagicMock(value=1.0)
+            MockAccuracy.return_value = accuracy_mock
 
             insight_scorer(output, context)
 
-            mock_instance.score.assert_called_once()
-            call_kwargs = mock_instance.score.call_args.kwargs
+            call_kwargs = factual_mock.score.call_args.kwargs
             assert "DECOY" not in call_kwargs["response"]
             assert call_kwargs["response"] == "The answer is 13."
 
-    def test_returns_named_scores_with_ragas_f1(self):
+    def test_returns_both_named_scores(self):
         from src.eval.insight_scorer import insight_scorer
 
         output = json.dumps({"output": "There are 4500 accounts."})
@@ -72,16 +85,22 @@ class TestInsightScorer:
             },
         }
 
-        with patch("src.eval.insight_scorer.FactualCorrectness") as MockMetric:
-            mock_instance = MagicMock()
-            mock_instance.score.return_value = MagicMock(value=0.85)
-            MockMetric.return_value = mock_instance
+        with patch("src.eval.insight_scorer.FactualCorrectness") as MockFactual, \
+             patch("src.eval.insight_scorer.AnswerAccuracy") as MockAccuracy:
+            factual_mock = MagicMock()
+            factual_mock.score.return_value = MagicMock(value=0.85)
+            MockFactual.return_value = factual_mock
+
+            accuracy_mock = MagicMock()
+            accuracy_mock.score.return_value = MagicMock(value=0.75)
+            MockAccuracy.return_value = accuracy_mock
 
             result = insight_scorer(output, context)
 
             assert "named_scores" in result
-            assert "RAGAS F1" in result["named_scores"]
-            assert result["named_scores"]["RAGAS F1"] == 0.85
+            assert result["named_scores"]["RAGAS Precision"] == 0.85
+            assert result["named_scores"]["Answer Accuracy"] == 0.75
+            assert result["score"] == 0.75
 
     def test_raises_on_missing_reference_answer(self):
         from src.eval.insight_scorer import insight_scorer
@@ -106,18 +125,24 @@ class TestInsightScorer:
             },
         }
 
-        with patch("src.eval.insight_scorer.FactualCorrectness") as MockMetric:
-            mock_instance = MagicMock()
-            mock_instance.score.return_value = MagicMock(value=1.0)
-            MockMetric.return_value = mock_instance
+        with patch("src.eval.insight_scorer.FactualCorrectness") as MockFactual, \
+             patch("src.eval.insight_scorer.AnswerAccuracy") as MockAccuracy:
+            factual_mock = MagicMock()
+            factual_mock.score.return_value = MagicMock(value=1.0)
+            MockFactual.return_value = factual_mock
+
+            accuracy_mock = MagicMock()
+            accuracy_mock.score.return_value = MagicMock(value=1.0)
+            MockAccuracy.return_value = accuracy_mock
 
             result = insight_scorer(output, context)
 
             assert result["score"] == 1.0
             assert result["pass"] is True
-            assert result["named_scores"]["RAGAS F1"] == 1.0
+            assert result["named_scores"]["RAGAS Precision"] == 1.0
+            assert result["named_scores"]["Answer Accuracy"] == 1.0
 
-    def test_pass_threshold_applied(self):
+    def test_low_answer_accuracy_flows_to_score(self):
         from src.eval.insight_scorer import insight_scorer
 
         output = json.dumps({"output": "There are 3 accounts."})
@@ -128,16 +153,22 @@ class TestInsightScorer:
             },
         }
 
-        with patch("src.eval.insight_scorer.FactualCorrectness") as MockMetric:
-            mock_instance = MagicMock()
-            mock_instance.score.return_value = MagicMock(value=0.3)
-            MockMetric.return_value = mock_instance
+        with patch("src.eval.insight_scorer.FactualCorrectness") as MockFactual, \
+             patch("src.eval.insight_scorer.AnswerAccuracy") as MockAccuracy:
+            factual_mock = MagicMock()
+            factual_mock.score.return_value = MagicMock(value=0.5)
+            MockFactual.return_value = factual_mock
+
+            accuracy_mock = MagicMock()
+            accuracy_mock.score.return_value = MagicMock(value=0.25)
+            MockAccuracy.return_value = accuracy_mock
 
             result = insight_scorer(output, context)
 
-            assert result["score"] == 0.3
+            assert result["score"] == 0.25
             assert result["pass"] is True
-            assert result["named_scores"]["RAGAS F1"] == 0.3
+            assert result["named_scores"]["RAGAS Precision"] == 0.5
+            assert result["named_scores"]["Answer Accuracy"] == 0.25
 
     def test_handles_non_json_output(self):
         from src.eval.insight_scorer import insight_scorer
@@ -150,15 +181,21 @@ class TestInsightScorer:
             },
         }
 
-        with patch("src.eval.insight_scorer.FactualCorrectness") as MockMetric:
-            mock_instance = MagicMock()
-            mock_instance.score.return_value = MagicMock(value=0.9)
-            MockMetric.return_value = mock_instance
+        with patch("src.eval.insight_scorer.FactualCorrectness") as MockFactual, \
+             patch("src.eval.insight_scorer.AnswerAccuracy") as MockAccuracy:
+            factual_mock = MagicMock()
+            factual_mock.score.return_value = MagicMock(value=0.9)
+            MockFactual.return_value = factual_mock
+
+            accuracy_mock = MagicMock()
+            accuracy_mock.score.return_value = MagicMock(value=0.9)
+            MockAccuracy.return_value = accuracy_mock
 
             result = insight_scorer(output, context)
 
-            mock_instance.score.assert_called_once_with(
+            factual_mock.score.assert_called_once_with(
                 response="There are 4500 accounts.",
                 reference="There are 4500 accounts.",
             )
             assert result["score"] == 0.9
+            assert result["named_scores"]["Answer Accuracy"] == 0.9

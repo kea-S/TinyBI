@@ -43,6 +43,8 @@ def map_metric(metric_entry: ColumnVectorIndexEntry | None, aggregation: str | N
         return ""
     source_key = metric_entry.source_key
     if aggregation:
+        if aggregation == "count_distinct":
+            return f"COUNT(DISTINCT {_quote(source_key)})"
         agg_upper = aggregation.upper()
         return f"{agg_upper}({_quote(source_key)})"
     return _quote(source_key)
@@ -95,6 +97,8 @@ def map_sort_on(
             return ""
         source_key = metric_entry.source_key
         if aggregation:
+            if aggregation == "count_distinct":
+                return f"COUNT(DISTINCT {_quote(source_key)})"
             return f"{aggregation.upper()}({_quote(source_key)})"
         return _quote(source_key)
 

@@ -3,20 +3,24 @@ import os
 
 import instructor
 from openai import AsyncOpenAI
-from ragas.metrics.collections import FactualCorrectness
+from ragas.metrics.collections import FactualCorrectness, AnswerAccuracy
 from ragas.llms import InstructorLLM
 
 
 def _get_scorer_llm():
-    model = os.environ.get("RAGAS_SCORER_MODEL", "ibm-granite/granite-4.1-3b")
-    use_vllm = os.environ.get("TINYBI_USE_VLLM", "false").lower() == "true"
-    if use_vllm:
-        base_url = os.environ.get("TINYBI_VLLM_URL", "http://host.docker.internal:8001/v1")
-        api_key = "none"
+    model = os.environ.get("RAGAS_SCORER_MODEL", "deepseek/deepseek-v4-flash")
+    if model.startswith("deepseek/"):
+        base_url = "https://openrouter.ai/api/v1"
+        api_key = os.environ.get("OPENROUTER_API_KEY", "")
     else:
-        ollama_url = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
-        base_url = f"{ollama_url}/v1"
-        api_key = "ollama"
+        use_vllm = os.environ.get("TINYBI_USE_VLLM", "false").lower() == "true"
+        if use_vllm:
+            base_url = os.environ.get("TINYBI_VLLM_URL", "http://host.docker.internal:8001/v1")
+            api_key = "none"
+        else:
+            ollama_url = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+            base_url = f"{ollama_url}/v1"
+            api_key = "ollama"
     client = instructor.from_openai(
         AsyncOpenAI(base_url=base_url, api_key=api_key)
     )
@@ -50,15 +54,28 @@ def insight_scorer(output: str, context: dict) -> dict:
     except (json.JSONDecodeError, AttributeError):
         agent_answer = output
 
+    user_query = vars_.get("query", "")
+
     llm = _get_scorer_llm()
-    metric = FactualCorrectness(llm=llm, mode="f1", beta=1.0)
-    ragas_result = metric.score(response=agent_answer, reference=reference_answer)
-    score = ragas_result.value
-    rounded = round(score, 2)
+
+    factual_metric = FactualCorrectness(llm=llm, mode="precision", atomicity="high")
+    factual_result = factual_metric.score(response=agent_answer, reference=reference_answer)
+    factual_score = round(factual_result.value, 2)
+
+    accuracy_metric = AnswerAccuracy(llm=llm)
+    accuracy_result = accuracy_metric.score(
+        user_input=user_query,
+        response=agent_answer,
+        reference=reference_answer,
+    )
+    accuracy_score = round(accuracy_result.value, 2)
 
     return {
         "pass": True,
-        "score": rounded,
-        "named_scores": {"RAGAS F1": rounded},
-        "reason": f"Score: {score:.2f} | Reference: {reference_answer[:120]}{'...' if len(reference_answer) > 120 else ''}",
+        "score": accuracy_score,
+        "named_scores": {
+            "RAGAS Precision": factual_score,
+            "Answer Accuracy": accuracy_score,
+        },
+        "reason": f"Accuracy: {accuracy_score:.2f} | Precision: {factual_score:.2f} | Ref: {reference_answer[:100]}{'...' if len(reference_answer) > 100 else ''}",
     }
