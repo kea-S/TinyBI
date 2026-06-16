@@ -1,12 +1,9 @@
 import logging
 from typing import Annotated, Dict, List, Any, Optional, Union, Tuple
 
-from langchain_core.messages import BaseMessage, HumanMessage, ToolMessage, SystemMessage
+from langchain_core.messages import BaseMessage, HumanMessage, AIMessage, ToolMessage, SystemMessage
 from langgraph.graph import StateGraph, MessagesState, START, END
 from langgraph.prebuilt import ToolNode, tools_condition
-
-from src.tools.query_tool import query_tool
-from src.utils.prompts import EXTRACTOR_PROMPT
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +20,7 @@ def get_model_node(llm_with_tools):
     return call_model
 
 
-def get_sql_tool_result(state: MessagesState) -> Tuple[Optional[str], Any]:
+def get_sql_tool_result(state: MessagesState, tool_name: str = "query_tool") -> Tuple[Optional[str], Any]:
     """
     Returns the sql string generated as well as the result
     dataframe that was produced by running the sql string
@@ -39,7 +36,7 @@ def get_sql_tool_result(state: MessagesState) -> Tuple[Optional[str], Any]:
     messages = state.get("messages", [])
     # Iterate through messages to find tool results
     for msg in reversed(messages):
-        if isinstance(msg, ToolMessage) and msg.name == "query_tool":
+        if isinstance(msg, ToolMessage) and msg.name == tool_name:
             artifact = getattr(msg, "artifact", None)
             if artifact is None:
                 continue
@@ -60,14 +57,11 @@ def get_sql_tool_result(state: MessagesState) -> Tuple[Optional[str], Any]:
     return sql, df
 
 
-async def run_agent(messages: List[BaseMessage], llm: Any) -> Dict[str, Any]:
-    # Bind tools
-    tools = [query_tool]
+async def run_agent(messages: List[BaseMessage], llm: Any, tools: list, system_prompt: str) -> Dict[str, Any]:
     llm_with_tools = llm.bind_tools(tools)
 
-    # Define the system prompt
-    system_prompt = SystemMessage(content=EXTRACTOR_PROMPT)
-    all_messages = [system_prompt] + messages
+    system_message = SystemMessage(content=system_prompt)
+    all_messages = [system_message] + messages
 
     # Define the graph
     workflow = StateGraph(AgentState)
@@ -91,12 +85,31 @@ async def run_agent(messages: List[BaseMessage], llm: Any) -> Dict[str, Any]:
 
     # Extract results
     agent_output = final_state["messages"][-1].content
-    sql, df = get_sql_tool_result(final_state)
+    tool_name = tools[0].name if tools else "query_tool"
+    sql, df = get_sql_tool_result(final_state, tool_name=tool_name)
+
+    # Accumulate token usage across all LLM calls
+    total_input = 0
+    total_output = 0
+    num_llm_calls = 0
+    for msg in final_state.get("messages", []):
+        if isinstance(msg, AIMessage):
+            usage = getattr(msg, "usage_metadata", None)
+            if usage:
+                total_input += usage.get("input_tokens", 0)
+                total_output += usage.get("output_tokens", 0)
+                num_llm_calls += 1
 
     return {
         "output": agent_message if (agent_message := agent_output) else "",
         "sql": sql,
-        "data": df.to_dict(orient='records') if df is not None else None
+        "data": df.to_dict(orient='records') if df is not None else None,
+        "token_usage": {
+            "prompt": total_input,
+            "completion": total_output,
+            "total": total_input + total_output,
+            "num_requests": num_llm_calls,
+        },
     }
 
 

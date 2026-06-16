@@ -1,0 +1,30 @@
+prompts:
+  - "{{query}}"
+
+evaluateOptions:
+  maxConcurrency: 1
+
+providers:
+  - id: python:./provider.py
+    label: 'TinyBI: granite4'
+    config:
+      agent_type: tinybi
+      model_name: "ibm-granite/granite-4.1-3b"
+      local: true
+
+  - id: python:./provider.py
+    label: 'Schema Dump: granite4'
+    config:
+      agent_type: schema_dump
+      model_name: "ibm-granite/granite-4.1-3b"
+      local: true
+
+defaultTest:
+  assert:
+    - type: python
+      value: file://insight_scorer.py:insight_scorer
+      threshold: 0.5
+
+tests:
+  - ./tests.yaml
+

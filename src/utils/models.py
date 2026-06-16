@@ -1,3 +1,4 @@
+import os
 from langchain_groq import ChatGroq
 from langchain_ollama import ChatOllama, OllamaEmbeddings
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
@@ -14,13 +15,14 @@ LANGCHAIN = "langchain"
 # models to be experimented with
 REMOTE_GPT_4o = "gpt-4o"
 REMOTE_GPT_OSS_LARGE = "openai/gpt-oss-120b"
-REMOTE_OPENROUTER = "deepseek/deepseek-v4-flash"
+REMOTE_DEEPSEEK = "deepseek/deepseek-v4-flash"
+REMOTE_GRANITE = "ibm-granite/granite-4.1-8b"
 REMOTE_LLAMA_8B = "llama-3.1-8b-instant"
 LOCAL_GEMMA3 = "gemma3:4b"
 LOCAL_GEMMA4 = "gemma4:e4b"
 LOCAL_LLAMA = "llama3.2:3b"
 LOCAL_PHI4 = "phi4-mini:3.8b"
-LOCAL_GRANITE4 = "granite4:3b"
+LOCAL_GRANITE4 = "ibm-granite/granite-4.1-3b"
 
 LOCAL_BIG_LLAMA = "llama3.1:8b"
 LOCAL_BIG_GRANITE = "granite3.1-dense:8b"
@@ -47,13 +49,24 @@ def get_remote_llm(name: str):
         return ChatOpenAI(model=REMOTE_GPT_4o)
     elif name == REMOTE_LLAMA_8B:
         return ChatGroq(model=REMOTE_LLAMA_8B)
-    elif name == REMOTE_OPENROUTER:
-        return ChatOpenRouter(model=REMOTE_OPENROUTER)
+    elif name == REMOTE_DEEPSEEK:
+        return ChatOpenRouter(model=REMOTE_DEEPSEEK)
+    elif name == REMOTE_GRANITE:
+        return ChatOpenRouter(model=REMOTE_DEEPSEEK, openrouter_provider={"allow_fallbacks": True})
     else:
         return ChatGroq(model=REMOTE_GPT_OSS_LARGE)
 
 
 def get_local_llm(name: str):
+    use_vllm = os.getenv("TINYBI_USE_VLLM", "false").lower() == "true"
+    if use_vllm:
+        vllm_url = os.getenv("TINYBI_VLLM_URL", "http://localhost:8001/v1")
+        return ChatOpenAI(
+            model=name,
+            base_url=vllm_url,
+            api_key="none"
+        )
+
     return ChatOllama(
         model=name,
         reasoning=False
@@ -83,3 +96,5 @@ def get_embedding_model_name_from_key(key: str) -> str:
         raise ValueError(
             f"Unsupported embedding model key '{key}'. Supported keys: {supported_keys}"
         ) from exc
+
+

@@ -156,29 +156,23 @@ promptfoo runs in a **Docker container** to avoid dependency issues on the host 
 docker compose build
 ```
 
-### 2. Generate test cases and prepare the database (on host)
+### 2. Prepare the database (on host)
 
 ```bash
-uv run python src/eval/generate_tests.py \
-  --input data/app_data/bird_financial_minidev.json \
-  --output src/eval/tests.yaml
-
 uv run python scripts/prepare_db.py \
   --duckdb data/intermediate/financial.duckdb \
   --sqlite data/minidev_raw/financial/financial.sqlite
 ```
 
-### 3. Run the evaluation
+### 3. Run the insight evaluation
 
 ```bash
-./scripts/eval.sh -c src/eval/bare_config.yaml --output data/app_data/eval_results.json
+./scripts/run_insight_eval.sh
 ```
 
-For the alternative config with manual test cases:
-
-```bash
-./scripts/eval.sh -c src/eval/heavy_config.yaml --output data/app_data/eval_results.json
-```
+This runs the promptfoo insight eval (TinyBI vs Schema Dump) in Docker, scoring
+answers with RAGAS FactualCorrectness against pre-computed `reference_answer`
+fields in `src/eval/tests.yaml`.
 
 ### 4. Inspect results
 

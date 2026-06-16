@@ -29,5 +29,7 @@ services:
       - PROMPTFOO_PYTHON=/usr/local/bin/python3
       - PYTHONPATH=/app
       - OLLAMA_HOST=http://host.docker.internal:11434
+      - TINYBI_USE_VLLM=${TINYBI_USE_VLLM:-false}
+      - TINYBI_VLLM_URL=${TINYBI_VLLM_URL:-http://host.docker.internal:8001/v1}
     extra_hosts:
       - "host.docker.internal:host-gateway"

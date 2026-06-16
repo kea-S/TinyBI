@@ -6,6 +6,8 @@ from pydantic import BaseModel
 from langchain_core.messages import HumanMessage, AIMessage
 
 from src.agent import run_agent
+from src.tools.query_tool import query_tool
+from src.utils.prompts import EXTRACTOR_PROMPT
 from src.utils.models import get_local_llm, get_remote_llm, REMOTE_LLAMA_8B, LOCAL_GRANITE4
 
 logger = logging.getLogger(__name__)
@@ -46,7 +48,12 @@ async def query_endpoint(request: QueryRequest):
             else:
                 messages.append(AIMessage(content=msg.content))
 
-        result = await run_agent(messages, llm)
+        result = await run_agent(
+            messages,
+            llm,
+            tools=[query_tool],
+            system_prompt=EXTRACTOR_PROMPT
+        )
 
         return QueryResponse(
             message=result["output"],

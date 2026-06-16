@@ -9,6 +9,7 @@ ORDERED_OPERATORS = {"<", "<=", ">", ">="}
 # Statistical taxonomy constants
 CATEGORICAL_TYPES = {"nominal", "ordinal", "categorical"}
 QUANTITATIVE_TYPES = {"continuous", "discrete", "quantitative"}
+TEMPORAL_TYPES = {"temporal"}
 
 
 class FilterIntent(BaseModel):

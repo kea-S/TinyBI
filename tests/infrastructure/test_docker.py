@@ -78,17 +78,17 @@ def test_dockercompose_mounts_data_app_data():
     pytest.fail("data/app_data volume mount not found in any service")
 
 
-def test_eval_script_exists():
-    script = PROJECT_ROOT / "scripts" / "eval.sh"
-    assert script.exists(), "scripts/eval.sh missing"
+def test_run_insight_eval_script_exists():
+    script = PROJECT_ROOT / "scripts" / "run_insight_eval.sh"
+    assert script.exists(), "scripts/run_insight_eval.sh missing"
 
 
-def test_eval_script_is_executable():
-    script = PROJECT_ROOT / "scripts" / "eval.sh"
+def test_run_insight_eval_script_is_executable():
+    script = PROJECT_ROOT / "scripts" / "run_insight_eval.sh"
     if not script.exists():
-        pytest.skip("scripts/eval.sh not found")
+        pytest.skip("scripts/run_insight_eval.sh not found")
     import os
-    assert os.access(script, os.X_OK), "scripts/eval.sh is not executable"
+    assert os.access(script, os.X_OK), "scripts/run_insight_eval.sh is not executable"
 
 
 def test_dockerfile_has_promptfoo():

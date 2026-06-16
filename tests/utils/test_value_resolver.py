@@ -230,6 +230,24 @@ class TestCanResolveValueTypeCompatibility:
         )
         assert can_resolve_value(intent, entry) is True
 
+    def test_temporal_entry_with_invalid_date_rejected(self):
+        entry = make_entry(statistical_type="temporal")
+        intent = FilterIntent(
+            attribute_hint="date",
+            operator="=",
+            raw_value_text=["oldest"],
+        )
+        assert can_resolve_value(intent, entry) is False
+
+    def test_temporal_entry_mixed_valid_invalid_rejected(self):
+        entry = make_entry(statistical_type="temporal")
+        intent = FilterIntent(
+            attribute_hint="date",
+            operator="BETWEEN",
+            raw_value_text=["2024-01-01", "oldest"],
+        )
+        assert can_resolve_value(intent, entry) is False
+
     def test_identifier_entry_passthrough_unaffected(self):
         entry = make_entry(statistical_type="identifier")
         intent = FilterIntent(

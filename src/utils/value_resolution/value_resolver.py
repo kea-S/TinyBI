@@ -3,11 +3,14 @@ import re
 from difflib import SequenceMatcher
 from typing import Dict, List, Tuple, Optional
 
+from datetime import datetime
+
 from src.utils.pydantic_models import (
     FilterIntent, 
     ColumnVectorIndexEntry,
     CATEGORICAL_TYPES,
     QUANTITATIVE_TYPES,
+    TEMPORAL_TYPES,
 )
 
 logger = logging.getLogger(__name__)
@@ -93,6 +96,13 @@ def can_resolve_value(
             for v in raw_values:
                 try:
                     float(v)
+                except ValueError:
+                    return False
+        if index_entry.statistical_type in TEMPORAL_TYPES:
+            raw_values = _as_list(filter_intent.raw_value_text)
+            for v in raw_values:
+                try:
+                    datetime.strptime(v, "%Y-%m-%d")
                 except ValueError:
                     return False
         return True

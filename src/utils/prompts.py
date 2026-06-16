@@ -83,6 +83,11 @@ filters: order year = 2024
 sort_on: subject
 ordering: asc
 limit: null
+
+After calling the tool, write a natural-language answer to the user's question
+based on the data returned. State only what the data directly shows — do not
+add context, explanations, or recommendations beyond what the user asked.
+Match the scope of your answer to the question.
 """
 
 EXPLAINER_PROMPT = """

@@ -83,3 +83,52 @@ The goal is to frame the Text-to-SQL evaluation as a **"System Health & Monitori
 ### Other cleanup
 - [ ] `src/utils/queries.py` has unused hardcoded SQL templates -- candidate for removal.
 - [ ] `src/llms/explainer.py` is loaded but disabled in `main_pipeline.py` -- wasteful model load.
+
+---
+
+## Phase 5: Insight-Level Evaluation (LLM-as-a-Judge)
+
+**Strategy:** Binary EX is the wrong metric -- the constrained `QuerySchema` can't express CTEs, STRFTIME, or complex subqueries, so EX will be near zero. Instead, evaluate whether the *insight* from the generated answer matches the gold answer.
+
+### 5a. Three-way LLM-as-a-Judge comparison
+
+For each of the 32 BIRD queries, produce three answers:
+1. **Gold answer** -- execute gold SQL, get result
+2. **TinyBI answer** -- agent pipeline generating SQL via `QuerySchema`, execute, get result
+3. **Baseline answer** -- full schema dump, one LLM call -> raw SQL, execute, get result
+
+Ask GPT-4o (LLM-as-a-judge): *"Do these two answers convey the same insight?"* with three pairwise comparisons:
+- [ ] TinyBI vs Gold -> TinyBI's insight accuracy
+- [ ] Baseline vs Gold -> baseline's insight accuracy (benchmark)
+- [ ] TinyBI vs Baseline -> agreement score
+
+### 5b. Efficiency metrics (comparative -- currently zero tracking exists)
+
+Instrument the agent loop to capture:
+- [x] **Token counting** — `AIMessage.usage_metadata` captured in `agent.py:93-112`. Passed to promptfoo as top-level `tokenUsage` in `provider.py:74`.
+- [ ] **Latency tracking** -- `time.perf_counter()` around LLM calls, tool calls, SQL execution. Compute breakdown: discovery vs generation vs execution.
+- [ ] **Cost tracking** -- tokens x model pricing ($/1K tokens).
+- [ ] **Schema discovery rate** -- columns agent touches / total schema columns.
+
+### 5c. Full schema dump baseline
+
+New code needed (no shared code with existing pipeline):
+- [x] `src/baselines/ddl_generator.py` — convert `columns.json` → DuckDB DDL with full comment annotations (description, aliases, statistical_type, categorical_values, sample_values, FKs). 10 TDD tests.
+- [x] `src/baselines/raw_query_tool.py` — LangChain tool wrapping `global_database.query()`, takes raw SQL string, returns (result_summary, (df, sql)). 13 TDD tests.
+- [x] `src/baselines/schema_dump_agent.py` — Agent using `raw_query_tool` with DDL in system prompt. Same LangGraph loop as TinyBI. 7 TDD tests (incl. e2e integration against Ollama).
+- [x] `src/eval/provider.py` — Unified promptfoo provider with `config.agent_type` routing: `"tinybi"` (default) → `run_agent`, `"schema_dump"` → `run_schema_dump_agent`. Shared BenchmarkEncoder. 4 TDD tests.
+- [x] `src/eval/comparison_config.yaml` — TinyBI vs Schema Dump side-by-side, granite4:3b, same test suite.
+- Run: `./scripts/eval.sh -c src/eval/comparison_config.yaml --output data/app_data/eval_results.json`
+
+### 5d. Composite narrative metric
+
+- [ ] **Tokens consumed per correct insight.** Headline number that sells the architecture tradeoff.
+
+### 5e. Component-level accuracy (fallback if insight eval noisy)
+
+Grade individual `QuerySchema` fields against what the gold SQL does:
+- [ ] Table selection accuracy (right tables identified?)
+- [ ] Filter column accuracy (right column for each filter?)
+- [ ] Filter value accuracy (right DB value for each concept?)
+- [ ] Aggregation accuracy (COUNT vs AVG vs SUM?)
+- [ ] Metrics accuracy (right entity being measured?)

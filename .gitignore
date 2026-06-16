@@ -241,6 +241,14 @@ data/minidev_raw/*
 !data/minidev_raw/financial/
 data/minidev_raw/financial/financial.duckdb
 
+# Eval outputs (regenerable by running the scripts)
+data/app_data/eval_results.json
+data/app_data/insight_results.json
+data/app_data/reference_answers.json
+
+# OS metadata
+.DS_Store
+
 # Agentic Artifacts
 HANDOFF.md
 .antigravitycli/
