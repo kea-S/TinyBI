@@ -2,7 +2,7 @@ prompts:
   - "{{query}}"
 
 evaluateOptions:
-  maxConcurrency: 16
+  maxConcurrency: 8
 
 providers:
   - id: python:./provider.py

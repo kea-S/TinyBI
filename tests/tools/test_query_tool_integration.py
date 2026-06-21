@@ -7,6 +7,7 @@ from src.utils.pydantic_models import (
     ColumnVectorIndexEntry,
     VectorSearchResult
 )
+from tests.tools.test_query_tool import MockLLM
 
 def _entry(entry_id: int, table_name: str, column_name: str, references: str = None):
     return ColumnVectorIndexEntry(
@@ -19,9 +20,9 @@ def _entry(entry_id: int, table_name: str, column_name: str, references: str = N
     )
 
 
-def _invoke_query_tool(query: QuerySchema):
+def _invoke_query_tool(query: QuerySchema, llm=None):
     """Call execute_query directly (bypasses @tool wrapper)."""
-    df, sql = execute_query(query)
+    df, sql = execute_query(query, llm=llm)
     return df, sql
 
 
@@ -37,27 +38,32 @@ def test_query_tool_cross_table_sql_generation(mock_db, mock_vc_class):
     mock_db.query.return_value = MagicMock()
 
     mock_vc = mock_vc_class.return_value
-    
+
     candidates = CandidateEntries(
         subject_entries=[_result(1, 0.95, "users", "name")],
         metric_entries=[_result(2, 0.90, "orders", "total")],
         filter_entries={}
     )
     mock_vc.run.return_value = candidates
-    
+
     mock_vc.get_current_index_entries.return_value = [
         _entry(1, "users", "id"),
         _entry(2, "orders", "total"),
         _entry(3, "orders", "user_id", references="users.id")
     ]
-    
-    query = QuerySchema(
+
+    query = QuerySchema(user_question="dummy question", 
         subject="name",
         metric_hint="total",
         aggregation="sum"
     )
 
-    df, sql = _invoke_query_tool(query)
+    llm = MockLLM(
+        'SELECT "users"."name", SUM("orders"."total") AS "total" '
+        'FROM "orders" LEFT JOIN "users" ON "orders"."user_id" = "users"."id" '
+        'GROUP BY "users"."name"'
+    )
+    df, sql = _invoke_query_tool(query, llm=llm)
 
     sql_lower = sql.lower()
     assert "select" in sql_lower
@@ -65,5 +71,5 @@ def test_query_tool_cross_table_sql_generation(mock_db, mock_vc_class):
     assert "join" in sql_lower
     assert '"users"."name"' in sql_lower
     assert 'sum("orders"."total")' in sql_lower or 'sum("total")' in sql_lower
-    
+
     assert mock_db.query.called

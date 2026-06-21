@@ -16,7 +16,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from src.utils.prompts import EXTRACTOR_PROMPT
 from src.utils.models import get_local_llm, get_remote_llm
 from src.agent import run_agent
-from src.tools.query_tool import query_tool
+from src.tools.query_tool import make_query_tool
 from src.baselines.raw_query_tool import raw_query_tool
 from src.baselines.prompts import build_schema_dump_prompt
 from src.baselines.ddl_generator import generate_ddl
@@ -89,7 +89,7 @@ async def call_api(prompt, options, context):
     else:
         result = await run_agent(
             [HumanMessage(content=prompt)], llm,
-            tools=[query_tool],
+            tools=[make_query_tool(llm)],
             system_prompt=EXTRACTOR_PROMPT,
         )
 

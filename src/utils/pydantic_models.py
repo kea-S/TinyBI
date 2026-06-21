@@ -164,12 +164,18 @@ class FilterIntent(BaseModel):
 
 
 class QuerySchema(BaseModel):
-    subject: str = Field(
+    user_question: str = Field(
         ...,
-        min_length=1,
+        description="The exact original natural language question asked by the user. Do not modify or summarize it."
+    )
+    subject: Optional[str] = Field(
+        default=None,
         description="""
         Semantic descriptor for what each result row is about, and usually the
         thing results are grouped by.
+
+        Use null for pure aggregate queries with no grouping (e.g. "how many
+        accounts...", "total number of parcels").
 
         Prefer a richer business-facing descriptor over a guessed schema
         column name. The goal is to preserve meaning for downstream schema

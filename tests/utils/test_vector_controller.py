@@ -165,7 +165,7 @@ class TestRunReturnsDictBasedFilterEntries:
             operator="=",
             raw_value_text=["DB Schenker"],
         )
-        query = QuerySchema(
+        query = QuerySchema(user_question="dummy question", 
             subject="customer",
             metric_hint="order total",
             filters=[fi],
@@ -223,7 +223,7 @@ class TestRunReturnsDictBasedFilterEntries:
             operator="IN",
             raw_value_text=["Singapore", "Malaysia"],
         )
-        query = QuerySchema(
+        query = QuerySchema(user_question="dummy question", 
             subject="customer",
             metric_hint="order total",
             filters=[fi_provider, fi_country],
@@ -259,7 +259,7 @@ class TestRunReturnsDictBasedFilterEntries:
             operator="=",
             raw_value_text=["DB Schenker"],
         )
-        query = QuerySchema(
+        query = QuerySchema(user_question="dummy question", 
             subject="customer",
             metric_hint="order total",
             filters=[fi],
@@ -289,7 +289,7 @@ class TestRunReturnsDictBasedFilterEntries:
             operator="=",
             raw_value_text=["DB Schenker"],
         )
-        query = QuerySchema(
+        query = QuerySchema(user_question="dummy question", 
             subject="customer",
             metric_hint="order total",
             filters=[fi],

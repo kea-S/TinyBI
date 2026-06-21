@@ -1,4 +1,5 @@
 import logging
+import re
 from typing import Optional, List, Any
 
 from src.utils.database import global_database
@@ -8,21 +9,62 @@ from src.utils.pydantic_models import (
     QuerySchema,
     CandidateEntries,
     FinalEntries,
-    FilterIntent
+    FinalJoins,
+    FilterIntent,
+    ColumnVectorIndexEntry
 )
 from src.utils.value_resolution.column_resolver import resolve_columns
 from src.utils.value_resolution.join_resolution import resolve_joins
 from src.utils.value_resolution.db_schema_graph import build_schema_graph
 from src.utils.rag.vector_controller import VectorController
 from src.utils.models import DEFAULT_EMBEDDING_MODEL
-import src.utils.sql_normaliser as nrm
+from src.utils.prompts import SQL_GENERATION_PROMPT, format_sql_generation_context
 
 from langchain_core.tools import tool
 
 logger = logging.getLogger(__name__)
 
 
-def execute_query(structured_query: QuerySchema):
+def _extract_sql_from_llm_response(response_text: str) -> str:
+    """
+    Extract SQL from LLM response, stripping markdown code blocks if present.
+    """
+    text = response_text.strip()
+
+    sql_match = re.search(r"```(?:sql)?\s*(.*?)\s*```", text, re.DOTALL)
+    if sql_match:
+        return sql_match.group(1).strip()
+
+    select_match = re.search(r"(SELECT.*?)(?:\n\n|$)", text, re.DOTALL | re.IGNORECASE)
+    if select_match:
+        return select_match.group(1).strip()
+
+    return text
+
+
+def generate_sql_with_llm(
+    final_entries: FinalEntries,
+    final_joins: FinalJoins,
+    structured_query: QuerySchema,
+    all_entries: List[ColumnVectorIndexEntry],
+    llm: Any,
+) -> str:
+    """
+    Generate SQL by calling the LLM with resolved context.
+    """
+    context = format_sql_generation_context(final_entries, final_joins, structured_query, all_entries)
+
+    prompt = f"{SQL_GENERATION_PROMPT}\n\n{context}\n\nGenerate the SQL query:"
+
+    response = llm.invoke(prompt)
+    sql = _extract_sql_from_llm_response(response.content)
+
+    logger.info("LLM-generated SQL:\n%s", sql)
+
+    return sql
+
+
+def execute_query(structured_query: QuerySchema, llm: Optional[Any] = None):
     if global_database._database is None:
         global_database.setup_database(TABLE_DATA_PATH, SQLITE_DATA_PATH, read_only=True)
 
@@ -43,88 +85,47 @@ def execute_query(structured_query: QuerySchema):
 
     logger.info("Final entries: %s", final_entries.to_log_dict())
 
-    join_clause = nrm.map_join(final_joins)
-    subject_clause = nrm.map_subject(final_entries.subject_entries)
-    view_name = nrm.map_view_name(final_joins.from_table)
-    metric_clause = nrm.map_metric(
-        final_entries.metric_entry,
-        structured_query.aggregation
-    )
-    where_clause = nrm.map_conditions(final_entries.filter_entries)
-    group_by_clause = nrm.map_groupby(
-        final_entries.subject_entries,
-        structured_query.aggregation
-    )
-    order_by_direction = nrm.map_ordering(structured_query.ordering)
-    order_by_column = nrm.map_sort_on(
-        structured_query.sort_on,
-        final_entries.metric_entry,
-        final_entries.subject_entries,
-        structured_query.aggregation
-    )
-    limit_clause = nrm.map_limit(structured_query.limit)
-
-    select_parts = []
-    if subject_clause:
-        select_parts.append(subject_clause)
-    if metric_clause:
-        select_parts.append(metric_clause)
-    select_clause = ", ".join(select_parts)
-    if not select_clause:
+    if not final_entries.subject_entries and not final_entries.metric_entry and not final_entries.filter_entries:
         raise ValueError(
             "No columns could be resolved for the SELECT clause. "
             "Please rephrase your question to specify what you want to see "
             "(e.g. a subject, metric, or both)."
         )
 
-    sql_parts = [
-        f"SELECT {select_clause}",
-        f"FROM {view_name}",
-    ]
-
-    if join_clause:
-        sql_parts.append(join_clause)
-
-    if where_clause:
-        sql_parts.append(where_clause)
-
-    if group_by_clause:
-        sql_parts.append(group_by_clause)
-
-    if order_by_column:
-        direction = f" {order_by_direction}" if order_by_direction else ""
-        sql_parts.append(f"ORDER BY {order_by_column}{direction}")
-
-    if limit_clause is not None:
-        sql_parts.append(f"LIMIT {limit_clause}")
-
-    sql = "\n".join(sql_parts)
-
-    logger.info("Final SQL:\n%s", sql)
+    if llm is not None:
+        sql = generate_sql_with_llm(final_entries, final_joins, structured_query, all_entries, llm)
+    else:
+        raise ValueError(
+            "LLM is required for SQL generation. "
+            "Pass an LLM instance via the 'llm' parameter."
+        )
 
     df = global_database.query(sql)
 
     return df, sql
 
 
-@tool(args_schema=QuerySchema, response_format="content_and_artifact")
-def query_tool(**kwargs):
-    """
-    Execute a semantic query against the database.
-    
-    This tool resolves natural language intents into SQL by linking 
-    subjects and metrics to the underlying schema using vector search.
-    """
-    structured_query = QuerySchema(**kwargs)
-    df, sql = execute_query(structured_query)
+def make_query_tool(llm: Any):
+    @tool(args_schema=QuerySchema, response_format="content_and_artifact")
+    def query_tool(**kwargs):
+        """
+        Execute a semantic query against the database.
 
-    agent_summary = (
-        f"SQL executed successfully.\n"
-        f"SQL: {sql}\n"
-        f"Data result (top 5 rows):\n{df.head(5).to_markdown() if not df.empty else 'No data found.'}"
-    )
+        This tool resolves natural language intents into SQL by linking
+        subjects and metrics to the underlying schema using vector search.
+        """
+        structured_query = QuerySchema(**kwargs)
+        df, sql = execute_query(structured_query, llm=llm)
 
-    return agent_summary, (df, sql)
+        agent_summary = (
+            f"SQL executed successfully.\n"
+            f"SQL: {sql}\n"
+            f"Data result (top 5 rows):\n{df.head(5).to_markdown() if not df.empty else 'No data found.'}"
+        )
+
+        return agent_summary, (df, sql)
+
+    return query_tool
 
 
 

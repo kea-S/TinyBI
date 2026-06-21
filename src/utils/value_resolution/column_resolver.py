@@ -11,7 +11,7 @@ from src.utils.value_resolution.value_resolver import resolve_filter_literals
 from src.utils.value_resolution.db_schema_graph import pick_anchor_table
 
 # hyperparameters
-MIN_CONFIDENCE = 0.5
+MIN_CONFIDENCE = 0.0
 
 
 def resolve_columns(
@@ -22,16 +22,16 @@ def resolve_columns(
     Pick the best column for each intent, ensuring they all connect to a central anchor table.
     """
 
-    potential_subjects = [r.entry.table_name for r in candidates.subject_entries if r.score >= MIN_CONFIDENCE]
-    potential_metrics = [r.entry.table_name for r in candidates.metric_entries if r.score >= MIN_CONFIDENCE]
+    potential_subjects = [r.entry.table_name for r in candidates.subject_entries]
+    potential_metrics = [r.entry.table_name for r in candidates.metric_entries]
     potential_filters = []
     for group in candidates.filter_entries.values():
-        potential_filters.extend([r.entry.table_name for r in group if r.score >= MIN_CONFIDENCE])
+        potential_filters.extend([r.entry.table_name for r in group])
 
     # Precedence: Highest scoring metric's table is the preferred anchor.
     best_metric_table = None
     if candidates.metric_entries:
-        valid_metrics = [r for r in candidates.metric_entries if r.score >= MIN_CONFIDENCE]
+        valid_metrics = [r for r in candidates.metric_entries]
         if valid_metrics:
             best_metric_table = max(valid_metrics, key=lambda r: r.score).entry.table_name
 
@@ -57,14 +57,14 @@ def resolve_columns(
     # 2. Resolve Subjects (All that are connected)
     subject_entries_final = [
         r.entry for r in candidates.subject_entries
-        if r.score >= MIN_CONFIDENCE and is_reachable(r.entry.table_name)
+        if is_reachable(r.entry.table_name)
     ]
 
     # 3. Resolve Metric (Highest scoring connected)
     metric_entry_final = None
     valid_metrics = [
         r for r in candidates.metric_entries
-        if r.score >= MIN_CONFIDENCE and is_reachable(r.entry.table_name)
+        if is_reachable(r.entry.table_name)
     ]
     if valid_metrics:
         metric_entry_final = max(valid_metrics, key=lambda r: r.score).entry
@@ -76,9 +76,6 @@ def resolve_columns(
         sorted_group = sorted(filter_group, key=lambda r: r.score, reverse=True)
 
         for r in sorted_group:
-            if r.score < MIN_CONFIDENCE:
-                break
-
             if is_reachable(r.entry.table_name):
                 resolved_intent = resolve_filter_literals(filter_intent, r.entry)
                 if resolved_intent is not None:

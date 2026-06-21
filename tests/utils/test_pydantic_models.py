@@ -19,7 +19,7 @@ def _base_kwargs():
 
 
 def test_query_schema_accepts_minimal_shape():
-    q = QuerySchema(**_base_kwargs())
+    q = QuerySchema(user_question="dummy question", **_base_kwargs())
 
     assert q.subject == "route"
     assert q.metric_hint == "buyer waiting time"
@@ -31,7 +31,7 @@ def test_query_schema_accepts_minimal_shape():
 
 
 def test_query_schema_accepts_metric_aggregation_and_filters():
-    q = QuerySchema(
+    q = QuerySchema(user_question="dummy question", 
         **_base_kwargs(),
         aggregation="avg",
         sort_on="metric_hint",
@@ -63,22 +63,22 @@ def test_query_schema_accepts_metric_aggregation_and_filters():
 
 def test_query_schema_rejects_empty_metric_hint():
     with pytest.raises(ValidationError):
-        QuerySchema(subject="route", metric_hint="")
+        QuerySchema(user_question="dummy question", subject="route", metric_hint="")
 
 
 def test_query_schema_accepts_count_distinct_aggregation():
-    q = QuerySchema(**_base_kwargs(), aggregation="count_distinct")
+    q = QuerySchema(user_question="dummy question", **_base_kwargs(), aggregation="count_distinct")
     assert q.aggregation == "count_distinct"
 
 
 def test_query_schema_rejects_invalid_aggregation():
     with pytest.raises(ValidationError):
-        QuerySchema(**_base_kwargs(), aggregation="median")
+        QuerySchema(user_question="dummy question", **_base_kwargs(), aggregation="median")
 
 
 def test_query_schema_rejects_limit_above_guardrail():
     with pytest.raises(ValidationError):
-        QuerySchema(**_base_kwargs(), limit=101)
+        QuerySchema(user_question="dummy question", **_base_kwargs(), limit=101)
 
 
 def test_filter_intent_normalises_operator_and_value_text():

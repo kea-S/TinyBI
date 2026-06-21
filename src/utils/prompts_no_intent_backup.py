@@ -198,17 +198,17 @@ SQL_GENERATION_PROMPT = """
 You are a SQL expert. You generate DuckDB SQL based on a provided database schema to answer a user's question.
 
 Rules:
-- Write valid DuckDB SQL.
 - Return ONLY the SQL query. No explanation, no markdown, no code blocks.
-- Use ONLY the exact table and column names from the "Database Schema" below. Do not invent columns or tables that are not in the schema.
+- Use ONLY the tables listed in the "Database Schema" below. Do not invent tables.
+- Use ONLY the columns listed in the schema. Do not invent columns.
+- The "Database Schema" provides the DDL, descriptions, statistical types, and categorical value mappings. Use these exact categorical values in your WHERE clauses.
 - Use the "Suggested JOIN path" to correctly connect the tables. Do not invent direct links between tables that do not exist in the schema.
-- Use appropriate aggregations (COUNT, SUM, AVG, MIN, MAX) when the question asks for summaries. Use COUNT(DISTINCT "table"."column") if counting unique values.
-- Use WHERE clauses for filtering. Match filter values strictly to the exact string literals or integers specified in the question or the categorical_values in the schema.
-- Use ORDER BY and LIMIT for ranking requests (top N, highest, lowest, etc.).
-- Use GROUP BY when aggregating by a dimension.
-- Date filtering: the trans.date column is stored as an integer in YYMMDD format (e.g., 980101 = Jan 1, 1998). Use CAST or string operations for date comparisons.
+- Write a query that accurately answers the "User Question".
+- If the question asks for a single aggregate number without grouping (e.g., total count), use COUNT(*), SUM, AVG, etc. WITHOUT GROUP BY.
+- If aggregation is "count_distinct", use COUNT(DISTINCT "table"."column").
 - Always quote identifiers with double quotes: "table"."column".
 - NEVER use table aliases (e.g. "FROM account a" is forbidden). Always use the full table name.
+- Use DuckDB syntax.
 """
 
 
@@ -288,28 +288,5 @@ def format_sql_generation_context(
         for step in final_joins.joins:
             lines.append(f"  LEFT JOIN \"{step.table}\" ON {step.on_clause}")
         lines.append("")
-
-    lines.append("Query intent (hints):")
-    if final_entries.subject_entries:
-        sub_cols = [f'"{e.table_name}"."{e.column_name}"' for e in final_entries.subject_entries]
-        lines.append(f"- Subjects to select/group by: {', '.join(sub_cols)}")
-    else:
-        lines.append(f"- Subjects to select/group by: {structured_query.subject}")
-        
-    if final_entries.metric_entry:
-        lines.append(f"- Metric to aggregate: {structured_query.metric_hint} on \"{final_entries.metric_entry.table_name}\".\"{final_entries.metric_entry.column_name}\"")
-    elif structured_query.metric_hint:
-        lines.append(f"- Metric to aggregate: {structured_query.metric_hint}")
-
-    if structured_query.filters:
-        lines.append("- Filters:")
-        for filter_intent in structured_query.filters:
-            resolved_entry = final_entries.filter_entries.get(filter_intent)
-            vals = [f"'{v}'" for v in filter_intent.raw_value_text] if filter_intent.raw_value_text else []
-            if resolved_entry:
-                lines.append(f"  * \"{resolved_entry.table_name}\".\"{resolved_entry.column_name}\" {filter_intent.operator} {', '.join(vals)}")
-            else:
-                lines.append(f"  * {filter_intent.attribute_hint} {filter_intent.operator} {', '.join(vals)}")
-    lines.append("")
 
     return "\n".join(lines)

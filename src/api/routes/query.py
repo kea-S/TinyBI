@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from langchain_core.messages import HumanMessage, AIMessage
 
 from src.agent import run_agent
-from src.tools.query_tool import query_tool
+from src.tools.query_tool import make_query_tool
 from src.utils.prompts import EXTRACTOR_PROMPT
 from src.utils.models import get_local_llm, get_remote_llm, REMOTE_LLAMA_8B, LOCAL_GRANITE4
 
@@ -51,7 +51,7 @@ async def query_endpoint(request: QueryRequest):
         result = await run_agent(
             messages,
             llm,
-            tools=[query_tool],
+            tools=[make_query_tool(llm)],
             system_prompt=EXTRACTOR_PROMPT
         )
 
