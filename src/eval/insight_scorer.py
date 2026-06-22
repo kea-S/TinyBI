@@ -15,7 +15,7 @@ def _get_scorer_llm():
     else:
         use_vllm = os.environ.get("TINYBI_USE_VLLM", "false").lower() == "true"
         if use_vllm:
-            base_url = os.environ.get("TINYBI_VLLM_URL", "http://host.docker.internal:8001/v1")
+            base_url = os.environ.get("TINYBI_VLLM_URL", "http://host.docker.internal:8003/v1")
             api_key = "none"
         else:
             ollama_url = os.environ.get("OLLAMA_HOST", "http://localhost:11434")

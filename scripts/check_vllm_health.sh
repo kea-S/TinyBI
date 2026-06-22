@@ -29,8 +29,8 @@ docker ps -a --filter name=vllm-bridge || echo "vllm-bridge container not found.
 
 echo ""
 echo "=== 5. Testing Local Endpoints ==="
-echo -n "Pinging localhost:8001 (direct SSH tunnel): "
-if curl -sf http://localhost:8001/v1/models > /dev/null 2>&1; then
+echo -n "Pinging localhost:8003 (direct SSH tunnel): "
+if curl -sf http://localhost:8003/v1/models > /dev/null 2>&1; then
     echo "SUCCESS (Ready)"
 else
     echo "FAILED"

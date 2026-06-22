@@ -6,7 +6,7 @@ REMOTE="keaharv@xlogin.comp.nus.edu.sg"
 echo "=== Launching vLLM on cluster ==="
 ssh "$REMOTE" \
   "nohup srun --gpus=a100-40 --time=02:00:00 \
-   bash -c 'source ~/vllm_env/bin/activate && cd ~/vllm && VLLM_USE_FLASHINFER_SAMPLER=0 vllm serve ibm-granite/granite-4.1-3b --port 8001 --enable-auto-tool-choice --tool-call-parser granite4 --gpu-memory-utilization 0.85' \
+   bash -c 'source ~/vllm_env/bin/activate && cd ~/vllm && VLLM_USE_FLASHINFER_SAMPLER=0 vllm serve ibm-granite/granite-4.1-3b --port 8003 --enable-auto-tool-choice --tool-call-parser granite4 --gpu-memory-utilization 0.85' \
    > /tmp/vllm.log 2>&1 &"
 
 echo ""
@@ -28,21 +28,21 @@ while true; do
 done
 
 echo ""
-echo "=== Starting SSH tunnel (localhost:8001 -> $HOSTNAME:8001) ==="
-ssh -fL 8001:"$HOSTNAME":8001 "$REMOTE" "sleep infinity"
+echo "=== Starting SSH tunnel (localhost:8003 -> $HOSTNAME:8003) ==="
+ssh -fL 8003:"$HOSTNAME":8003 "$REMOTE" "sleep infinity"
 echo "SSH tunnel started"
 
 echo ""
-echo "=== Starting socat bridge (Docker 8002 -> localhost:8001) ==="
+echo "=== Starting socat bridge (Docker 8002 -> localhost:8003) ==="
 docker rm -f vllm-bridge 2>/dev/null || true
 docker run -d --name vllm-bridge -p 8002:8002 \
-  alpine/socat tcp-listen:8002,fork,reuseaddr tcp:host.docker.internal:8001
+  alpine/socat tcp-listen:8002,fork,reuseaddr tcp:host.docker.internal:8003
 echo "Socat bridge started"
 
 echo ""
 echo "=== Waiting for vLLM to be ready ==="
 for i in $(seq 1 60); do
-    if curl -sf http://localhost:8001/v1/models > /dev/null 2>&1; then
+    if curl -sf http://localhost:8003/v1/models > /dev/null 2>&1; then
         echo "vLLM is ready!"
         break
     fi

@@ -5,7 +5,7 @@ from src.utils.models import get_local_llm, LOCAL_GRANITE4
 @pytest.fixture
 def mock_env_vllm(monkeypatch):
     monkeypatch.setenv("TINYBI_USE_VLLM", "true")
-    monkeypatch.setenv("TINYBI_VLLM_URL", "http://localhost:8001/v1")
+    monkeypatch.setenv("TINYBI_VLLM_URL", "http://localhost:8003/v1")
 
 @pytest.mark.parametrize("model_name", [LOCAL_GRANITE4, "granite-3.1-8b"])
 def test_get_local_llm_routes_to_vllm(mock_env_vllm, model_name, monkeypatch):
@@ -19,7 +19,7 @@ def test_get_local_llm_routes_to_vllm(mock_env_vllm, model_name, monkeypatch):
         # Verify ChatOpenAI was called with the local vLLM config
         mock_chat_openai.assert_called_once()
         args, kwargs = mock_chat_openai.call_args
-        assert kwargs["base_url"] == "http://localhost:8001/v1"
+        assert kwargs["base_url"] == "http://localhost:8003/v1"
         assert kwargs["model"] == model_name
         # api_key should be dummy for local vLLM
         assert "api_key" in kwargs

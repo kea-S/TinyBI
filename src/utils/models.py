@@ -60,7 +60,7 @@ def get_remote_llm(name: str):
 def get_local_llm(name: str):
     use_vllm = os.getenv("TINYBI_USE_VLLM", "false").lower() == "true"
     if use_vllm:
-        vllm_url = os.getenv("TINYBI_VLLM_URL", "http://localhost:8001/v1")
+        vllm_url = os.getenv("TINYBI_VLLM_URL", "http://localhost:8003/v1")
         return ChatOpenAI(
             model=name,
             base_url=vllm_url,

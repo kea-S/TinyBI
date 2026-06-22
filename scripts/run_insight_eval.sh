@@ -3,7 +3,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-if ! curl -sf http://localhost:8001/v1/models > /dev/null 2>&1; then
+if ! curl -sf http://localhost:8003/v1/models > /dev/null 2>&1; then
     echo "ERROR: vLLM is not running."
     echo "Start it with: ./scripts/start_vllm.sh"
     exit 1

@@ -84,6 +84,7 @@ def execute_query(structured_query: QuerySchema, llm: Optional[Any] = None):
     final_joins = resolve_joins(final_entries, schema_graph)
 
     logger.info("Final entries: %s", final_entries.to_log_dict())
+    logger.info("Final joins: %s", final_joins.model_dump_json())
 
     if not final_entries.subject_entries and not final_entries.metric_entry and not final_entries.filter_entries:
         raise ValueError(

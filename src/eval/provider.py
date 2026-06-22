@@ -220,6 +220,25 @@ class PrettyLogFormatter(logging.Formatter):
             except Exception:
                 pass
 
+        # Check Final joins
+        elif message.startswith("Final joins:"):
+            dict_str = message[len("Final joins:"):].strip()
+            try:
+                data = json.loads(dict_str)
+                from_table = data.get("from_table", "unknown")
+                joins = data.get("joins", [])
+                
+                formatted_lines = [
+                    "### 🔗 Final Join Path",
+                    f"FROM {from_table}"
+                ]
+                for j in joins:
+                    formatted_lines.append(f"LEFT JOIN {j.get('table')} ON {j.get('on_clause')}")
+                formatted_lines.append("")
+                return "\n".join(formatted_lines).strip()
+            except Exception:
+                return f"### 🔗 Final Join Path\n{dict_str}"
+
         # Check for LLM-generated SQL or Executing raw SQL
         elif message.startswith("LLM-generated SQL:") or message.startswith("Executing raw SQL:"):
             title = "🤖 LLM-generated SQL" if message.startswith("LLM-generated SQL:") else "🔌 Executing Raw SQL"

@@ -5,13 +5,8 @@ from src.utils.pydantic_models import ColumnVectorIndexEntry
 
 
 def _quote(identifier: str) -> str:
-    """Quote a SQL identifier (table or column) using double quotes."""
-    if not identifier:
-        return ""
-    if "." in identifier:
-        parts = identifier.split(".")
-        return ".".join(f'"{p.replace('"', '""')}"' for p in parts)
-    return f'"{identifier.replace('"', '""')}"'
+    """Return the identifier without adding double quotes to match schema dump style."""
+    return identifier
 
 
 def build_schema_graph(entries: List[ColumnVectorIndexEntry]) -> nx.Graph:
@@ -19,6 +14,13 @@ def build_schema_graph(entries: List[ColumnVectorIndexEntry]) -> nx.Graph:
     Build an undirected graph of table relationships from column metadata.
     Edges store the 'on_clause' as an attribute.
     """
+    from collections import defaultdict
+    outgoing_fks = defaultdict(set)
+    for entry in entries:
+        if entry.references:
+            target_table = entry.references.split(".")[0]
+            outgoing_fks[entry.table_name].add(target_table)
+
     G = nx.Graph()
     for entry in entries:
         G.add_node(entry.table_name)
@@ -27,7 +29,9 @@ def build_schema_graph(entries: List[ColumnVectorIndexEntry]) -> nx.Graph:
                 # Parse references: e.g. "users.id"
                 target_table = entry.references.split(".")[0]
                 on_clause = f"{_quote(entry.source_key)} = {_quote(entry.references)}"
-                G.add_edge(entry.table_name, target_table, on_clause=on_clause)
+                # Junction tables have >1 outgoing foreign key (like disp). We reward traversals through them.
+                weight = 1 if len(outgoing_fks[entry.table_name]) > 1 else 10
+                G.add_edge(entry.table_name, target_table, on_clause=on_clause, weight=weight)
             except Exception:
                 continue
     return G

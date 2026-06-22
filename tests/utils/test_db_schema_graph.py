@@ -46,7 +46,7 @@ def test_build_schema_graph(sample_entries):
     # Check edge
     assert graph.has_edge("orders", "users")
     edge_data = graph.get_edge_data("orders", "users")
-    assert edge_data["on_clause"] == '"orders"."user_id" = "users"."id"'
+    assert edge_data["on_clause"] == 'orders.user_id = users.id'
 
 def test_pick_anchor_table_metric_precedence():
     # Metric table should win regardless of frequency

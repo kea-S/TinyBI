@@ -6,7 +6,7 @@ the LLM to generate a natural language answer. Writes results to
 data/app_data/reference_answers.json.
 
 Usage:
-    TINYBI_VLLM_URL=http://localhost:8001/v1 uv run python -m src.eval.generate_reference_answers
+    TINYBI_VLLM_URL=http://localhost:8003/v1 uv run python -m src.eval.generate_reference_answers
 """
 import asyncio
 import json

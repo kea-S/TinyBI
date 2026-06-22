@@ -65,9 +65,9 @@ def format_sql_generation_context(
 
     if final_joins.joins:
         lines.append("Suggested JOIN path:")
-        lines.append(f"  FROM \"{final_joins.from_table}\"")
+        lines.append(f"  FROM {final_joins.from_table}")
         for step in final_joins.joins:
-            lines.append(f"  LEFT JOIN \"{step.table}\" ON {step.on_clause}")
+            lines.append(f"  LEFT JOIN {step.table} ON {step.on_clause}")
         lines.append("")
 
     return "\n".join(lines)

@@ -7,7 +7,7 @@ load_dotenv()
 
 async def test_vllm():
     use_vllm = os.getenv("TINYBI_USE_VLLM", "false").lower() == "true"
-    vllm_url = os.getenv("TINYBI_VLLM_URL", "http://localhost:8001/v1")
+    vllm_url = os.getenv("TINYBI_VLLM_URL", "http://localhost:8003/v1")
     model_name = "ibm-granite/granite-4.1-3b"
     
     print(f"USE_VLLM: {use_vllm}")

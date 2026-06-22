@@ -21,7 +21,7 @@ echo "Job cancelled"
 
 echo ""
 echo "=== Killing SSH tunnel ==="
-pkill -f "ssh -fL 8001:" 2>/dev/null || echo "No SSH tunnel found"
+pkill -f "ssh -fL 8003:" 2>/dev/null || echo "No SSH tunnel found"
 echo "SSH tunnel stopped"
 
 echo ""

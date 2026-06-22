@@ -48,7 +48,7 @@ def resolve_joins(
             continue
 
         try:
-            path = nx.shortest_path(schema_graph, source=anchor_table, target=target_table)
+            path = nx.shortest_path(schema_graph, source=anchor_table, target=target_table, weight='weight')
 
             # Add steps for the path
             for i in range(len(path) - 1):
