@@ -71,16 +71,17 @@ Runs promptfoo inside Docker (`docker compose run --rm promptfoo-eval`). Single 
 
 ## Workflow
 
-On every new session, you must read the HANDOFF.md
+> [!IMPORTANT]
+> **CRITICAL RULE**: Do NOT make any file edits or execute arbitrary code without first explaining to the user why you are doing it and presenting a clear, step-by-step implementation plan for their review and approval. 
 
-Planning and implementation should be cleanly split as two stages. During
-planning, use the grill me skill if implementing a new feature that is not well
-defined in order for you and the user to reach a common understanding. Once
-satisfied with the answers, present a plan of how you would implement the feature
-to the user. The development of all new features should be as much as possible
-done through red/green test driven development (tdd skill). As such, after the
-user approves of the plan, present the user with a list of test cases
-and their failure/ success modes for the user to inspect and work with you
-through. Once the user agrees with the test cases, are you allowed to make 
-edits. Only if the user gives the explicit go to for this plan, are you 
-allowed to start editing and implementing code.
+### Phase 1: Planning and Alignment (Socratic Phase)
+1. **Read HANDOFF.md**: Always read [HANDOFF.md](file:///Users/keaharvan/Documents/University/TinyBIExplore/TinyBI/HANDOFF.md) at the beginning of every session to align on the current state.
+2. **Design Socratic Alignment**: If a feature or task is not perfectly defined, you MUST use socratic questioning or recommend the `/grill-me` slash command to align with the user on design decisions before proposing a plan.
+3. **Propose the Plan**: Present a comprehensive implementation plan to the user first. Do NOT touch any code or make file edits yet.
+
+### Phase 2: Test-Driven Development (TDD Phase)
+1. **Present Test Cases**: Once the user approves the implementation plan, you must present a list of test cases and their failure/success modes (Expected Red vs. Green behavior).
+2. **Get Go-Ahead**: You are strictly forbidden from writing or modifying project code until the user explicitly agrees with the test cases and gives the green light to implement.
+3. **Red Phase**: Write the failing tests first and run them to verify they fail as expected.
+4. **Green Phase**: Implement the code changes to satisfy the tests and run them to verify they all pass.
+

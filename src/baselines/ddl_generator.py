@@ -10,7 +10,9 @@ TYPE_MAP = {
 
 
 def _build_comment(col: dict) -> str:
-    parts = [col["description"]]
+    parts = []
+    if col.get("description"):
+        parts.append(col["description"])
 
     st = col.get("statistical_type")
     if st:
@@ -18,7 +20,7 @@ def _build_comment(col: dict) -> str:
 
     aliases = col.get("aliases", [])
     if aliases:
-        parts.append(f"aliases: {', '.join(aliases)}")
+        parts.append(f"search_synonyms: {', '.join(aliases)}")
 
     cat_values = col.get("categorical_values", {})
     if cat_values:

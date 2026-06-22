@@ -247,7 +247,7 @@ def test_comment_density():
 
     assert "frequency of the account. categorical." in comment
     assert "type: nominal" in comment
-    assert "aliases: frequency" in comment
+    assert "search_synonyms: frequency" in comment
     assert "POPLATEK MESICNE=monthly issuance" in comment
     assert "POPLATEK TYDNE=weekly issuance" in comment
     assert "sample: POPLATEK MESICNE, POPLATEK TYDNE" in comment

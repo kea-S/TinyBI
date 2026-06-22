@@ -230,6 +230,21 @@ class TestCanResolveValueTypeCompatibility:
         )
         assert can_resolve_value(intent, entry) is True
 
+    def test_can_resolve_value_accepts_year_and_month_temporals(self):
+        entry = make_entry(statistical_type="temporal")
+        intent_year = FilterIntent(
+            attribute_hint="date",
+            operator="=",
+            raw_value_text=["1997"],
+        )
+        intent_month = FilterIntent(
+            attribute_hint="date",
+            operator="=",
+            raw_value_text=["1997-12"],
+        )
+        assert can_resolve_value(intent_year, entry) is True
+        assert can_resolve_value(intent_month, entry) is True
+
     def test_temporal_entry_with_invalid_date_rejected(self):
         entry = make_entry(statistical_type="temporal")
         intent = FilterIntent(

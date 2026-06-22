@@ -101,9 +101,15 @@ def can_resolve_value(
         if index_entry.statistical_type in TEMPORAL_TYPES:
             raw_values = _as_list(filter_intent.raw_value_text)
             for v in raw_values:
-                try:
-                    datetime.strptime(v, "%Y-%m-%d")
-                except ValueError:
+                valid = False
+                for fmt in ("%Y-%m-%d", "%Y-%m", "%Y"):
+                    try:
+                        datetime.strptime(v, fmt)
+                        valid = True
+                        break
+                    except ValueError:
+                        pass
+                if not valid:
                     return False
         return True
 
