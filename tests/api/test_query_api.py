@@ -63,3 +63,34 @@ def test_query_endpoint_error(client):
 
     assert response.status_code == 500
     assert "Agent failed" in response.json()["detail"]
+
+def test_query_config_endpoint(client):
+    response = client.get("/query/config")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["llm"] == "ibm/granite4.1:3b"
+    assert body["embedding"] == "qwen3-embedding:0.6b"
+
+def test_query_endpoint_keeps_history(client):
+    fake_result = {
+        "output": "Sure.",
+        "sql": None,
+        "data": None
+    }
+
+    async def mock_run_agent(messages, llm, tools, system_prompt):
+        # We assert that history is NOT dropped
+        assert len(messages) == 3
+        assert messages[-1].content == "what about for Singapore?"
+        return fake_result
+
+    with patch("src.api.routes.query.run_agent", mock_run_agent):
+        response = client.post("/query", json={
+            "messages": [
+                {"role": "user", "content": "average buyer waiting time"},
+                {"role": "assistant", "content": "The average waiting time is 2 days."},
+                {"role": "user", "content": "what about for Singapore?"}
+            ]
+        })
+
+    assert response.status_code == 200

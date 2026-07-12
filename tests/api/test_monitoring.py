@@ -17,22 +17,27 @@ def get_fake_eval_json():
                 {
                     "provider": {"label": "TinyBI: granite4"},
                     "score": 1,
+                    "success": True,
                     "latencyMs": 10000,
-                    "metrics": {"tokenUsage": {"total": 5000}},
+                    "response": {"tokenUsage": {"total": 5000}},
                     "vars": {"difficulty": "simple"}
                 },
                 {
                     "provider": {"label": "TinyBI: granite4"},
                     "score": 0,
+                    "success": False,
+                    "error": "Python score 0 is less than threshold",
                     "latencyMs": 20000,
-                    "metrics": {"tokenUsage": {"total": 10000}},
+                    "response": {"tokenUsage": {"total": 10000}},
                     "vars": {"difficulty": "challenging"}
                 },
                 {
                     "provider": {"label": "Schema Dump: granite4"},
                     "score": 0.5,
+                    "success": False,
+                    "error": "BinderException",
                     "latencyMs": 15000,
-                    "metrics": {"tokenUsage": {"total": 30000}},
+                    "response": {"tokenUsage": {"total": 30000}},
                     "vars": {"difficulty": "simple"}
                 }
             ]
@@ -100,3 +105,19 @@ def test_monitoring_endpoints_missing_file(mock_load, client):
     res3 = client.get("/monitoring/provider-comparison")
     assert res3.status_code == 200
     assert res3.json() == []
+
+@patch("src.api.routes.monitoring._load_eval_data")
+def test_monitoring_difficulty_segregated_success(mock_load, client):
+    mock_load.return_value = get_fake_eval_json()
+    response = client.get("/monitoring/difficulty-segregated")
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 3  # 2 for TinyBI (simple, challenging) + 1 for Schema Dump (simple)
+    
+    tinybi_simple = next(s for s in data if s["provider"] == "TinyBI" and s["difficulty"] == "simple")
+    assert tinybi_simple["accuracy"] == 1
+    assert tinybi_simple["tokens"] == 5000
+
+    schema_dump_simple = next(s for s in data if s["provider"] == "Schema Dump" and s["difficulty"] == "simple")
+    assert schema_dump_simple["accuracy"] == 0.5
+    assert schema_dump_simple["tokens"] == 30000

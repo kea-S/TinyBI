@@ -1,6 +1,5 @@
 import os
 from langchain_groq import ChatGroq
-from langchain_ollama import ChatOllama, OllamaEmbeddings
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_openrouter import ChatOpenRouter
 
@@ -22,7 +21,7 @@ LOCAL_GEMMA3 = "gemma3:4b"
 LOCAL_GEMMA4 = "gemma4:e4b"
 LOCAL_LLAMA = "llama3.2:3b"
 LOCAL_PHI4 = "phi4-mini:3.8b"
-LOCAL_GRANITE4 = "ibm-granite/granite-4.1-3b"
+LOCAL_GRANITE4 = "ibm/granite4.1:3b"
 
 LOCAL_BIG_LLAMA = "llama3.1:8b"
 LOCAL_BIG_GRANITE = "granite3.1-dense:8b"
@@ -57,25 +56,43 @@ def get_remote_llm(name: str):
         return ChatGroq(model=REMOTE_GPT_OSS_LARGE)
 
 
+
+from langchain_ollama import ChatOllama
+
 def get_local_llm(name: str):
     use_vllm = os.getenv("TINYBI_USE_VLLM", "false").lower() == "true"
+    
     if use_vllm:
-        vllm_url = os.getenv("TINYBI_VLLM_URL", "http://localhost:8003/v1")
+        base_url = os.getenv("TINYBI_VLLM_URL", "http://localhost:8003/v1")
+        # If running the API locally on the host Mac instead of in Docker, 
+        # 'host.docker.internal' will fail DNS resolution. Translate it to localhost.
+        if "host.docker.internal" in base_url and not os.path.exists("/.dockerenv"):
+            base_url = base_url.replace("host.docker.internal", "localhost")
+            
         return ChatOpenAI(
             model=name,
-            base_url=vllm_url,
-            api_key="none"
+            base_url=base_url,
+            api_key="none", # Required by OpenAI client, but ignored by local endpoints
+            max_retries=0
         )
-
-    return ChatOllama(
-        model=name,
-        reasoning=False
-    )
+    else:
+        # User requested to stick with ChatOllama
+        return ChatOllama(
+            model=name,
+            reasoning=False
+        )
 
 
 def get_embedding_model(name: str):
+    base_url = os.getenv("LOCAL_API_BASE", "http://127.0.0.1:11434/v1")
+    
     if name in {NOMIC_EMBED_TEXT, QWEN3_EMBEDDING, BGE_M3}:
-        return OllamaEmbeddings(model=name)
+        return OpenAIEmbeddings(
+            model=name,
+            base_url=base_url,
+            api_key="none",
+            check_embedding_ctx_length=False
+        )
     if name == OPENAI_TEXT_EMBEDDING_3_SMALL:
         return OpenAIEmbeddings(model=OPENAI_TEXT_EMBEDDING_3_SMALL)
 

@@ -61,8 +61,6 @@ def test_query_schema_accepts_metric_aggregation_and_filters():
     assert q.filters[1].negated is True
 
 
-def test_query_schema_rejects_empty_metric_hint():
-    with pytest.raises(ValidationError):
         QuerySchema(user_question="dummy question", subject="route", metric_hint="")
 
 

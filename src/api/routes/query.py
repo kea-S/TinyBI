@@ -8,7 +8,7 @@ from langchain_core.messages import HumanMessage, AIMessage
 from src.agent import run_agent
 from src.tools.query_tool import make_query_tool
 from src.utils.prompts import EXTRACTOR_PROMPT
-from src.utils.models import get_local_llm, get_remote_llm, REMOTE_LLAMA_8B, LOCAL_GRANITE4
+from src.utils.models import get_local_llm, get_remote_llm, REMOTE_LLAMA_8B, LOCAL_GRANITE4, QWEN3_EMBEDDING
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +32,18 @@ class QueryResponse(BaseModel):
     data: Optional[List[dict]] = None
 
 
+class ConfigResponse(BaseModel):
+    llm: str
+    embedding: str
+
+@router.get("/config", response_model=ConfigResponse, status_code=status.HTTP_200_OK)
+async def query_config():
+    return ConfigResponse(
+        llm=LOCAL_GRANITE4,
+        embedding=QWEN3_EMBEDDING
+    )
+
+
 @router.post("", response_model=QueryResponse, status_code=status.HTTP_200_OK)
 async def query_endpoint(request: QueryRequest):
     try:
@@ -41,11 +53,13 @@ async def query_endpoint(request: QueryRequest):
             llm = get_remote_llm(request.model or REMOTE_LLAMA_8B)
 
         # Convert history to LangChain messages
+        # Now that we use the robust AgentDecision router, we can safely pass history!
         messages = []
         for msg in request.messages:
             if msg.role == "user":
                 messages.append(HumanMessage(content=msg.content))
             else:
+                from langchain_core.messages import AIMessage
                 messages.append(AIMessage(content=msg.content))
 
         result = await run_agent(

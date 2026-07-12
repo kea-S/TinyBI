@@ -165,7 +165,7 @@ class FilterIntent(BaseModel):
 
 class QuerySchema(BaseModel):
     user_question: str = Field(
-        ...,
+        default="",
         description="The exact original natural language question asked by the user. Do not modify or summarize it."
     )
     subject: Optional[str] = Field(
@@ -190,9 +190,8 @@ class QuerySchema(BaseModel):
         """
     )
 
-    metric_hint: str = Field(
-        ...,
-        min_length=1,
+    metric_hint: Optional[str] = Field(
+        default=None,
         description="""
         Semantic descriptor for the measure or outcome the user wants to
         analyze for each subject.
@@ -512,3 +511,16 @@ class FinalJoins(BaseModel):
     """
     from_table: str
     joins: list[JoinStep]
+
+class AgentDecision(BaseModel):
+    needs_database_query: bool = Field(
+        description="True if the user is asking for new data that requires querying the database. False if the user is asking a follow-up question that can be answered using the existing chat history context."
+    )
+    conversational_response: Optional[str] = Field(
+        default=None,
+        description="If needs_database_query is False, write your natural language answer here based on the chat history."
+    )
+    query_parameters: Optional[QuerySchema] = Field(
+        default=None,
+        description="If needs_database_query is True, extract the query parameters here."
+    )

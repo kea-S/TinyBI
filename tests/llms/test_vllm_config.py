@@ -31,8 +31,8 @@ def test_get_local_llm_falls_back_to_ollama_when_vllm_disabled(monkeypatch):
     monkeypatch.delenv("TINYBI_USE_VLLM", raising=False)
     
     with patch("src.utils.models.ChatOllama") as mock_chat_ollama:
-        get_local_llm(LOCAL_GRANITE4)
+        get_local_llm("test-model")
         mock_chat_ollama.assert_called_once_with(
-            model=LOCAL_GRANITE4,
+            model="test-model",
             reasoning=False
         )

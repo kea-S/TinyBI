@@ -21,6 +21,7 @@ from src.utils.models import DEFAULT_EMBEDDING_MODEL
 from src.utils.prompts import SQL_GENERATION_PROMPT, format_sql_generation_context
 
 from langchain_core.tools import tool
+from langchain_core.messages import HumanMessage, AIMessage
 
 logger = logging.getLogger(__name__)
 
@@ -42,26 +43,7 @@ def _extract_sql_from_llm_response(response_text: str) -> str:
     return text
 
 
-def generate_sql_with_llm(
-    final_entries: FinalEntries,
-    final_joins: FinalJoins,
-    structured_query: QuerySchema,
-    all_entries: List[ColumnVectorIndexEntry],
-    llm: Any,
-) -> str:
-    """
-    Generate SQL by calling the LLM with resolved context.
-    """
-    context = format_sql_generation_context(final_entries, final_joins, structured_query, all_entries)
 
-    prompt = f"{SQL_GENERATION_PROMPT}\n\n{context}\n\nGenerate the SQL query:"
-
-    response = llm.invoke(prompt)
-    sql = _extract_sql_from_llm_response(response.content)
-
-    logger.info("LLM-generated SQL:\n%s", sql)
-
-    return sql
 
 
 def execute_query(structured_query: QuerySchema, llm: Optional[Any] = None):
@@ -93,17 +75,34 @@ def execute_query(structured_query: QuerySchema, llm: Optional[Any] = None):
             "(e.g. a subject, metric, or both)."
         )
 
-    if llm is not None:
-        sql = generate_sql_with_llm(final_entries, final_joins, structured_query, all_entries, llm)
-    else:
+    if llm is None:
         raise ValueError(
             "LLM is required for SQL generation. "
             "Pass an LLM instance via the 'llm' parameter."
         )
 
-    df = global_database.query(sql)
-
-    return df, sql
+    context = format_sql_generation_context(final_entries, final_joins, structured_query, all_entries)
+    current_prompt = f"{SQL_GENERATION_PROMPT}\n\n{context}\n\nGenerate the SQL query:"
+    
+    max_retries = 3
+    for attempt in range(max_retries + 1):
+        response = llm.invoke(current_prompt)
+        sql = _extract_sql_from_llm_response(response.content)
+        
+        logger.info("LLM-generated SQL (attempt %d):\n%s", attempt + 1, sql)
+        
+        try:
+            df = global_database.query(sql)
+            return df, sql
+        except Exception as e:
+            if attempt < max_retries:
+                logger.warning("SQL execution failed (attempt %d). Retrying... Error: %s", attempt + 1, str(e))
+                # Use string concatenation instead of multi-turn messages. Small models often perform better 
+                # when the error is just appended to the ongoing text prompt.
+                current_prompt += f"\n\nWait, you generated this SQL:\n```sql\n{sql}\n```\nBut it failed with this error:\n{str(e)}\n\nPlease generate a corrected SQL query that fixes the error:"
+            else:
+                logger.error("SQL execution failed after %d retries.", max_retries)
+                raise ValueError(f"SQL execution failed after {max_retries} retries. Last error: {str(e)}") from e
 
 
 def make_query_tool(llm: Any):

@@ -3,7 +3,6 @@ import socket
 from urllib.parse import urlparse
 
 import pytest
-from langchain_ollama import OllamaEmbeddings
 from langchain_openai import OpenAIEmbeddings
 
 from src.utils.models import (
@@ -14,6 +13,7 @@ from src.utils.models import (
     # REMOTE_GPT_4o,
     QWEN3_EMBEDDING,
     REMOTE_LLAMA_8B,
+    LOCAL_GRANITE4,
 )
 
 from src.utils.models import get_embedding_model, get_remote_llm, get_local_llm
@@ -77,9 +77,9 @@ def _skip_if_runtime_unavailable(model_name: str, local: bool) -> None:
 @pytest.mark.parametrize(
     "model_name, expected_type, expected_model",
     [
-        (NOMIC_EMBED_TEXT, OllamaEmbeddings, NOMIC_EMBED_TEXT),
-        (QWEN3_EMBEDDING, OllamaEmbeddings, QWEN3_EMBEDDING),
-        (BGE_M3, OllamaEmbeddings, BGE_M3),
+        (NOMIC_EMBED_TEXT, OpenAIEmbeddings, NOMIC_EMBED_TEXT),
+        (QWEN3_EMBEDDING, OpenAIEmbeddings, QWEN3_EMBEDDING),
+        (BGE_M3, OpenAIEmbeddings, BGE_M3),
         (OPENAI_TEXT_EMBEDDING_3_SMALL, OpenAIEmbeddings, OPENAI_TEXT_EMBEDDING_3_SMALL),
     ],
 )
@@ -104,7 +104,11 @@ def test_get_embedding_model_rejects_unknown_model():
         (BGE_M3, True),
     ],
 )
-def test_langchain_embedding_call(model_name: str, local: bool):
+def test_langchain_embedding_call(model_name: str, local: bool, monkeypatch):
+    if local:
+        monkeypatch.setenv("LOCAL_API_BASE", "http://localhost:11434/v1")
+        monkeypatch.setenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
+    
     _skip_if_runtime_unavailable(model_name, local)
 
     embedding_model = get_embedding_model(model_name)
@@ -119,11 +123,16 @@ def test_langchain_embedding_call(model_name: str, local: bool):
 
 @pytest.mark.integration
 @pytest.mark.parametrize("model_name, local", [
+    (LOCAL_GRANITE4, True),
     # (REMOTE_GPT_4o, False),
     (REMOTE_GPT_OSS_LARGE, False),
     (REMOTE_LLAMA_8B, False),
 ])
-def test_langchain_llm_call(model_name, local: bool):
+def test_langchain_llm_call(model_name, local: bool, monkeypatch):
+    if local:
+        monkeypatch.setenv("LOCAL_API_BASE", "http://localhost:11434/v1")
+        monkeypatch.setenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
+        
     _skip_if_runtime_unavailable(model_name, local)
 
     llm = (get_local_llm(model_name)

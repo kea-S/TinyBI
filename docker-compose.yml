@@ -33,3 +33,32 @@ services:
       - TINYBI_VLLM_URL=${TINYBI_VLLM_URL:-http://host.docker.internal:8003/v1}
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
+  backend:
+    build: 
+      context: .
+      dockerfile: backend.Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - TINYBI_USE_VLLM=${TINYBI_USE_VLLM:-false}
+      - TINYBI_VLLM_URL=${TINYBI_VLLM_URL:-http://host.docker.internal:8003/v1}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_BACKEND_URL=http://backend:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
