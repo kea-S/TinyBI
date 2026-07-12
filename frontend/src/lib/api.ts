@@ -119,6 +119,14 @@ export type QueryResponse = {
   data?: Record<string, unknown>[] | null
 }
 
+export async function fetchEngineConfig() {
+  const response = await fetch(createApiUrl("/query/config"))
+  if (!response.ok) {
+    throw new Error(`Failed to fetch engine config: ${response.statusText}`)
+  }
+  return response.json()
+}
+
 export function submitQuery(payload: QueryRequest) {
   return apiRequest<QueryResponse>("/query", {
     method: "POST",
@@ -127,4 +135,52 @@ export function submitQuery(payload: QueryRequest) {
     },
     body: JSON.stringify(payload),
   })
+}
+
+export type OverviewStats = {
+  overallAccuracy: number
+  meanLatencyMs: number
+  meanTokens: number
+  totalTokens: number
+  lastRun?: string | null
+}
+
+export function fetchOverviewStats() {
+  return apiRequest<OverviewStats>("/monitoring/overview")
+}
+
+export type DifficultyBreakdownStats = {
+  difficulty: string
+  accuracy: number
+  latencyMs: number
+  tokens: number
+}
+
+export function fetchDifficultyBreakdown() {
+  return apiRequest<DifficultyBreakdownStats[]>("/monitoring/difficulty-breakdown")
+}
+
+export type DifficultySegregatedStats = {
+  provider: string
+  difficulty: string
+  accuracy: number
+  latencyMs: number
+  tokens: number
+}
+
+export function fetchDifficultySegregated() {
+  return apiRequest<DifficultySegregatedStats[]>("/monitoring/difficulty-segregated")
+}
+
+export type ProviderComparisonStats = {
+  provider: string
+  accuracy: number
+  tokens: number
+  correct: number
+  fail: number
+  error: number
+}
+
+export function fetchProviderComparison() {
+  return apiRequest<ProviderComparisonStats[]>("/monitoring/provider-comparison")
 }

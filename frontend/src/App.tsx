@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Database, Search, LayoutDashboard } from "lucide-react"
+import { Database, Search, LayoutDashboard, Activity } from "lucide-react"
 
 import { VectorIndexBuilderPage } from "@/pages/VectorIndexBuilderPage"
 import { QueryPage } from "@/pages/QueryPage"
-import { fetchCurrentVectorIndexEntries } from "@/lib/api"
+import { MonitoringPage } from "@/pages/MonitoringPage"
+import { fetchCurrentVectorIndexEntries, fetchEngineConfig } from "@/lib/api"
 
 // --- Types for shared state ---
 export type CategoricalValue = {
@@ -35,7 +36,7 @@ export type TableDraft = {
   y?: number
 }
 
-type AppTab = "builder" | "query"
+type AppTab = "builder" | "query" | "monitoring"
 
 function createId(prefix: string) {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`
@@ -71,6 +72,7 @@ function App() {
   const [showSplash, setShowSplash] = useState(true)
   const [activeTab, setActiveTab] = useState<AppTab>("query")
   const [tables, setTables] = useState<TableDraft[]>([createEmptyTable()])
+  const [config, setConfig] = useState({ llm: "Loading...", embedding: "Loading..." })
 
   // Initial data load
   useEffect(() => {
@@ -124,6 +126,10 @@ function App() {
       }
     })
 
+    fetchEngineConfig().then((data) => {
+      setConfig(data)
+    }).catch(console.error)
+
     return () => clearTimeout(timer)
   }, [])
 
@@ -168,35 +174,53 @@ function App() {
         )}
       </AnimatePresence>
 
-      <div className="flex h-full w-full">
-        {/* Sidebar Navigation */}
-        <aside className="z-40 flex w-20 flex-col items-center border-r border-border bg-card py-8 shadow-sm">
-          <div className="mb-12 flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <LayoutDashboard className="size-6" />
-          </div>
-          
-          <nav className="flex flex-1 flex-col gap-6">
-            <SidebarButton 
-              icon={<Database className="size-5" />} 
-              label="Builder" 
-              isActive={activeTab === "builder"} 
-              onClick={() => setActiveTab("builder")} 
-            />
-            <SidebarButton 
-              icon={<Search className="size-5" />} 
-              label="Query" 
-              isActive={activeTab === "query"} 
-              onClick={() => setActiveTab("query")} 
-            />
-          </nav>
-          
+      <div className="flex h-full w-full flex-col">
+        {/* Top Navigation */}
+        <header className="z-40 flex h-16 w-full shrink-0 items-center justify-between border-b border-border bg-card px-6 shadow-sm">
+          <div className="flex items-center gap-8">
+            <button 
+              onClick={() => window.location.reload()} 
+              className="ml-2 flex items-center transition-opacity hover:opacity-80 cursor-pointer"
+              aria-label="Refresh application"
+            >
+               <img src="/favicon.svg" alt="TinyBI Logo" className="size-8" />
+            </button>
 
-        </aside>
+            <nav className="flex items-center gap-6">
+              <TopNavButton 
+                label="Builder" 
+                isActive={activeTab === "builder"} 
+                onClick={() => setActiveTab("builder")} 
+              />
+              <TopNavButton 
+                label="Query" 
+                isActive={activeTab === "query"} 
+                onClick={() => setActiveTab("query")} 
+              />
+              <TopNavButton 
+                label="Monitoring" 
+                isActive={activeTab === "monitoring"} 
+                onClick={() => setActiveTab("monitoring")} 
+              />
+            </nav>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 rounded-full border border-border bg-muted/30 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/50">
+               <div className="size-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse" />
+               LLM: {config.llm}
+            </div>
+            <div className="flex items-center gap-2 rounded-full border border-border bg-muted/30 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/50">
+               <div className="size-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)] animate-pulse" />
+               Vector: {config.embedding}
+            </div>
+          </div>
+        </header>
 
         {/* Main Content Area */}
         <main className="relative flex-1 overflow-hidden bg-muted/20">
           <div className="relative h-full w-full">
-            {/* Builder tab — always mounted after first visit to avoid remount flicker */}
+            {/* Builder tab */}
             <div
               className={`absolute inset-0 transition-opacity duration-300 ${
                 activeTab === "builder"
@@ -216,6 +240,16 @@ function App() {
             >
               <QueryPage />
             </div>
+            {/* Monitoring tab */}
+            <div
+              className={`absolute inset-0 transition-opacity duration-300 ${
+                activeTab === "monitoring"
+                  ? "opacity-100 z-10"
+                  : "opacity-0 z-0 pointer-events-none"
+              }`}
+            >
+              <MonitoringPage />
+            </div>
           </div>
         </main>
       </div>
@@ -223,13 +257,11 @@ function App() {
   )
 }
 
-function SidebarButton({ 
-  icon, 
+function TopNavButton({ 
   label, 
   isActive, 
   onClick 
 }: { 
-  icon: React.ReactNode; 
   label: string; 
   isActive: boolean; 
   onClick: () => void 
@@ -237,27 +269,16 @@ function SidebarButton({
   return (
     <button
       onClick={onClick}
-      className={`group relative flex size-12 items-center justify-center rounded-xl transition-all duration-200 ${
+      aria-label={label}
+      className={`relative text-sm font-medium transition-colors hover:text-foreground cursor-pointer ${
         isActive 
-          ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" 
-          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+          ? "text-foreground underline decoration-primary decoration-2 underline-offset-8" 
+          : "text-muted-foreground hover:underline hover:decoration-muted-foreground/50 hover:decoration-2 hover:underline-offset-8"
       }`}
     >
-      {icon}
-      <span className="absolute left-16 z-50 rounded-md bg-foreground px-2 py-1 text-xs font-medium text-background opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none">
-        {label}
-      </span>
-      {isActive && (
-        <motion.div 
-          layoutId="sidebar-active"
-          className="absolute -right-3 h-8 w-1 rounded-l-full bg-primary"
-        />
-      )}
+      {label}
     </button>
   )
 }
 
 export default App
-
-
-

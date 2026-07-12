@@ -95,19 +95,6 @@ export function QueryPage() {
 
   return (
     <div className="flex flex-col h-full bg-background relative">
-      {/* Header */}
-      <header className="flex items-center justify-between border-b border-border bg-card/50 px-8 py-4 backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <Sparkles className="size-5" />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold">TinyBI Chat</h1>
-            <p className="text-xs text-muted-foreground">Conversational Data Intelligence</p>
-          </div>
-        </div>
-      </header>
-
       {/* Message History */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-8 space-y-8 scroll-smooth pb-60">
         {messages.length === 0 && (
