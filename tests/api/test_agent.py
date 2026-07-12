@@ -39,24 +39,27 @@ async def test_router_decides_conversation_only():
     assert result["data"] is None
 
 @pytest.mark.asyncio
-async def test_router_decides_database_query():
-    """Test when the agent decides it needs to query the database."""
+async def test_agent_generates_explainer_on_success():
+    """Test when the agent queries the database and then generates a natural language explanation."""
     if AgentDecision is None or QuerySchema is None:
         pytest.fail("AgentDecision or QuerySchema is not defined")
         
     mock_llm = MagicMock()
-    mock_structured_llm = AsyncMock()
     
-    # Mock the LLM to return a query decision
-    mock_query_schema = QuerySchema(subject="provider")
+    # 1. Mock the structured LLM for the routing decision
+    mock_structured_llm = AsyncMock()
     mock_decision = AgentDecision(
         needs_database_query=True,
-        query_parameters=mock_query_schema
+        query_parameters=QuerySchema(subject="provider")
     )
     mock_structured_llm.ainvoke.return_value = mock_decision
     mock_llm.with_structured_output.return_value = mock_structured_llm
     
-    # Mock execute_query
+    # 2. Mock the unstructured LLM for the final explainer response
+    from langchain_core.messages import AIMessage
+    mock_llm.ainvoke = AsyncMock(return_value=AIMessage(content="Based on the data, the average is 5."))
+    
+    # 3. Mock execute_query
     fake_df = pd.DataFrame({"col": [1, 2]})
     fake_sql = "SELECT * FROM dummy"
     
@@ -67,7 +70,33 @@ async def test_router_decides_database_query():
         
     assert result["sql"] == fake_sql
     assert result["data"] is not None
-    assert result["output"] == "SQL executed successfully."
+    assert result["output"] == "Based on the data, the average is 5."
+    # Assert that the explainer was actually called
+    assert mock_llm.ainvoke.call_count == 1
+
+@pytest.mark.asyncio
+async def test_agent_skips_explainer_on_error():
+    """Test that if the database query throws an error, the LLM is not invoked a second time."""
+    mock_llm = MagicMock()
+    
+    mock_structured_llm = AsyncMock()
+    mock_decision = AgentDecision(
+        needs_database_query=True,
+        query_parameters=QuerySchema(subject="provider")
+    )
+    mock_structured_llm.ainvoke.return_value = mock_decision
+    mock_llm.with_structured_output.return_value = mock_structured_llm
+    mock_llm.ainvoke = AsyncMock()
+    
+    messages = [HumanMessage(content="Break it")]
+    
+    with patch("src.agent.execute_query", side_effect=ValueError("Database exploded")):
+        result = await run_agent(messages, mock_llm, tools=[], system_prompt="Test Prompt")
+        
+    assert result["sql"] is None
+    assert "Database exploded" in result["output"]
+    # Should NOT have called the explainer
+    mock_llm.ainvoke.assert_not_called()
 
 def test_agent_decision_schema():
     """Test the Pydantic schema for AgentDecision."""

@@ -13,9 +13,9 @@ import { ChatMessage, type ChatMessageData } from "@/components/builder/ChatMess
 type QueryState = "idle" | "loading" | "error"
 
 const QUICK_START_EXAMPLES = [
-  "For the female client who was born in 1976/1/29, which district did she opened her account?",
-  "List out the no. of districts that have female average salary is more than 6000 but less than 10000?",
-  "List all the withdrawals in cash transactions that the client with the id 3356 makes.",
+  "How many accounts who choose issuance after transaction are staying in East Bohemia region?",
+  "What is the percentage of loan amount that has been fully paid with no issue.",
+  "For loan amount less than USD100,000, what is the percentage of accounts that is still running with no issue.",
 ]
 
 export function QueryPage() {

@@ -82,11 +82,16 @@ def execute_query(structured_query: QuerySchema, llm: Optional[Any] = None):
         )
 
     context = format_sql_generation_context(final_entries, final_joins, structured_query, all_entries)
-    current_prompt = f"{SQL_GENERATION_PROMPT}\n\n{context}\n\nGenerate the SQL query:"
+    from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
+
+    messages = [
+        SystemMessage(content=SQL_GENERATION_PROMPT),
+        HumanMessage(content=f"{context}\n\nGenerate the SQL query:")
+    ]
     
     max_retries = 3
     for attempt in range(max_retries + 1):
-        response = llm.invoke(current_prompt)
+        response = llm.invoke(messages)
         sql = _extract_sql_from_llm_response(response.content)
         
         logger.info("LLM-generated SQL (attempt %d):\n%s", attempt + 1, sql)
@@ -97,9 +102,15 @@ def execute_query(structured_query: QuerySchema, llm: Optional[Any] = None):
         except Exception as e:
             if attempt < max_retries:
                 logger.warning("SQL execution failed (attempt %d). Retrying... Error: %s", attempt + 1, str(e))
-                # Use string concatenation instead of multi-turn messages. Small models often perform better 
-                # when the error is just appended to the ongoing text prompt.
-                current_prompt += f"\n\nWait, you generated this SQL:\n```sql\n{sql}\n```\nBut it failed with this error:\n{str(e)}\n\nPlease generate a corrected SQL query that fixes the error:"
+                # Add the failed attempt and error as multi-turn conversation
+                messages.append(AIMessage(content=response.content))
+                messages.append(HumanMessage(
+                    content=f"Wait, you generated this SQL but it failed with this error:\n{str(e)}\n\n"
+                            f"Please generate a corrected SQL query. "
+                            f"CRITICAL RULES REMINDER: \n"
+                            f"1. Do NOT use table aliases. Use full table names.\n"
+                            f"2. Wrap reserved keywords like \"order\" in double quotes (e.g., FROM \"order\")."
+                ))
             else:
                 logger.error("SQL execution failed after %d retries.", max_retries)
                 raise ValueError(f"SQL execution failed after {max_retries} retries. Last error: {str(e)}") from e

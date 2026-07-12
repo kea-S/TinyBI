@@ -63,17 +63,17 @@ class VectorController:
 
         # map subject to potential ColumnVectorIndexEntry entities
         subject = structured_query.subject
-        subject_embedding = self._embedding_model.embed_query(subject)
-
-        subject_results: list[VectorSearchResult] = \
-            self._vector_index.search(subject_embedding, k=3)
+        subject_results = []
+        if subject:
+            subject_embedding = self._embedding_model.embed_query(subject)
+            subject_results = self._vector_index.search(subject_embedding, k=3)
 
         # map metric to potential ColumnVectorIndexEntry entities
         metric = structured_query.metric_hint
-        metric_embedding = self._embedding_model.embed_query(metric)
-
-        metric_results: list[VectorSearchResult] = \
-            self._vector_index.search(metric_embedding, k=3)
+        metric_results = []
+        if metric:
+            metric_embedding = self._embedding_model.embed_query(metric)
+            metric_results = self._vector_index.search(metric_embedding, k=3)
 
         # map filters to the ground truth columns
         filters: list[FilterIntent] = structured_query.filters
