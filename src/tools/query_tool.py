@@ -89,7 +89,7 @@ def execute_query(structured_query: QuerySchema, llm: Optional[Any] = None):
         HumanMessage(content=f"{context}\n\nGenerate the SQL query:")
     ]
     
-    max_retries = 3
+    max_retries = 5
     for attempt in range(max_retries + 1):
         response = llm.invoke(messages)
         sql = _extract_sql_from_llm_response(response.content)
