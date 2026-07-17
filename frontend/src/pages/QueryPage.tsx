@@ -15,7 +15,7 @@ type QueryState = "idle" | "loading" | "error"
 const QUICK_START_EXAMPLES = [
   "How many accounts who choose issuance after transaction are staying in East Bohemia region?",
   "What is the percentage of loan amount that has been fully paid with no issue.",
-  "For loan amount less than USD100,000, what is the percentage of accounts that is still running with no issue.",
+  "What percentage of clients who opened their accounts in the district with an average salary of over 10000 are women?",
 ]
 
 export function QueryPage() {
