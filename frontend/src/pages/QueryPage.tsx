@@ -18,7 +18,7 @@ const QUICK_START_EXAMPLES = [
   "What percentage of clients who opened their accounts in the district with an average salary of over 10000 are women?",
 ]
 
-export function QueryPage() {
+export function QueryPage({ isPeek = false }: { isPeek?: boolean }) {
   const [messages, setMessages] = useState<ChatMessageData[]>([])
   const [input, setInput] = useState("")
   const [queryState, setQueryState] = useState<QueryState>("idle")
@@ -111,7 +111,7 @@ export function QueryPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl w-full">
+            <div className={`grid grid-cols-1 gap-4 max-w-4xl w-full ${isPeek ? '' : 'md:grid-cols-3'}`}>
               {QUICK_START_EXAMPLES.map((example, i) => (
                 <button
                   key={i}
