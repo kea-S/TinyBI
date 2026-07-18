@@ -235,6 +235,7 @@ dist-ssr
 
 # Data — track only the distributable database and pre-built vector index
 data/*
+data/app_data/config.json
 !data/app_data/
 !data/minidev_raw/
 data/minidev_raw/*
@@ -266,3 +267,4 @@ frontend/.env.local
 frontend/.env.development.local
 frontend/.env.test.local
 frontend/.env.production.local
+

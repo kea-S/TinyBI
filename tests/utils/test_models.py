@@ -159,6 +159,16 @@ def test_test_embedding_connection(monkeypatch):
 
 
 @pytest.mark.integration
+def test_test_embedding_connection_unhappy_path():
+    # Provide a real, reachable URL that is NOT an Ollama server.
+    # It will connect successfully, but it won't have the "Ollama is running" signature.
+    res_invalid_server = test_embedding_connection("qwen", base_url="http://example.com/v1")
+    
+    assert res_invalid_server["success"] is False
+    assert "does not appear to be a valid Ollama instance" in res_invalid_server["error"]
+
+
+@pytest.mark.integration
 def test_test_llm_connection(monkeypatch):
     monkeypatch.setenv("LOCAL_API_BASE", "http://localhost:11434/v1")
     monkeypatch.setenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")

@@ -119,12 +119,46 @@ export type QueryResponse = {
   data?: Record<string, unknown>[] | null
 }
 
-export async function fetchEngineConfig() {
-  const response = await fetch(createApiUrl("/query/config"))
-  if (!response.ok) {
-    throw new Error(`Failed to fetch engine config: ${response.statusText}`)
-  }
-  return response.json()
+export type LocalLLMConfig = {
+  model: string
+  base_url: string
+}
+
+export type RemoteLLMConfig = {
+  model: string
+  api_key: string
+}
+
+export type EmbeddingConfig = {
+  model: string
+  base_url: string
+  api_key: string
+}
+
+export type ConfigPayload = {
+  active_llm: "local" | "remote"
+  local_llm: LocalLLMConfig
+  remote_llm: RemoteLLMConfig
+  embedding: EmbeddingConfig
+}
+
+export type ConfigResponse = {
+  configured: boolean
+  config: ConfigPayload | null
+}
+
+export function fetchEngineConfig() {
+  return apiRequest<ConfigResponse>("/config")
+}
+
+export function saveEngineConfig(payload: ConfigPayload) {
+  return apiRequest<{ success: boolean }>("/config", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  })
 }
 
 export function submitQuery(payload: QueryRequest) {

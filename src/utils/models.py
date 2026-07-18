@@ -56,21 +56,30 @@ def get_local_llm(name: str):
     
     if use_vllm:
         base_url = os.getenv("TINYBI_VLLM_URL", "http://localhost:8003/v1")
-        # If running the API locally on the host Mac instead of in Docker, 
-        # 'host.docker.internal' will fail DNS resolution. Translate it to localhost.
         if "host.docker.internal" in base_url and not os.path.exists("/.dockerenv"):
             base_url = base_url.replace("host.docker.internal", "localhost")
             
         return ChatOpenAI(
             model=name,
             base_url=base_url,
-            api_key="none", # Required by OpenAI client, but ignored by local endpoints
+            api_key="none",
             max_retries=0
         )
     else:
-        # User requested to stick with ChatOllama
+        base_url = os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434")
+        ollama_host = base_url.split('/v1')[0]
+        
+        try:
+            response = requests.get(f"{ollama_host}/", timeout=5)
+            response.raise_for_status()
+            if response.text.strip() != "Ollama is running":
+                raise ValueError("Endpoint did not return the Ollama signature.")
+        except Exception as e:
+            raise ValueError(f"The provided local endpoint does not appear to be a valid Ollama instance. Details: {e}")
+            
         return ChatOllama(
             model=name,
+            base_url=ollama_host,
             reasoning=False
         )
 
@@ -96,6 +105,9 @@ def get_embedding_model(name: str, base_url: str = None):
     except Exception as e:
         raise ValueError(f"Only Jina or Ollama endpoints are supported right now, and the provided local endpoint does not appear to be a valid Ollama instance. Details: {e}")
         
+    if not base_url.endswith("/v1") and "jina" not in base_url.lower():
+        base_url = f"{ollama_host}/v1"
+
     return OpenAIEmbeddings(
         model=name,
         base_url=base_url,

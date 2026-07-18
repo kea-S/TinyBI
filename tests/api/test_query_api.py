@@ -64,12 +64,7 @@ def test_query_endpoint_error(client):
     assert response.status_code == 500
     assert "Agent failed" in response.json()["detail"]
 
-def test_query_config_endpoint(client):
-    response = client.get("/query/config")
-    assert response.status_code == 200
-    body = response.json()
-    assert body["llm"] == "ibm/granite4.1:3b"
-    assert body["embedding"] == "qwen3-embedding:0.6b"
+
 
 def test_query_endpoint_keeps_history(client):
     fake_result = {

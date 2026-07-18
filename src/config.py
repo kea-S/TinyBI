@@ -9,3 +9,4 @@ APP_DATA_PATH = DATA_PATH / "app_data"
 
 TABLE_DATA_PATH = DATA_PATH / "minidev_raw" / "financial" / "financial.duckdb"
 SQLITE_DATA_PATH = DATA_PATH / "minidev_raw" / "financial"
+CONFIG_JSON_PATH = APP_DATA_PATH / "config.json"

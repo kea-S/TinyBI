@@ -32,16 +32,6 @@ class QueryResponse(BaseModel):
     data: Optional[List[dict]] = None
 
 
-class ConfigResponse(BaseModel):
-    llm: str
-    embedding: str
-
-@router.get("/config", response_model=ConfigResponse, status_code=status.HTTP_200_OK)
-async def query_config():
-    return ConfigResponse(
-        llm=LOCAL_GRANITE4,
-        embedding=QWEN3_EMBEDDING
-    )
 
 
 @router.post("", response_model=QueryResponse, status_code=status.HTTP_200_OK)

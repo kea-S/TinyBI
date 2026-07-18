@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from src.api.routes.vector import router as vector_router
 from src.api.routes.query import router as query_router
 from src.api.routes.monitoring import router as monitoring_router
+from src.api.routes.config import router as config_router, load_config_to_env
 from src.config import SQLITE_DATA_PATH, TABLE_DATA_PATH
 from src.utils.database import global_database
 
@@ -31,6 +32,9 @@ def create_app() -> FastAPI:
     def health() -> dict[str, str]:
         return {"status": "ok"}
 
+    load_config_to_env()
+    
+    app.include_router(config_router)
     app.include_router(vector_router)
     app.include_router(query_router)
     app.include_router(monitoring_router)

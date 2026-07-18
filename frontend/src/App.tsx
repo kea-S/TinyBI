@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Database, Search, LayoutDashboard, Activity } from "lucide-react"
 
 import { VectorIndexBuilderPage } from "@/pages/VectorIndexBuilderPage"
 import { QueryPage } from "@/pages/QueryPage"
 import { MonitoringPage } from "@/pages/MonitoringPage"
+import { SetupPage } from "@/pages/SetupPage"
 import { fetchCurrentVectorIndexEntries, fetchEngineConfig } from "@/lib/api"
 
 // --- Types for shared state ---
@@ -36,7 +37,7 @@ export type TableDraft = {
   y?: number
 }
 
-type AppTab = "builder" | "query" | "monitoring"
+type AppTab = "setup" | "builder" | "query" | "monitoring"
 
 function createId(prefix: string) {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`
@@ -63,16 +64,63 @@ function createEmptyTable(): TableDraft {
     id: createId("table"),
     name: "",
     columns: [createEmptyColumn()],
-    x: 100,
-    y: 100,
   }
 }
 
-function App() {
+class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error: Error | null}> {
+  constructor(props: {children: React.ReactNode}) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: "20px", color: "red", backgroundColor: "black", height: "100vh" }}>
+          <h1>Something went wrong.</h1>
+          <pre>{this.state.error?.toString()}</pre>
+          <pre>{this.state.error?.stack}</pre>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+function MainApp() {
   const [showSplash, setShowSplash] = useState(true)
+  const [isConfigLoaded, setIsConfigLoaded] = useState(false)
   const [activeTab, setActiveTab] = useState<AppTab>("query")
   const [tables, setTables] = useState<TableDraft[]>([createEmptyTable()])
   const [config, setConfig] = useState({ llm: "Loading...", embedding: "Loading..." })
+
+  const loadConfig = () => {
+    fetchEngineConfig().then((data) => {
+      if (typeof data === "string") {
+        console.error("Expected ConfigResponse, got string", data);
+        setIsConfigLoaded(true);
+        return;
+      }
+      if (!data.configured) {
+        setActiveTab("setup")
+      } else if (data.config) {
+        const activeLLM = data.config.active_llm
+        setConfig({
+          llm: activeLLM === "local" ? data.config.local_llm.model : data.config.remote_llm.model,
+          embedding: data.config.embedding.model
+        })
+        if (activeTab === "setup") {
+          setActiveTab("query")
+        }
+      }
+      setIsConfigLoaded(true)
+    }).catch((err) => {
+      console.error(err)
+      setIsConfigLoaded(true)
+    })
+  }
 
   // Initial data load
   useEffect(() => {
@@ -126,9 +174,7 @@ function App() {
       }
     })
 
-    fetchEngineConfig().then((data) => {
-      setConfig(data)
-    }).catch(console.error)
+    loadConfig()
 
     return () => clearTimeout(timer)
   }, [])
@@ -176,7 +222,8 @@ function App() {
 
       <div className="flex h-full w-full flex-col">
         {/* Top Navigation */}
-        <header className="z-40 flex h-16 w-full shrink-0 items-center justify-between border-b border-border bg-card px-6 shadow-sm">
+        {activeTab !== "setup" && (
+          <header className="z-40 flex h-16 w-full shrink-0 items-center justify-between border-b border-border bg-card px-6 shadow-sm">
           <div className="flex items-center gap-8">
             <button 
               onClick={() => window.location.reload()} 
@@ -206,50 +253,71 @@ function App() {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 rounded-full border border-border bg-muted/30 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/50">
+            <button 
+              onClick={() => setActiveTab("setup")}
+              className="flex items-center gap-2 rounded-full border border-border bg-muted/30 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground cursor-pointer"
+            >
                <div className="size-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse" />
                LLM: {config.llm}
-            </div>
-            <div className="flex items-center gap-2 rounded-full border border-border bg-muted/30 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/50">
+            </button>
+            <button 
+              onClick={() => setActiveTab("setup")}
+              className="flex items-center gap-2 rounded-full border border-border bg-muted/30 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground cursor-pointer"
+            >
                <div className="size-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)] animate-pulse" />
                Vector: {config.embedding}
-            </div>
+            </button>
           </div>
-        </header>
+          </header>
+        )}
 
         {/* Main Content Area */}
         <main className="relative flex-1 overflow-hidden bg-muted/20">
           <div className="relative h-full w-full">
-            {/* Builder tab */}
-            <div
-              className={`absolute inset-0 transition-opacity duration-300 ${
-                activeTab === "builder"
-                  ? "opacity-100 z-10"
-                  : "opacity-0 z-0 pointer-events-none"
-              }`}
-            >
-              <VectorIndexBuilderPage tables={tables} setTables={setTables} isVisible={activeTab === "builder"} />
-            </div>
-            {/* Query tab */}
-            <div
-              className={`absolute inset-0 transition-opacity duration-300 ${
-                activeTab === "query"
-                  ? "opacity-100 z-10"
-                  : "opacity-0 z-0 pointer-events-none"
-              }`}
-            >
-              <QueryPage />
-            </div>
-            {/* Monitoring tab */}
-            <div
-              className={`absolute inset-0 transition-opacity duration-300 ${
-                activeTab === "monitoring"
-                  ? "opacity-100 z-10"
-                  : "opacity-0 z-0 pointer-events-none"
-              }`}
-            >
-              <MonitoringPage />
-            </div>
+            {!isConfigLoaded ? (
+              <div className="flex h-full items-center justify-center">
+                <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+              </div>
+            ) : activeTab === "setup" ? (
+              <SetupPage 
+                onComplete={loadConfig} 
+                canCancel={config.llm !== "Loading..."} 
+                onCancel={() => setActiveTab("query")} 
+              />
+            ) : (
+              <>
+                {/* Builder tab */}
+                <div
+                  className={`absolute inset-0 transition-opacity duration-300 ${
+                    activeTab === "builder"
+                      ? "opacity-100 z-10"
+                      : "opacity-0 z-0 pointer-events-none"
+                  }`}
+                >
+                  <VectorIndexBuilderPage tables={tables} setTables={setTables} isVisible={activeTab === "builder"} />
+                </div>
+                {/* Query tab */}
+                <div
+                  className={`absolute inset-0 transition-opacity duration-300 ${
+                    activeTab === "query"
+                      ? "opacity-100 z-10"
+                      : "opacity-0 z-0 pointer-events-none"
+                  }`}
+                >
+                  <QueryPage />
+                </div>
+                {/* Monitoring tab */}
+                <div
+                  className={`absolute inset-0 transition-opacity duration-300 ${
+                    activeTab === "monitoring"
+                      ? "opacity-100 z-10"
+                      : "opacity-0 z-0 pointer-events-none"
+                  }`}
+                >
+                  <MonitoringPage />
+                </div>
+              </>
+            )}
           </div>
         </main>
       </div>
@@ -281,4 +349,10 @@ function TopNavButton({
   )
 }
 
-export default App
+export default function App() {
+  return (
+    <ErrorBoundary>
+      <MainApp />
+    </ErrorBoundary>
+  )
+}

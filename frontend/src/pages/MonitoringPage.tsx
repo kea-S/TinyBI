@@ -37,6 +37,10 @@ export function MonitoringPage() {
           fetchDifficultySegregated(),
           fetchProviderComparison(),
         ])
+
+        if (typeof overviewData === "string" || typeof rawSegregated === "string" || typeof comparisonData === "string") {
+          throw new Error("Failed to fetch monitoring stats (got string)")
+        }
         
         // Transform segregated data into combined composed chart format
         const mergedByDifficulty: Record<string, any> = {}
@@ -167,9 +171,9 @@ export function MonitoringPage() {
                 <Tooltip 
                   contentStyle={{ backgroundColor: "var(--background)", borderColor: "var(--border)", borderRadius: "8px", opacity: 1 }}
                   cursor={{ fill: "var(--muted)", opacity: 0.4 }}
-                  formatter={(value: number, name: string) => {
-                    if (name.includes("Accuracy")) return [`${(value * 100).toFixed(2)}%`, name];
-                    if (name.includes("Tokens")) return [`${(value / 1000).toFixed(2)}k`, name];
+                  formatter={(value: any, name: any) => {
+                    if (name && String(name).includes("Accuracy")) return [`${(Number(value) * 100).toFixed(2)}%`, name];
+                    if (name && String(name).includes("Tokens")) return [`${(Number(value) / 1000).toFixed(2)}k`, name];
                     return [value, name];
                   }}
                 />
