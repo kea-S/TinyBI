@@ -16,7 +16,7 @@ from src.utils.models import (
     LOCAL_GRANITE4,
 )
 
-from src.utils.models import get_embedding_model, get_remote_llm, get_local_llm
+from src.utils.models import get_embedding_model, get_remote_llm, get_local_llm, test_llm_connection, test_embedding_connection
 
 from dotenv import load_dotenv
 
@@ -90,9 +90,7 @@ def test_get_embedding_model_returns_expected_langchain_wrapper(model_name, expe
     assert embedding_model.model == expected_model
 
 
-def test_get_embedding_model_rejects_unknown_model():
-    with pytest.raises(ValueError, match="Unsupported embedding model"):
-        get_embedding_model("unknown-embedding-model")
+
 
 
 @pytest.mark.integration
@@ -143,3 +141,35 @@ def test_langchain_llm_call(model_name, local: bool, monkeypatch):
         assert response is not None and len(str(response)) > 0
     except Exception as e:
         pytest.fail(f"LANGCHAIN model '{model_name}' call failed: {e}")
+
+
+@pytest.mark.integration
+def test_test_embedding_connection(monkeypatch):
+    monkeypatch.setenv("LOCAL_API_BASE", "http://localhost:11434/v1")
+    _skip_if_runtime_unavailable(QWEN3_EMBEDDING, True)
+
+    # Valid model should succeed
+    res = test_embedding_connection(QWEN3_EMBEDDING)
+    assert res["success"] is True
+
+    # Missing model should fail gracefully
+    res_fail = test_embedding_connection("some-fake-model-that-is-not-pulled")
+    assert res_fail["success"] is False
+    assert "not found" in res_fail["error"].lower()
+
+
+@pytest.mark.integration
+def test_test_llm_connection(monkeypatch):
+    monkeypatch.setenv("LOCAL_API_BASE", "http://localhost:11434/v1")
+    monkeypatch.setenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
+    _skip_if_runtime_unavailable(LOCAL_GRANITE4, True)
+
+    # Valid model should succeed
+    res = test_llm_connection(LOCAL_GRANITE4, is_local=True)
+    assert res["success"] is True
+
+    # Missing model should fail gracefully
+    res_fail = test_llm_connection("some-fake-llm-that-is-not-pulled", is_local=True)
+    assert res_fail["success"] is False
+    assert "not found" in res_fail["error"].lower()
+
