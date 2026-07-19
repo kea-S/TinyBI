@@ -5,7 +5,7 @@ function trimTrailingSlash(value: string) {
 }
 
 export const apiBaseUrl = trimTrailingSlash(
-  import.meta.env.VITE_API_BASE_URL || fallbackApiBaseUrl
+  import.meta.env.VITE_API_BASE_URL ?? fallbackApiBaseUrl
 )
 
 function createApiUrl(path: string) {

@@ -9,6 +9,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+def resolve_docker_host(url: str) -> str:
+    if not url:
+        return url
+    if os.path.exists("/.dockerenv"):
+        return url.replace("localhost", "host.docker.internal").replace("127.0.0.1", "host.docker.internal")
+    return url.replace("host.docker.internal", "localhost")
+
 # framework used
 LANGCHAIN = "langchain"
 
@@ -56,8 +63,7 @@ def get_local_llm(name: str):
     
     if use_vllm:
         base_url = os.getenv("TINYBI_VLLM_URL", "http://localhost:8003/v1")
-        if "host.docker.internal" in base_url and not os.path.exists("/.dockerenv"):
-            base_url = base_url.replace("host.docker.internal", "localhost")
+        base_url = resolve_docker_host(base_url)
             
         return ChatOpenAI(
             model=name,
@@ -67,6 +73,7 @@ def get_local_llm(name: str):
         )
     else:
         base_url = os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434")
+        base_url = resolve_docker_host(base_url)
         ollama_host = base_url.split('/v1')[0]
         
         try:
@@ -86,7 +93,11 @@ def get_local_llm(name: str):
 
 def get_embedding_model(name: str, base_url: str = None):
     if base_url is None:
-        base_url = os.getenv("LOCAL_API_BASE", "http://127.0.0.1:11434/v1")
+        base_url = os.getenv("OLLAMA_BASE_URL") or os.getenv("LOCAL_API_BASE", "http://127.0.0.1:11434")
+        if not base_url.endswith("/v1"):
+            base_url = f"{base_url.rstrip('/')}/v1"
+            
+    base_url = resolve_docker_host(base_url)
     
     if "jina" in base_url.lower():
         return OpenAIEmbeddings(

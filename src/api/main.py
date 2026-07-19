@@ -1,7 +1,9 @@
 import logging
-
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 from src.api.routes.vector import router as vector_router
 from src.api.routes.query import router as query_router
@@ -38,6 +40,29 @@ def create_app() -> FastAPI:
     app.include_router(vector_router)
     app.include_router(query_router)
     app.include_router(monitoring_router)
+
+    # --- SPA Static File Serving ---
+    frontend_dist = os.path.join(os.path.dirname(__file__), "..", "..", "frontend", "dist")
+    
+    if os.path.exists(frontend_dist):
+        # Serve the /assets/ folder (JS, CSS, images) directly
+        assets_path = os.path.join(frontend_dist, "assets")
+        if os.path.exists(assets_path):
+            app.mount("/assets", StaticFiles(directory=assets_path), name="assets")
+        
+        # Catch-all route for React Router fallback
+        @app.get("/{full_path:path}", include_in_schema=False)
+        async def serve_spa(full_path: str):
+            file_path = os.path.join(frontend_dist, full_path)
+            # If requesting a specific file (e.g. favicon.svg), serve it directly
+            if full_path and os.path.isfile(file_path):
+                return FileResponse(file_path)
+            # Otherwise fallback to React's index.html
+            return FileResponse(os.path.join(frontend_dist, "index.html"))
+    else:
+        logger = logging.getLogger(__name__)
+        logger.warning("Frontend dist folder not found. API running without UI.")
+
     return app
 
 

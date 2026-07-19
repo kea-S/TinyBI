@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { Activity, Target, Clock, Zap, Hash, ExternalLink } from "lucide-react"
+import { Activity, Target, Clock, Zap, ExternalLink } from "lucide-react"
 import {
   BarChart,
   Bar,

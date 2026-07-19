@@ -34,12 +34,12 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
-  backend:
+  app:
     build: 
       context: .
-      dockerfile: backend.Dockerfile
+      dockerfile: Dockerfile.app
     ports:
-      - "8000:8000"
+      - "4510:8000"
     environment:
       - OLLAMA_BASE_URL=http://host.docker.internal:11434
       - TINYBI_USE_VLLM=${TINYBI_USE_VLLM:-false}
@@ -49,16 +49,4 @@ services:
       - "host.docker.internal:host-gateway"
     volumes:
       - ./data:/app/data
-    restart: unless-stopped
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "5173:5173"
-    environment:
-      - VITE_BACKEND_URL=http://backend:8000
-    depends_on:
-      - backend
     restart: unless-stopped

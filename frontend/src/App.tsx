@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Database, Search, LayoutDashboard, Activity } from "lucide-react"
+import { LayoutDashboard } from "lucide-react"
 
 import { VectorIndexBuilderPage } from "@/pages/VectorIndexBuilderPage"
 import { QueryPage } from "@/pages/QueryPage"

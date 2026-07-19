@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react"
-import { expect, test } from "vitest"
+import { expect, test, vi } from "vitest"
 import App from "../App"
 
 // Mock the components so we just test the layout rendering
