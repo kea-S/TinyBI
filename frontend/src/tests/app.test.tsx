@@ -1,6 +1,8 @@
-import { render, screen } from "@testing-library/react"
+import { render, screen, act } from "@testing-library/react"
 import { expect, test, vi } from "vitest"
 import App from "../App"
+import { fetchCurrentVectorIndexEntries, fetchEngineConfig } from "../lib/api"
+
 
 // Mock the components so we just test the layout rendering
 vi.mock("../pages/VectorIndexBuilderPage", () => ({
@@ -14,14 +16,23 @@ vi.mock("../pages/MonitoringPage", () => ({
 }))
 vi.mock("../lib/api", () => ({
   fetchCurrentVectorIndexEntries: vi.fn().mockResolvedValue([]),
-  fetchEngineConfig: vi.fn().mockResolvedValue({ llm: "Mock-LLM", embedding: "Mock-Vector" })
+  saveEngineConfig: vi.fn().mockResolvedValue({ success: true }),
+  fetchEngineConfig: vi.fn().mockResolvedValue({ 
+    configured: true, 
+    config: { 
+      active_llm: "local", 
+      local_llm: { model: "Mock-LLM" }, 
+      remote_llm: { model: "Mock-LLM" }, 
+      embedding: { model: "Mock-Vector" } 
+    } 
+  })
 }))
 
 test("renders top navigation instead of sidebar and includes engine status", async () => {
   render(<App />)
   
-  // The global nav should have the TinyBI logo image
-  const logo = screen.getByAltText("TinyBI Logo")
+  // Wait for the global nav to appear once configuration loads
+  const logo = await screen.findByAltText("TinyBI Logo")
   expect(logo).toBeInTheDocument()
   
   // Ensure the old h1 text is gone
@@ -40,6 +51,46 @@ test("renders top navigation instead of sidebar and includes engine status", asy
   expect(screen.queryByRole("complementary")).not.toBeInTheDocument() // <aside> is 'complementary' role
   
   // Should have the engine badges loaded dynamically
-  expect(await screen.findByText(/LLM: Mock-LLM/i)).toBeInTheDocument()
-  expect(await screen.findByText(/Vector: Mock-Vector/i)).toBeInTheDocument()
+  // Should have the engine badges loaded dynamically
+  expect(await screen.findByText(/LLM: Mock-LLM/i, {}, { timeout: 2000 })).toBeInTheDocument()
+  expect(await screen.findByText(/Vector: Mock-Vector/i, {}, { timeout: 2000 })).toBeInTheDocument()
 })
+
+
+test("re-fetches vector index entries after setup is completed", async () => {
+  const fetchConfigMock = vi.mocked(fetchEngineConfig)
+  fetchConfigMock.mockResolvedValueOnce({
+    configured: false,
+    config: null
+  })
+  
+  const fetchEntriesMock = vi.mocked(fetchCurrentVectorIndexEntries)
+  fetchEntriesMock.mockClear()
+  
+  render(<App />)
+  
+  expect(await screen.findByText(/Welcome to TinyBI/i)).toBeInTheDocument()
+  expect(fetchEntriesMock).toHaveBeenCalledTimes(1)
+  
+  fetchEntriesMock.mockClear()
+  
+  fetchConfigMock.mockResolvedValueOnce({
+    configured: true,
+    config: {
+      active_llm: "local",
+      local_llm: { model: "Mock-LLM", base_url: "" },
+      remote_llm: { model: "Mock-LLM", api_key: "" },
+      embedding: { model: "Mock-Vector", base_url: "", api_key: "" }
+    }
+  })
+  
+  const saveButton = screen.getByRole("button", { name: /Save & Connect/i })
+  act(() => {
+    saveButton.click()
+  })
+  
+  await vi.waitFor(() => {
+    expect(fetchEntriesMock).toHaveBeenCalledTimes(1)
+  })
+})
+

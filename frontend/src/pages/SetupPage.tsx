@@ -6,7 +6,7 @@ import { motion } from "framer-motion"
 export function SetupPage({ onComplete, onCancel, canCancel = false }: { onComplete: () => void, onCancel?: () => void, canCancel?: boolean }) {
   const [config, setConfig] = useState<ConfigPayload>({
     active_llm: "local",
-    local_llm: { model: "granite4.1:3b", base_url: "http://127.0.0.1:11434" },
+    local_llm: { model: "granite4:3b", base_url: "http://127.0.0.1:11434" },
     remote_llm: { model: "llama-3.1-8b-instant", api_key: "" },
     embedding: { model: "qwen3-embedding:0.6b", base_url: "http://127.0.0.1:11434", api_key: "" },
   })

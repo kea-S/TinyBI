@@ -1,0 +1,1959 @@
+
+> frontend@0.0.0 test
+> vitest
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.8 [39m[90m/Users/keaharvan/Documents/University/TinyBIExplore/TinyBI/frontend[39m
+
+ [32m✓[39m src/components/builder/DataModal.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 36[2mms[22m[39m
+ [32m✓[39m src/tests/query.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 43[2mms[22m[39m
+ [32m✓[39m src/pages/SetupPage.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 172[2mms[22m[39m
+ [31m❯[39m src/pages/QueryPage.mvp.test.tsx [2m([22m[2m2 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 54[2mms[22m[39m
+[31m     [31m×[31m RED: displays quick-start cards in empty state[39m[32m 47[2mms[22m[39m
+[31m     [31m×[31m RED: clicking a quick-start card populates and focuses the input[39m[32m 4[2mms[22m[39m
+[90mstderr[2m | src/tests/workbench.test.tsx[2m > [22m[2mWorkbench Rework Tests[2m > [22m[2mverifies sidebar form completeness including Data Format and Categories
+[22m[39mAn update to VectorIndexBuilderPageInner inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+[90mstderr[2m | src/tests/workbench.test.tsx[2m > [22m[2mWorkbench Rework Tests[2m > [22m[2mverifies "Delete Table" button existence in the sidebar
+[22m[39mAn update to VectorIndexBuilderPageInner inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+[90mstderr[2m | src/pages/VectorIndexBuilderPage.test.tsx[2m > [22m[2mVectorIndexBuilderPage[2m > [22m[2mrenders without crashing
+[22m[39mAn update to VectorIndexBuilderPageInner inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ [32m✓[39m src/pages/VectorIndexBuilderPage.test.tsx [2m([22m[2m1 test[22m[2m)[22m[32m 16[2mms[22m[39m
+[90mstderr[2m | src/tests/workbench.test.tsx[2m > [22m[2mWorkbench Rework Tests[2m > [22m[2mverifies Peek Query and Table Editor are mutually exclusive
+[22m[39mAn update to VectorIndexBuilderPageInner inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+[90mstderr[2m | src/tests/workbench.test.tsx[2m > [22m[2mWorkbench Rework Tests[2m > [22m[2mverifies References (FK) field is present in column settings
+[22m[39mAn update to VectorIndexBuilderPageInner inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+[90mstderr[2m | src/tests/workbench.test.tsx[2m > [22m[2mWorkbench Rework Tests[2m > [22m[2mverifies visual differentiation between handles
+[22m[39mAn update to VectorIndexBuilderPageInner inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+[90mstderr[2m | src/tests/workbench.test.tsx[2m > [22m[2mWorkbench Rework Tests[2m > [22m[2mverifies top-right buttons shift when sidebar is open
+[22m[39mAn update to VectorIndexBuilderPageInner inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+Not implemented: Window's alert() method
+ [32m✓[39m src/pages/QueryPage.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 277[2mms[22m[39m
+[90mstderr[2m | src/tests/workbench.test.tsx[2m > [22m[2mEdge Reconnecting Bug Fixes (Red Phase)[2m > [22m[2mER-1: edges are rendered with reconnectable: true for React Flow v12
+[22m[39mAn update to VectorIndexBuilderPageInner inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+[90mstderr[2m | src/tests/workbench.test.tsx[2m > [22m[2mEdge Reconnecting Bug Fixes (Red Phase)[2m > [22m[2mER-2: reconnecting source to new column clears old source and sets new source references
+[22m[39mAn update to VectorIndexBuilderPageInner inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+[90mstderr[2m | src/tests/workbench.test.tsx[2m > [22m[2mEdge Reconnecting Bug Fixes (Red Phase)[2m > [22m[2mER-3: reconnecting target updates source column references to new target
+[22m[39mAn update to VectorIndexBuilderPageInner inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+[90mstderr[2m | src/tests/workbench.test.tsx[2m > [22m[2mEdge Reconnecting Bug Fixes (Red Phase)[2m > [22m[2mER-4: reconnecting is blocked if it would create a duplicate reference on the same table
+[22m[39mAn update to VectorIndexBuilderPageInner inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+[90mstderr[2m | src/tests/workbench.test.tsx[2m > [22m[2mEdge Deletion (Red Phase)[2m > [22m[2mED-1: clicking an edge selects it
+[22m[39mAn update to VectorIndexBuilderPageInner inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+[90mstderr[2m | src/tests/workbench.test.tsx[2m > [22m[2mEdge Deletion (Red Phase)[2m > [22m[2mED-2: selected edge without pending deletion keeps standard style
+[22m[39mAn update to VectorIndexBuilderPageInner inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+[90mstderr[2m | src/tests/workbench.test.tsx[2m > [22m[2mEdge Deletion (Red Phase)[2m > [22m[2mED-3: pressing Delete on selected edge marks source column for deletion
+[22m[39mAn update to VectorIndexBuilderPageInner inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+[90mstderr[2m | src/tests/workbench.test.tsx[2m > [22m[2mEdge Deletion (Red Phase)[2m > [22m[2mED-4: edge with pending deletion renders red dashed
+[22m[39mAn update to VectorIndexBuilderPageInner inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+[90mstderr[2m | src/tests/workbench.test.tsx[2m > [22m[2mEdge Deletion (Red Phase)[2m > [22m[2mED-5: pressing Delete again on same edge restores original style
+[22m[39mAn update to VectorIndexBuilderPageInner inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+[90mstderr[2m | src/tests/workbench.test.tsx[2m > [22m[2mEdge Deletion (Red Phase)[2m > [22m[2mED-6: pressing Delete with no edge selected does nothing
+[22m[39mAn update to VectorIndexBuilderPageInner inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+Not implemented: Window's alert() method
+Not implemented: Window's alert() method
+ [32m✓[39m src/tests/workbench.test.tsx [2m([22m[2m22 tests[22m[2m)[22m[32m 203[2mms[22m[39m
+ [31m❯[39m src/tests/app.test.tsx [2m([22m[2m1 test[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 1133[2mms[22m[39m
+[31m   [31m×[31m renders top navigation instead of sidebar and includes engine status[39m[33m 1130[2mms[22m[39m
+ [31m❯[39m src/pages/MonitoringPage.test.tsx [2m([22m[2m2 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 1029[2mms[22m[39m
+[31m     [31m×[31m renders only Accuracy and Latency KPIs (removes Tokens)[39m[33m 1016[2mms[22m[39m
+     [32m✓[39m renders the combined ComposedChart with both TinyBI and Schema Dump bars/lines[32m 10[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 4 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/tests/app.test.tsx[2m > [22mrenders top navigation instead of sidebar and includes engine status
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an element with the text: /LLM: Mock-LLM/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"relative h-screen w-full overflow-hidden bg-background text-foreground font-sans"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"fixed inset-0 z-50 flex flex-col items-center justify-center bg-background"[39m
+        [33mstyle[39m=[32m"opacity: 1;"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex items-center gap-4"[39m
+          [33mstyle[39m=[32m"opacity: 0.9984768481517676; transform: scale(0.9996953696303535);"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex size-16 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/20"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"lucide lucide-layout-dashboard size-8 text-primary-foreground"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<rect[39m
+                [33mheight[39m=[32m"9"[39m
+                [33mrx[39m=[32m"1"[39m
+                [33mwidth[39m=[32m"7"[39m
+                [33mx[39m=[32m"3"[39m
+                [33my[39m=[32m"3"[39m
+              [36m/>[39m
+              [36m<rect[39m
+                [33mheight[39m=[32m"5"[39m
+                [33mrx[39m=[32m"1"[39m
+                [33mwidth[39m=[32m"7"[39m
+                [33mx[39m=[32m"14"[39m
+                [33my[39m=[32m"3"[39m
+              [36m/>[39m
+              [36m<rect[39m
+                [33mheight[39m=[32m"9"[39m
+                [33mrx[39m=[32m"1"[39m
+                [33mwidth[39m=[32m"7"[39m
+                [33mx[39m=[32m"14"[39m
+                [33my[39m=[32m"12"[39m
+              [36m/>[39m
+              [36m<rect[39m
+                [33mheight[39m=[32m"5"[39m
+                [33mrx[39m=[32m"1"[39m
+                [33mwidth[39m=[32m"7"[39m
+                [33mx[39m=[32m"3"[39m
+                [33my[39m=[32m"16"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</div>[39m
+          [36m<h1[39m
+            [33mclass[39m=[32m"text-6xl font-bold tracking-tighter"[39m
+            [33mstyle[39m=[32m"opacity: 0.9581461896013934; transform: translateX(-0.8370762079721317px);"[39m
+          [36m>[39m
+            [0mTinyBI[0m
+          [36m</h1>[39m
+        [36m</div>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"mt-6 text-muted-foreground"[39m
+          [33mstyle[39m=[32m"opacity: 0.49963378909160383;"[39m
+        [36m>[39m
+          [0mYour data, naturally understood.[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex h-full w-full flex-col"[39m
+      [36m>[39m
+        [36m<main[39m
+          [33mclass[39m=[32m"relative flex-1 overflow-hidden bg-muted/20"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"relative h-full w-full"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex min-h-screen items-center justify-center p-6 pb-20"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"w-full max-w-2xl rounded-2xl border border-border bg-card p-6 shadow-xl"[39m
+                [33mstyle[39m=[32m"opacity: 1; transform: none;"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"mb-6 flex items-center justify-between"[39m
+                [36m>[39m
+                  [36m<div>[39m
+                    [36m<h1[39m
+                      [33mclass[39m=[32m"text-2xl font-bold tracking-tight"[39m
+                    [36m>[39m
+                      [0mWelcome to TinyBI[0m
+                    [36m</h1>[39m
+                    [36m<p[39m
+                      [33mclass[39m=[32m"mt-1 text-sm text-muted-foreground"[39m
+                    [36m>[39m
+                      [0mLet's connect your models to get started.[0m
+                    [36m</p>[39m
+                  [36m</div>[39m
+                  [36m<div />[39m
+                [36m</div>[39m
+                [36m<form[39m
+                  [33mclass[39m=[32m"space-y-6"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"space-y-3"[39m
+                  [36m>[39m
+                    [36m<h2[39m
+                      [33mclass[39m=[32m"text-base font-semibold flex items-center gap-2 border-b border-border pb-2"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mclass[39m=[32m"lucide lucide-server size-4"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"24"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"24"[39m
+                        [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                      [36m>[39m
+                        [36m<rect[39m
+                          [33mheight[39m=[32m"8"[39m
+                          [33mrx[39m=[32m"2"[39m
+                          [33mry[39m=[32m"2"[39m
+                          [33mwidth[39m=[32m"20"[39m
+                          [33mx[39m=[32m"2"[39m
+                          [33my[39m=[32m"2"[39m
+                        [36m/>[39m
+                        [36m<rect[39m
+                          [33mheight[39m=[32m"8"[39m
+                          [33mrx[39m=[32m"2"[39m
+                          [33mry[39m=[32m"2"[39m
+                          [33mwidth[39m=[32m"20"[39m
+                          [33mx[39m=[32m"2"[39m
+                          [33my[39m=[32m"14"[39m
+                        [36m/>[39m
+                        [36m<line[39m
+                          [33mx1[39m=[32m"6"[39m
+                          [33mx2[39m=[32m"6.01"[39m
+                          [33my1[39m=[32m"6"[39m
+                          [33my2[39m=[32m"6"[39m
+                        [36m/>[39m
+                        [36m<line[39m
+                          [33mx1[39m=[32m"6"[39m
+                          [33mx2[39m=[32m"6.01"[39m
+                          [33my1[39m=[32m"18"[39m
+                          [33my2[39m=[32m"18"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                      [0m Chat Model Configuration[0m
+                    [36m</h2>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"grid grid-cols-2 gap-3"[39m
+                    [36m>[39m
+                      [36m<button[39m
+                        [33maria-label[39m=[32m"Local LLM"[39m
+                        [33mclass[39m=[32m"flex flex-col items-center justify-center rounded-xl border p-3 transition-all border-primary bg-primary/5 text-foreground ring-2 ring-primary/20"[39m
+                        [33mtype[39m=[32m"button"[39m
+                      [36m>[39m
+                        [36m<svg[39m
+                          [33maria-hidden[39m=[32m"true"[39m
+                          [33mclass[39m=[32m"lucide lucide-server mb-1 size-5"[39m
+                          [33mfill[39m=[32m"none"[39m
+                          [33mheight[39m=[32m"24"[39m
+                          [33mstroke[39m=[32m"currentColor"[39m
+                          [33mstroke-linecap[39m=[32m"round"[39m
+                          [33mstroke-linejoin[39m=[32m"round"[39m
+                          [33mstroke-width[39m=[32m"2"[39m
+                          [33mviewBox[39m=[32m"0 0 24 24"[39m
+                          [33mwidth[39m=[32m"24"[39m
+                          [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                        [36m>[39m
+                          [36m<rect[39m
+                            [33mheight[39m=[32m"8"[39m
+                            [33mrx[39m=[32m"2"[39m
+                            [33mry[39m=[32m"2"[39m
+                            [33mwidth[39m=[32m"20"[39m
+                            [33mx[39m=[32m"2"[39m
+                            [33my[39m=[32m"2"[39m
+                          [36m/>[39m
+                          [36m<rect[39m
+                            [33mheight[39m=[32m"8"[39m
+                            [33mrx[39m=[32m"2"[39m
+                            [33mry[39m=[32m"2"[39m
+                            [33mwidth[39m=[32m"20"[39m
+                            [33mx[39m=[32m"2"[39m
+                            [33my[39m=[32m"14"[39m
+                          [36m/>[39m
+                          [36m<line[39m
+                            [33mx1[39m=[32m"6"[39m
+                            [33mx2[39m=[32m"6.01"[39m
+                            [33my1[39m=[32m"6"[39m
+                            [33my2[39m=[32m"6"[39m
+                          [36m/>[39m
+                          [36m<line[39m
+                            [33mx1[39m=[32m"6"[39m
+                            [33mx2[39m=[32m"6.01"[39m
+                            [33my1[39m=[32m"18"[39m
+                            [33my2[39m=[32m"18"[39m
+                          [36m/>[39m
+                        [36m</svg>[39m
+                        [36m<span[39m
+                          [33mclass[39m=[32m"text-sm font-medium"[39m
+                        [36m>[39m
+                          [0mLocal (Ollama)[0m
+                        [36m</span>[39m
+                      [36m</button>[39m
+                      [36m<button[39m
+                        [33maria-label[39m=[32m"Remote LLM"[39m
+                        [33mclass[39m=[32m"flex flex-col items-center justify-center rounded-xl border p-3 transition-all border-border bg-muted/50 text-muted-foreground hover:bg-muted"[39m
+                        [33mtype[39m=[32m"button"[39m
+                      [36m>[39m
+                        [36m<svg[39m
+                          [33maria-hidden[39m=[32m"true"[39m
+                          [33mclass[39m=[32m"lucide lucide-globe mb-1 size-5"[39m
+                          [33mfill[39m=[32m"none"[39m
+                          [33mheight[39m=[32m"24"[39m
+                          [33mstroke[39m=[32m"currentColor"[39m
+                          [33mstroke-linecap[39m=[32m"round"[39m
+                          [33mstroke-linejoin[39m=[32m"round"[39m
+                          [33mstroke-width[39m=[32m"2"[39m
+                          [33mviewBox[39m=[32m"0 0 24 24"[39m
+                          [33mwidth[39m=[32m"24"[39m
+                          [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                        [36m>[39m
+                          [36m<circle[39m
+                            [33mcx[39m=[32m"12"[39m
+                            [33mcy[39m=[32m"12"[39m
+                            [33mr[39m=[32m"10"[39m
+                          [36m/>[39m
+                          [36m<path[39m
+                            [33md[39m=[32m"M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"[39m
+                          [36m/>[39m
+                          [36m<path[39m
+                            [33md[39m=[32m"M2 12h20"[39m
+                          [36m/>[39m
+                        [36m</svg>[39m
+                        [36m<span[39m
+                          [33mclass[39m=[32m"text-sm font-medium"[39m
+                        [36m>[39m
+                          [0mRemote (Groq)[0m
+                        [36m</span>[39m
+                      [36m</button>[39m
+                    [36m</div>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"pt-2"[39m
+                    [36m>[39m
+                      [36m<div[39m
+                        [33mclass[39m=[32m"space-y-3"[39m
+                      [36m>[39m
+                        [36m<div[39m
+                          [33mclass[39m=[32m"space-y-1.5"[39m
+                        [36m>[39m
+                          [36m<label[39m
+                            [33mclass[39m=[32m"text-xs font-medium"[39m
+                          [36m>[39m
+                            [0mOllama Base URL[0m
+                          [36m</label>[39m
+                          [36m<input[39m
+                            [33mclass[39m=[32m"w-full rounded-lg border border-input bg-background px-3 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"[39m
+                            [33mtype[39m=[32m"text"[39m
+                            [33mvalue[39m=[32m"http://127.0.0.1:11434"[39m
+                          [36m/>[39m
+                        [36m</div>[39m
+                        [36m<div[39m
+                          [33mclass[39m=[32m"space-y-1.5"[39m
+                        [36m>[39m
+                          [36m<label[39m
+                            [33mclass[39m=[32m"text-xs font-medium"[39m
+                          [36m>[39m
+                            [0mModel Name[0m
+                          [36m</label>[39m
+                          [36m<input[39m
+                            [33mclass[39m=[32m"w-full rounded-lg border border-input bg-background px-3 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"[39m
+                            [33mtype[39m=[32m"text"[39m
+                            [33mvalue[39m=[32m"granite4.1:3b"[39m
+                          [36m/>[39m
+                        [36m</div>[39m
+                      [36m</div>[39m
+                    [36m</div>[39m
+                  [36m</div>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"space-y-3 pt-2"[39m
+                  [36m>[39m
+                    [36m<h2[39m
+                      [33mclass[39m=[32m"text-base font-semibold flex items-center gap-2 border-b border-border pb-2"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mclass[39m=[32m"lucide lucide-database size-4"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"24"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"24"[39m
+                        [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                      [36m>[39m
+                        [36m<ellipse[39m
+                          [33mcx[39m=[32m"12"[39m
+                          [33mcy[39m=[32m"5"[39m
+                          [33mrx[39m=[32m"9"[39m
+                          [33mry[39m=[32m"3"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M3 5V19A9 3 0 0 0 21 19V5"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M3 12A9 3 0 0 0 21 12"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                      [0m Embedding Configuration[0m
+                    [36m</h2>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"grid gap-3 md:grid-cols-2"[39m
+                    [36m>[39m
+                      [36m<div[39m
+                        [33mclass[39m=[32m"space-y-1.5"[39m
+                      [36m>[39m
+                        [36m<label[39m
+                          [33mclass[39m=[32m"text-xs font-medium"[39m
+                        [36m>[39m
+                          [0mModel Name[0m
+                        [36m</label>[39m
+                        [36m<input[39m
+                          [33mclass[39m=[32m"w-full rounded-lg border border-input bg-background px-3 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"[39m
+                          [33mtype[39m=[32m"text"[39m
+                          [33mvalue[39m=[32m"qwen3-embedding:0.6b"[39m
+                        [36m/>[39m
+                      [36m</div>[39m
+                      [36m<div[39m
+                        [33mclass[39m=[32m"space-y-1.5"[39m
+                      [36m>[39m
+                        [36m<label[39m
+                          [33mclass[39m=[32m"text-xs font-medium"[39m
+                        [36m>[39m
+                          [0mBase URL[0m
+                        [36m</label>[39m
+                        [36m<input[39m
+                          [33mclass[39m=[32m"w-full rounded-lg border border-input bg-background px-3 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"[39m
+                          [33mtype[39m=[32m"text"[39m
+                          [33mvalue[39m=[32m"http://127.0.0.1:11434"[39m
+                        [36m/>[39m
+                      [36m</div>[39m
+                    [36m</div>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"space-y-1.5"[39m
+                    [36m>[39m
+                      [36m<label[39m
+                        [33mclass[39m=[32m"text-xs font-medium"[39m
+                      [36m>[39m
+                        [0mAPI Key (Optional for Jina)[0m
+                      [36m</label>[39m
+                      [36m<input[39m
+                        [33mclass[39m=[32m"w-full rounded-lg border border-input bg-background px-3 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"[39m
+                        [33mtype[39m=[32m"password"[39m
+                        [33mvalue[39m=[32m""[39m
+                      [36m/>[39m
+                    [36m</div>[39m
+                  [36m</div>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"pt-2"[39m
+                  [36m>[39m
+                    [36m<button[39m
+                      [33mclass[39m=[32m"flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 cursor-pointer"[39m
+                      [33mtype[39m=[32m"submit"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mclass[39m=[32m"lucide lucide-circle-check size-4"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"24"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"24"[39m
+                        [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                      [36m>[39m
+                        [36m<circle[39m
+                          [33mcx[39m=[32m"12"[39m
+                          [33mcy[39m=[32m"12"[39m
+                          [33mr[39m=[32m"10"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"m9 12 2 2 4-4"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                      [0mSave & Connect[0m
+                    [36m</button>[39m
+                  [36m</div>[39m
+                [36m</form>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</main>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"relative h-screen w-full overflow-hidden bg-background text-foreground font-sans"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"fixed inset-0 z-50 flex flex-col items-center justify-center bg-background"[39m
+        [33mstyle[39m=[32m"opacity: 1;"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex items-center gap-4"[39m
+          [33mstyle[39m=[32m"opacity: 0.9984768481517676; transform: scale(0.9996953696303535);"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex size-16 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/20"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"lucide lucide-layout-dashboard size-8 text-primary-foreground"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<rect[39m
+                [33mheight[39m=[32m"9"[39m
+                [33mrx[39m=[32m"1"[39m
+                [33mwidth[39m=[32m"7"[39m
+                [33mx[39m=[32m"3"[39m
+                [33my[39m=[32m"3"[39m
+              [36m/>[39m
+              [36m<rect[39m
+                [33mheight[39m=[32m"5"[39m
+                [33mrx[39m=[32m"1"[39m
+                [33mwidth[39m=[32m"7"[39m
+                [33mx[39m=[32m"14"[39m
+                [33my[39m=[32m"3"[39m
+              [36m/>[39m
+              [36m<rect[39m
+                [33mheight[39m=[32m"9"[39m
+                [33mrx[39m=[32m"1"[39m
+                [33mwidth[39m=[32m"7"[39m
+                [33mx[39m=[32m"14"[39m
+                [33my[39m=[32m"12"[39m
+              [36m/>[39m
+              [36m<rect[39m
+                [33mheight[39m=[32m"5"[39m
+                [33mrx[39m=[32m"1"[39m
+                [33mwidth[39m=[32m"7"[39m
+                [33mx[39m=[32m"3"[39m
+                [33my[39m=[32m"16"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</div>[39m
+          [36m<h1[39m
+            [33mclass[39m=[32m"text-6xl font-bold tracking-tighter"[39m
+            [33mstyle[39m=[32m"opacity: 0.9581461896013934; transform: translateX(-0.8370762079721317px);"[39m
+          [36m>[39m
+            [0mTinyBI[0m
+          [36m</h1>[39m
+        [36m</div>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"mt-6 text-muted-foreground"[39m
+          [33mstyle[39m=[32m"opacity: 0.49963378909160383;"[39m
+        [36m>[39m
+          [0mYour data, naturally understood.[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex h-full w-full flex-col"[39m
+      [36m>[39m
+        [36m<main[39m
+          [33mclass[39m=[32m"relative flex-1 overflow-hidden bg-muted/20"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"relative h-full w-full"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex min-h-screen items-center justify-center p-6 pb-20"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"w-full max-w-2xl rounded-2xl border border-border bg-card p-6 shadow-xl"[39m
+                [33mstyle[39m=[32m"opacity: 1; transform: none;"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"mb-6 flex items-center justify-between"[39m
+                [36m>[39m
+                  [36m<div>[39m
+                    [36m<h1[39m
+                      [33mclass[39m=[32m"text-2xl font-bold tracking-tight"[39m
+                    [36m>[39m
+                      [0mWelcome to TinyBI[0m
+                    [36m</h1>[39m
+                    [36m<p[39m
+                      [33mclass[39m=[32m"mt-1 text-sm text-muted-foreground"[39m
+                    [36m>[39m
+                      [0mLet's connect your models to get started.[0m
+                    [36m</p>[39m
+                  [36m</div>[39m
+                  [36m<div />[39m
+                [36m</div>[39m
+                [36m<form[39m
+                  [33mclass[39m=[32m"space-y-6"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"space-y-3"[39m
+                  [36m>[39m
+                    [36m<h2[39m
+                      [33mclass[39m=[32m"text-base font-semibold flex items-center gap-2 border-b border-border pb-2"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mclass[39m=[32m"lucide lucide-server size-4"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"24"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"24"[39m
+                        [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                      [36m>[39m
+                        [36m<rect[39m
+                          [33mheight[39m=[32m"8"[39m
+                          [33mrx[39m=[32m"2"[39m
+                          [33mry[39m=[32m"2"[39m
+                          [33mwidth[39m=[32m"20"[39m
+                          [33mx[39m=[32m"2"[39m
+                          [33my[39m=[32m"2"[39m
+                        [36m/>[39m
+                        [36m<rect[39m
+                          [33mheight[39m=[32m"8"[39m
+                          [33mrx[39m=[32m"2"[39m
+                          [33mry[39m=[32m"2"[39m
+                          [33mwidth[39m=[32m"20"[39m
+                          [33mx[39m=[32m"2"[39m
+                          [33my[39m=[32m"14"[39m
+                        [36m/>[39m
+                        [36m<line[39m
+                          [33mx1[39m=[32m"6"[39m
+                          [33mx2[39m=[32m"6.01"[39m
+                          [33my1[39m=[32m"6"[39m
+                          [33my2[39m=[32m"6"[39m
+                        [36m/>[39m
+                        [36m<line[39m
+                          [33mx1[39m=[32m"6"[39m
+                          [33mx2[39m=[32m"6.01"[39m
+                          [33my1[39m=[32m"18"[39m
+                          [33my2[39m=[32m"18"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                      [0m Chat Model Configuration[0m
+                    [36m</h2>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"grid grid-cols-2 gap-3"[39m
+                    [36m>[39m
+                      [36m<button[39m
+                        [33maria-label[39m=[32m"Local LLM"[39m
+                        [33mclass[39m=[32m"flex flex-col items-center justify-center rounded-xl border p-3 transition-all border-primary bg-primary/5 text-foreground ring-2 ring-primary/20"[39m
+                        [33mtype[39m=[32m"button"[39m
+                      [36m>[39m
+                        [36m<svg[39m
+                          [33maria-hidden[39m=[32m"true"[39m
+                          [33mclass[39m=[32m"lucide lucide-server mb-1 size-5"[39m
+                          [33mfill[39m=[32m"none"[39m
+                          [33mheight[39m=[32m"24"[39m
+                          [33mstroke[39m=[32m"currentColor"[39m
+                          [33mstroke-linecap[39m=[32m"round"[39m
+                          [33mstroke-linejoin[39m=[32m"round"[39m
+                          [33mstroke-width[39m=[32m"2"[39m
+                          [33mviewBox[39m=[32m"0 0 24 24"[39m
+                          [33mwidth[39m=[32m"24"[39m
+                          [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                        [36m>[39m
+                          [36m<rect[39m
+                            [33mheight[39m=[32m"8"[39m
+                            [33mrx[39m=[32m"2"[39m
+                            [33mry[39m=[32m"2"[39m
+                            [33mwidth[39m=[32m"20"[39m
+                            [33mx[39m=[32m"2"[39m
+                            [33my[39m=[32m"2"[39m
+                          [36m/>[39m
+                          [36m<rect[39m
+                            [33mheight[39m=[32m"8"[39m
+                            [33mrx[39m=[32m"2"[39m
+                            [33mry[39m=[32m"2"[39m
+                            [33mwidth[39m=[32m"20"[39m
+                            [33mx[39m=[32m"2"[39m
+                            [33my[39m=[32m"14"[39m
+                          [36m/>[39m
+                          [36m<line[39m
+                            [33mx1[39m=[32m"6"[39m
+                            [33mx2[39m=[32m"6.01"[39m
+                            [33my1[39m=[32m"6"[39m
+                            [33my2[39m=[32m"6"[39m
+                          [36m/>[39m
+                          [36m<line[39m
+                            [33mx1[39m=[32m"6"[39m
+                            [33mx2[39m=[32m"6.01"[39m
+                            [33my1[39m=[32m"18"[39m
+                            [33my2[39m=[32m"18"[39m
+                          [36m/>[39m
+                        [36m</svg>[39m
+                        [36m<span[39m
+                          [33mclass[39m=[32m"text-sm font-medium"[39m
+                        [36m>[39m
+                          [0mLocal (Ollama)[0m
+                        [36m</span>[39m
+                      [36m</button>[39m
+                      [36m<button[39m
+                        [33maria-label[39m=[32m"Remote LLM"[39m
+                        [33mclass[39m=[32m"flex flex-col items-center justify-center rounded-xl border p-3 transition-all border-border bg-muted/50 text-muted-foreground hover:bg-muted"[39m
+                        [33mtype[39m=[32m"button"[39m
+                      [36m>[39m
+                        [36m<svg[39m
+                          [33maria-hidden[39m=[32m"true"[39m
+                          [33mclass[39m=[32m"lucide lucide-globe mb-1 size-5"[39m
+                          [33mfill[39m=[32m"none"[39m
+                          [33mheight[39m=[32m"24"[39m
+                          [33mstroke[39m=[32m"currentColor"[39m
+                          [33mstroke-linecap[39m=[32m"round"[39m
+                          [33mstroke-linejoin[39m=[32m"round"[39m
+                          [33mstroke-width[39m=[32m"2"[39m
+                          [33mviewBox[39m=[32m"0 0 24 24"[39m
+                          [33mwidth[39m=[32m"24"[39m
+                          [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                        [36m>[39m
+                          [36m<circle[39m
+                            [33mcx[39m=[32m"12"[39m
+                            [33mcy[39m=[32m"12"[39m
+                            [33mr[39m=[32m"10"[39m
+                          [36m/>[39m
+                          [36m<path[39m
+                            [33md[39m=[32m"M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"[39m
+                          [36m/>[39m
+                          [36m<path[39m
+                            [33md[39m=[32m"M2 12h20"[39m
+                          [36m/>[39m
+                        [36m</svg>[39m
+                        [36m<span[39m
+                          [33mclass[39m=[32m"text-sm font-medium"[39m
+                        [36m>[39m
+                          [0mRemote (Groq)[0m
+                        [36m</span>[39m
+                      [36m</button>[39m
+                    [36m</div>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"pt-2"[39m
+                    [36m>[39m
+                      [36m<div[39m
+                        [33mclass[39m=[32m"space-y-3"[39m
+                      [36m>[39m
+                        [36m<div[39m
+                          [33mclass[39m=[32m"space-y-1.5"[39m
+                        [36m>[39m
+                          [36m<label[39m
+                            [33mclass[39m=[32m"text-xs font-medium"[39m
+                          [36m>[39m
+                            [0mOllama Base URL[0m
+                          [36m</label>[39m
+                          [36m<input[39m
+                            [33mclass[39m=[32m"w-full rounded-lg border border-input bg-background px-3 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"[39m
+                            [33mtype[39m=[32m"text"[39m
+                            [33mvalue[39m=[32m"http://127.0.0.1:11434"[39m
+                          [36m/>[39m
+                        [36m</div>[39m
+                        [36m<div[39m
+                          [33mclass[39m=[32m"space-y-1.5"[39m
+                        [36m>[39m
+                          [36m<label[39m
+                            [33mclass[39m=[32m"text-xs font-medium"[39m
+                          [36m>[39m
+                            [0mModel Name[0m
+                          [36m</label>[39m
+                          [36m<input[39m
+                            [33mclass[39m=[32m"w-full rounded-lg border border-input bg-background px-3 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"[39m
+                            [33mtype[39m=[32m"text"[39m
+                            [33mvalue[39m=[32m"granite4.1:3b"[39m
+                          [36m/>[39m
+                        [36m</div>[39m
+                      [36m</div>[39m
+                    [36m</div>[39m
+                  [36m</div>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"space-y-3 pt-2"[39m
+                  [36m>[39m
+                    [36m<h2[39m
+                      [33mclass[39m=[32m"text-base font-semibold flex items-center gap-2 border-b border-border pb-2"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mclass[39m=[32m"lucide lucide-database size-4"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"24"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"24"[39m
+                        [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                      [36m>[39m
+                        [36m<ellipse[39m
+                          [33mcx[39m=[32m"12"[39m
+                          [33mcy[39m=[32m"5"[39m
+                          [33mrx[39m=[32m"9"[39m
+                          [33mry[39m=[32m"3"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M3 5V19A9 3 0 0 0 21 19V5"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M3 12A9 3 0 0 0 21 12"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                      [0m Embedding Configuration[0m
+                    [36m</h2>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"grid gap-3 md:grid-cols-2"[39m
+                    [36m>[39m
+                      [36m<div[39m
+                        [33mclass[39m=[32m"space-y-1.5"[39m
+                      [36m>[39m
+                        [36m<label[39m
+                          [33mclass[39m=[32m"text-xs font-medium"[39m
+                        [36m>[39m
+                          [0mModel Name[0m
+                        [36m</label>[39m
+                        [36m<input[39m
+                          [33mclass[39m=[32m"w-full rounded-lg border border-input bg-background px-3 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"[39m
+                          [33mtype[39m=[32m"text"[39m
+                          [33mvalue[39m=[32m"qwen3-embedding:0.6b"[39m
+                        [36m/>[39m
+                      [36m</div>[39m
+                      [36m<div[39m
+                        [33mclass[39m=[32m"space-y-1.5"[39m
+                      [36m>[39m
+                        [36m<label[39m
+                          [33mclass[39m=[32m"text-xs font-medium"[39m
+                        [36m>[39m
+                          [0mBase URL[0m
+                        [36m</label>[39m
+                        [36m<input[39m
+                          [33mclass[39m=[32m"w-full rounded-lg border border-input bg-background px-3 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"[39m
+                          [33mtype[39m=[32m"text"[39m
+                          [33mvalue[39m=[32m"http://127.0.0.1:11434"[39m
+                        [36m/>[39m
+                      [36m</div>[39m
+                    [36m</div>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"space-y-1.5"[39m
+                    [36m>[39m
+                      [36m<label[39m
+                        [33mclass[39m=[32m"text-xs font-medium"[39m
+                      [36m>[39m
+                        [0mAPI Key (Optional for Jina)[0m
+                      [36m</label>[39m
+                      [36m<input[39m
+                        [33mclass[39m=[32m"w-full rounded-lg border border-input bg-background px-3 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"[39m
+                        [33mtype[39m=[32m"password"[39m
+                        [33mvalue[39m=[32m""[39m
+                      [36m/>[39m
+                    [36m</div>[39m
+                  [36m</div>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"pt-2"[39m
+                  [36m>[39m
+                    [36m<button[39m
+                      [33mclass[39m=[32m"flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 cursor-pointer"[39m
+                      [33mtype[39m=[32m"submit"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mclass[39m=[32m"lucide lucide-circle-check size-4"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"24"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"24"[39m
+                        [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                      [36m>[39m
+                        [36m<circle[39m
+                          [33mcx[39m=[32m"12"[39m
+                          [33mcy[39m=[32m"12"[39m
+                          [33mr[39m=[32m"10"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"m9 12 2 2 4-4"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                      [0mSave & Connect[0m
+                    [36m</button>[39m
+                  [36m</div>[39m
+                [36m</form>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</main>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+[90m [2m❯[22m waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:[2m163:27[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m86:33[22m[39m
+[36m [2m❯[22m src/tests/app.test.tsx:[2m43:23[22m[39m
+    [90m 41|[39m
+    [90m 42|[39m   [90m// Should have the engine badges loaded dynamically[39m
+    [90m 43|[39m   [34mexpect[39m([35mawait[39m screen[33m.[39m[34mfindByText[39m([36m/LLM: Mock-LLM/i[39m))[33m.[39m[34mtoBeInTheDocument[39m()
+    [90m   |[39m                       [31m^[39m
+    [90m 44|[39m   expect(await screen.findByText(/Vector: Mock-Vector/i)).toBeInTheDoc…
+    [90m 45|[39m })
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/pages/MonitoringPage.test.tsx[2m > [22mMonitoringPage[2m > [22mrenders only Accuracy and Latency KPIs (removes Tokens)
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an element with the text: 85%. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex h-full flex-col overflow-y-auto bg-background p-6"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"mb-4 flex flex-col gap-4"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex items-center justify-between"[39m
+        [36m>[39m
+          [36m<div>[39m
+            [36m<h1[39m
+              [33mclass[39m=[32m"text-2xl font-bold tracking-tight"[39m
+            [36m>[39m
+              [0mSystem Health & Evaluation[0m
+            [36m</h1>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-sm text-muted-foreground"[39m
+            [36m>[39m
+              [0mMonitoring accuracy, latency, and tokens across the agent pipeline.[0m
+            [36m</p>[39m
+          [36m</div>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m"group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-8 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 gap-2"[39m
+            [33mdata-size[39m=[32m"default"[39m
+            [33mdata-slot[39m=[32m"button"[39m
+            [33mdata-variant[39m=[32m"outline"[39m
+            [33mhref[39m=[32m"http://localhost:15500"[39m
+            [33mrel[39m=[32m"noopener noreferrer"[39m
+            [33mtarget[39m=[32m"_blank"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"lucide lucide-external-link size-4"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M15 3h6v6"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M10 14 21 3"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [0mPromptfoo Dashboard[0m
+          [36m</a>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"rounded-lg border border-amber-500/20 bg-amber-500/5 p-4 text-sm text-muted-foreground flex items-start gap-3"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"lucide lucide-zap size-5 shrink-0 text-amber-500 mt-0.5"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex flex-col gap-1.5"[39m
+          [36m>[39m
+            [36m<p>[39m
+              [36m<strong[39m
+                [33mclass[39m=[32m"text-foreground font-medium"[39m
+              [36m>[39m
+                [0mEvaluation Runtime Environment:[0m
+              [36m</strong>[39m
+              [0m These metrics were captured using a high-performance evaluation cluster equipped with specialized hardware (NVIDIA Tesla GPUs) running accelerated inference via vLLM. Consequently, latency figures reflect this specialized testing environment rather than the standard local TinyBI deployment configuration.[0m
+            [36m</p>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</header>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"mb-4 grid grid-cols-1 gap-4 md:grid-cols-2"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex items-center gap-4 rounded-2xl border border-border bg-card p-6 shadow-sm hover:bg-muted/30 transition-colors"[39m
+          [33mstyle[39m=[32m"opacity: 1; transform: none;"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex size-12 shrink-0 items-center justify-center rounded-xl bg-muted/50"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"lucide lucide-target size-5 text-emerald-500"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<circle[39m
+                [33mcx[39m=[32m"12"[39m
+                [33mcy[39m=[32m"12"[39m
+                [33mr[39m=[32m"10"[39m
+              [36m/>[39m
+              [36m<circle[39m
+                [33mcx[39m=[32m"12"[39m
+                [33mcy[39m=[32m"12"[39m
+                [33mr[39m=[32m"6"[39m
+              [36m/>[39m
+              [36m<circle[39m
+                [33mcx[39m=[32m"12"[39m
+                [33mcy[39m=[32m"12"[39m
+                [33mr[39m=[32m"2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</div>[39m
+          [36m<div>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-sm font-medium text-muted-foreground"[39m
+            [36m>[39m
+              [0mOverall Accuracy[0m
+            [36m</p>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-2xl font-bold tracking-tight"[39m
+            [36m>[39m
+              [0m85.00%[0m
+            [36m</p>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex items-center gap-4 rounded-2xl border border-border bg-card p-6 shadow-sm hover:bg-muted/30 transition-colors"[39m
+          [33mstyle[39m=[32m"opacity: 1; transform: none;"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex size-12 shrink-0 items-center justify-center rounded-xl bg-muted/50"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"lucide lucide-clock size-5 text-blue-500"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<circle[39m
+                [33mcx[39m=[32m"12"[39m
+                [33mcy[39m=[32m"12"[39m
+                [33mr[39m=[32m"10"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M12 6v6l4 2"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</div>[39m
+          [36m<div>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-sm font-medium text-muted-foreground"[39m
+            [36m>[39m
+              [0mMean Latency[0m
+            [36m</p>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-2xl font-bold tracking-tight"[39m
+            [36m>[39m
+              [0m14.50s[0m
+            [36m</p>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"grid grid-cols-1 gap-6 lg:grid-cols-2"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"rounded-2xl border border-border bg-card p-5 shadow-sm flex flex-col"[39m
+          [33mstyle[39m=[32m"opacity: 1; transform: none;"[39m
+        [36m>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"mb-4 text-lg font-semibold shrink-0"[39m
+          [36m>[39m
+            [0mPerformance by Difficulty (TinyBI vs Schema Dump)[0m
+          [36m</h2>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"h-[300px] w-full mt-auto"[39m
+          [36m>[39m
+            [36m<div>[39m
+              [36m<div[39m
+                [33mdata-testid[39m=[32m"mock-composed-chart"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mdata-testid[39m=[32m"mock-bar-tinyBITokens"[39m
+                [36m/>[39m
+                [36m<div[39m
+                  [33mdata-testid[39m=[32m"mock-bar-schemaDumpTokens"[39m
+                [36m/>[39m
+                [36m<div[39m
+                  [33mdata-testid[39m=[32m"mock-line-tinyBIAccuracy"[39m
+                [36m/>[39m
+                [36m<div[39m
+                  [33mdata-testid[39m=[32m"mock-line-schemaDumpAccuracy"[39m
+                [36m/>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"rounded-2xl border border-border bg-card p-5 shadow-sm flex flex-col"[39m
+          [33mstyle[39m=[32m"opacity: 1; transform: none;"[39m
+        [36m>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"mb-4 text-lg font-semibold shrink-0"[39m
+          [36m>[39m
+            [0mResults (TinyBI vs Schema Dump)[0m
+          [36m</h2>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"h-[300px] w-full mt-auto"[39m
+          [36m>[39m
+            [36m<div>[39m
+              [36m<div[39m
+                [33mdata-testid[39m=[32m"mock-bar-chart"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mdata-testid[39m=[32m"mock-bar-correct"[39m
+                [36m/>[39m
+                [36m<div[39m
+                  [33mdata-testid[39m=[32m"mock-bar-fail"[39m
+                [36m/>[39m
+                [36m<div[39m
+                  [33mdata-testid[39m=[32m"mock-bar-error"[39m
+                [36m/>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex h-full flex-col overflow-y-auto bg-background p-6"[39m
+      [36m>[39m
+        [36m<header[39m
+          [33mclass[39m=[32m"mb-4 flex flex-col gap-4"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center justify-between"[39m
+          [36m>[39m
+            [36m<div>[39m
+              [36m<h1[39m
+                [33mclass[39m=[32m"text-2xl font-bold tracking-tight"[39m
+              [36m>[39m
+                [0mSystem Health & Evaluation[0m
+              [36m</h1>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-sm text-muted-foreground"[39m
+              [36m>[39m
+                [0mMonitoring accuracy, latency, and tokens across the agent pipeline.[0m
+              [36m</p>[39m
+            [36m</div>[39m
+            [36m<a[39m
+              [33mclass[39m=[32m"group/button inline-flex shrink-0 items-center justify-center rounded-lg border bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-8 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 gap-2"[39m
+              [33mdata-size[39m=[32m"default"[39m
+              [33mdata-slot[39m=[32m"button"[39m
+              [33mdata-variant[39m=[32m"outline"[39m
+              [33mhref[39m=[32m"http://localhost:15500"[39m
+              [33mrel[39m=[32m"noopener noreferrer"[39m
+              [33mtarget[39m=[32m"_blank"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-external-link size-4"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M15 3h6v6"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M10 14 21 3"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [0mPromptfoo Dashboard[0m
+            [36m</a>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"rounded-lg border border-amber-500/20 bg-amber-500/5 p-4 text-sm text-muted-foreground flex items-start gap-3"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"lucide lucide-zap size-5 shrink-0 text-amber-500 mt-0.5"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-col gap-1.5"[39m
+            [36m>[39m
+              [36m<p>[39m
+                [36m<strong[39m
+                  [33mclass[39m=[32m"text-foreground font-medium"[39m
+                [36m>[39m
+                  [0mEvaluation Runtime Environment:[0m
+                [36m</strong>[39m
+                [0m These metrics were captured using a high-performance evaluation cluster equipped with specialized hardware (NVIDIA Tesla GPUs) running accelerated inference via vLLM. Consequently, latency figures reflect this specialized testing environment rather than the standard local TinyBI deployment configuration.[0m
+              [36m</p>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</header>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"mb-4 grid grid-cols-1 gap-4 md:grid-cols-2"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center gap-4 rounded-2xl border border-border bg-card p-6 shadow-sm hover:bg-muted/30 transition-colors"[39m
+            [33mstyle[39m=[32m"opacity: 1; transform: none;"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex size-12 shrink-0 items-center justify-center rounded-xl bg-muted/50"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-target size-5 text-emerald-500"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"12"[39m
+                  [33mcy[39m=[32m"12"[39m
+                  [33mr[39m=[32m"10"[39m
+                [36m/>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"12"[39m
+                  [33mcy[39m=[32m"12"[39m
+                  [33mr[39m=[32m"6"[39m
+                [36m/>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"12"[39m
+                  [33mcy[39m=[32m"12"[39m
+                  [33mr[39m=[32m"2"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</div>[39m
+            [36m<div>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-sm font-medium text-muted-foreground"[39m
+              [36m>[39m
+                [0mOverall Accuracy[0m
+              [36m</p>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-2xl font-bold tracking-tight"[39m
+              [36m>[39m
+                [0m85.00%[0m
+              [36m</p>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center gap-4 rounded-2xl border border-border bg-card p-6 shadow-sm hover:bg-muted/30 transition-colors"[39m
+            [33mstyle[39m=[32m"opacity: 1; transform: none;"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex size-12 shrink-0 items-center justify-center rounded-xl bg-muted/50"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-clock size-5 text-blue-500"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"12"[39m
+                  [33mcy[39m=[32m"12"[39m
+                  [33mr[39m=[32m"10"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 6v6l4 2"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</div>[39m
+            [36m<div>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-sm font-medium text-muted-foreground"[39m
+              [36m>[39m
+                [0mMean Latency[0m
+              [36m</p>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-2xl font-bold tracking-tight"[39m
+              [36m>[39m
+                [0m14.50s[0m
+              [36m</p>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"grid grid-cols-1 gap-6 lg:grid-cols-2"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"rounded-2xl border border-border bg-card p-5 shadow-sm flex flex-col"[39m
+            [33mstyle[39m=[32m"opacity: 1; transform: none;"[39m
+          [36m>[39m
+            [36m<h2[39m
+              [33mclass[39m=[32m"mb-4 text-lg font-semibold shrink-0"[39m
+            [36m>[39m
+              [0mPerformance by Difficulty (TinyBI vs Schema Dump)[0m
+            [36m</h2>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"h-[300px] w-full mt-auto"[39m
+            [36m>[39m
+              [36m<div>[39m
+                [36m<div[39m
+                  [33mdata-testid[39m=[32m"mock-composed-chart"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mdata-testid[39m=[32m"mock-bar-tinyBITokens"[39m
+                  [36m/>[39m
+                  [36m<div[39m
+                    [33mdata-testid[39m=[32m"mock-bar-schemaDumpTokens"[39m
+                  [36m/>[39m
+                  [36m<div[39m
+                    [33mdata-testid[39m=[32m"mock-line-tinyBIAccuracy"[39m
+                  [36m/>[39m
+                  [36m<div[39m
+                    [33mdata-testid[39m=[32m"mock-line-schemaDumpAccuracy"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"rounded-2xl border border-border bg-card p-5 shadow-sm flex flex-col"[39m
+            [33mstyle[39m=[32m"opacity: 1; transform: none;"[39m
+          [36m>[39m
+            [36m<h2[39m
+              [33mclass[39m=[32m"mb-4 text-lg font-semibold shrink-0"[39m
+            [36m>[39m
+              [0mResults (TinyBI vs Schema Dump)[0m
+            [36m</h2>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"h-[300px] w-full mt-auto"[39m
+            [36m>[39m
+              [36m<div>[39m
+                [36m<div[39m
+                  [33mdata-testid[39m=[32m"mock-bar-chart"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mdata-testid[39m=[32m"mock-bar-correct"[39m
+                  [36m/>[39m
+                  [36m<div[39m
+                    [33mdata-testid[39m=[32m"mock-bar-fail"[39m
+                  [36m/>[39m
+                  [36m<div[39m
+                    [33mdata-testid[39m=[32m"mock-bar-error"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</body>[39m
+[36m</html>[39m
+[90m [2m❯[22m Proxy.waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:[2m163:27[22m[39m
+[36m [2m❯[22m src/pages/MonitoringPage.test.tsx:[2m56:11[22m[39m
+    [90m 54|[39m
+    [90m 55|[39m     [90m// Wait for the data to load and stats to be displayed[39m
+    [90m 56|[39m     [35mawait[39m [34mwaitFor[39m(() [33m=>[39m {
+    [90m   |[39m           [31m^[39m
+    [90m 57|[39m       expect(screen.getByText(/System Health & Evaluation/i)).toBeInTh…
+    [90m 58|[39m       [90m// 0.85 -> 85%[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/pages/QueryPage.mvp.test.tsx[2m > [22mQueryPage MVP Features[2m > [22mRED: displays quick-start cards in empty state
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an element with the text: /For the female client who was born in 1976/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col h-full bg-background relative"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex-1 overflow-y-auto p-8 space-y-8 scroll-smooth pb-60"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex flex-col items-center justify-center h-full text-center space-y-8"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"space-y-4 opacity-50"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"mx-auto size-16 rounded-3xl bg-muted flex items-center justify-center"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-bot size-8"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 8V4H8"[39m
+                [36m/>[39m
+                [36m<rect[39m
+                  [33mheight[39m=[32m"12"[39m
+                  [33mrx[39m=[32m"2"[39m
+                  [33mwidth[39m=[32m"16"[39m
+                  [33mx[39m=[32m"4"[39m
+                  [33my[39m=[32m"8"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M2 14h2"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M20 14h2"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M15 13v2"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M9 13v2"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"space-y-1"[39m
+            [36m>[39m
+              [36m<h2[39m
+                [33mclass[39m=[32m"text-xl font-semibold"[39m
+              [36m>[39m
+                [0mWelcome to TinyBI[0m
+              [36m</h2>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-sm max-w-xs text-muted-foreground"[39m
+              [36m>[39m
+                [0mAsk questions about your data in natural language.[0m
+              [36m</p>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"grid grid-cols-1 gap-4 max-w-4xl w-full md:grid-cols-3"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"p-4 rounded-2xl border border-border bg-card hover:bg-accent/50 hover:border-primary/50 transition-all text-left text-sm group"[39m
+            [36m>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-muted-foreground group-hover:text-foreground transition-colors"[39m
+              [36m>[39m
+                [0mHow many accounts who choose issuance after transaction are staying in East Bohemia region?[0m
+              [36m</p>[39m
+            [36m</button>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"p-4 rounded-2xl border border-border bg-card hover:bg-accent/50 hover:border-primary/50 transition-all text-left text-sm group"[39m
+            [36m>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-muted-foreground group-hover:text-foreground transition-colors"[39m
+              [36m>[39m
+                [0mWhat is the percentage of loan amount that has been fully paid with no issue.[0m
+              [36m</p>[39m
+            [36m</button>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"p-4 rounded-2xl border border-border bg-card hover:bg-accent/50 hover:border-primary/50 transition-all text-left text-sm group"[39m
+            [36m>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-muted-foreground group-hover:text-foreground transition-colors"[39m
+              [36m>[39m
+                [0mWhat percentage of clients who opened their accounts in the district with an average salary of over 10000 are women?[0m
+              [36m</p>[39m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<footer[39m
+        [33mclass[39m=[32m"absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-background via-background to-transparent z-10"[39m
+      [36m>[39m
+        [36m<form[39m
+          [33mclass[39m=[32m"mx-auto max-w-4xl relative group"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"absolute inset-0 -m-1 rounded-[2rem] bg-gradient-to-r from-primary/20 to-primary/10 opacity-0 blur-xl transition-opacity group-focus-within:opacity-100"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"relative flex items-end gap-3 rounded-[1.5rem] border border-border bg-card p-2 shadow-lg transition-all focus-within:ring-2 focus-within:ring-primary/20"[39m
+          [36m>[39m
+            [36m<textarea[39m
+              [33mclass[39m=[32m"flex w-full rounded-lg border border-input transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 md:text-sm dark:bg-input/30 flex-1 min-h-[40px] max-h-[120px] border-none bg-transparent text-lg shadow-none focus-visible:ring-0 resize-none overflow-y-auto py-3 px-4"[39m
+              [33mdata-slot[39m=[32m"textarea"[39m
+              [33mplaceholder[39m=[32m"Ask your data anything..."[39m
+              [33mrows[39m=[32m"1"[39m
+            [36m/>[39m
+            [36m<button[39m
+              [33maria-label[39m=[32m"Submit"[39m
+              [33mclass[39m=[32m"group/button inline-flex items-center justify-center border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground [a]:hover:bg-primary/80 gap-1.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 rounded-xl size-12 p-0 shrink-0"[39m
+              [33mdata-size[39m=[32m"lg"[39m
+              [33mdata-slot[39m=[32m"button"[39m
+              [33mdata-variant[39m=[32m"default"[39m
+              [33mdisabled[39m=[32m""[39m
+              [33mtype[39m=[32m"submit"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-send size-5"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m21.854 2.147-10.94 10.939"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</form>[39m
+      [36m</footer>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+[90m [2m❯[22m Object.getElementError node_modules/@testing-library/dom/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m76:38[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m52:17[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m95:19[22m[39m
+[36m [2m❯[22m src/pages/QueryPage.mvp.test.tsx:[2m10:19[22m[39m
+    [90m  8|[39m     [34mrender[39m([33m<[39m[33mQueryPage[39m [33m/[39m[33m>[39m)
+    [90m  9|[39m
+    [90m 10|[39m     expect(screen.getByText(/For the female client who was born in 197…
+    [90m   |[39m                   [31m^[39m
+    [90m 11|[39m     expect(screen.getByText(/List out the no. of districts that have f…
+    [90m 12|[39m     expect(screen.getByText(/List all the withdrawals in cash transact…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/pages/QueryPage.mvp.test.tsx[2m > [22mQueryPage MVP Features[2m > [22mRED: clicking a quick-start card populates and focuses the input
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an element with the text: /For the female client who was born in 1976/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col h-full bg-background relative"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex-1 overflow-y-auto p-8 space-y-8 scroll-smooth pb-60"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex flex-col items-center justify-center h-full text-center space-y-8"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"space-y-4 opacity-50"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"mx-auto size-16 rounded-3xl bg-muted flex items-center justify-center"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-bot size-8"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 8V4H8"[39m
+                [36m/>[39m
+                [36m<rect[39m
+                  [33mheight[39m=[32m"12"[39m
+                  [33mrx[39m=[32m"2"[39m
+                  [33mwidth[39m=[32m"16"[39m
+                  [33mx[39m=[32m"4"[39m
+                  [33my[39m=[32m"8"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M2 14h2"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M20 14h2"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M15 13v2"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M9 13v2"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"space-y-1"[39m
+            [36m>[39m
+              [36m<h2[39m
+                [33mclass[39m=[32m"text-xl font-semibold"[39m
+              [36m>[39m
+                [0mWelcome to TinyBI[0m
+              [36m</h2>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-sm max-w-xs text-muted-foreground"[39m
+              [36m>[39m
+                [0mAsk questions about your data in natural language.[0m
+              [36m</p>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"grid grid-cols-1 gap-4 max-w-4xl w-full md:grid-cols-3"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"p-4 rounded-2xl border border-border bg-card hover:bg-accent/50 hover:border-primary/50 transition-all text-left text-sm group"[39m
+            [36m>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-muted-foreground group-hover:text-foreground transition-colors"[39m
+              [36m>[39m
+                [0mHow many accounts who choose issuance after transaction are staying in East Bohemia region?[0m
+              [36m</p>[39m
+            [36m</button>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"p-4 rounded-2xl border border-border bg-card hover:bg-accent/50 hover:border-primary/50 transition-all text-left text-sm group"[39m
+            [36m>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-muted-foreground group-hover:text-foreground transition-colors"[39m
+              [36m>[39m
+                [0mWhat is the percentage of loan amount that has been fully paid with no issue.[0m
+              [36m</p>[39m
+            [36m</button>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"p-4 rounded-2xl border border-border bg-card hover:bg-accent/50 hover:border-primary/50 transition-all text-left text-sm group"[39m
+            [36m>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-muted-foreground group-hover:text-foreground transition-colors"[39m
+              [36m>[39m
+                [0mWhat percentage of clients who opened their accounts in the district with an average salary of over 10000 are women?[0m
+              [36m</p>[39m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<footer[39m
+        [33mclass[39m=[32m"absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-background via-background to-transparent z-10"[39m
+      [36m>[39m
+        [36m<form[39m
+          [33mclass[39m=[32m"mx-auto max-w-4xl relative group"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"absolute inset-0 -m-1 rounded-[2rem] bg-gradient-to-r from-primary/20 to-primary/10 opacity-0 blur-xl transition-opacity group-focus-within:opacity-100"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"relative flex items-end gap-3 rounded-[1.5rem] border border-border bg-card p-2 shadow-lg transition-all focus-within:ring-2 focus-within:ring-primary/20"[39m
+          [36m>[39m
+            [36m<textarea[39m
+              [33mclass[39m=[32m"flex w-full rounded-lg border border-input transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 md:text-sm dark:bg-input/30 flex-1 min-h-[40px] max-h-[120px] border-none bg-transparent text-lg shadow-none focus-visible:ring-0 resize-none overflow-y-auto py-3 px-4"[39m
+              [33mdata-slot[39m=[32m"textarea"[39m
+              [33mplaceholder[39m=[32m"Ask your data anything..."[39m
+              [33mrows[39m=[32m"1"[39m
+            [36m/>[39m
+            [36m<button[39m
+              [33maria-label[39m=[32m"Submit"[39m
+              [33mclass[39m=[32m"group/button inline-flex items-center justify-center border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 bg-primary text-primary-foreground [a]:hover:bg-primary/80 gap-1.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 rounded-xl size-12 p-0 shrink-0"[39m
+              [33mdata-size[39m=[32m"lg"[39m
+              [33mdata-slot[39m=[32m"button"[39m
+              [33mdata-variant[39m=[32m"default"[39m
+              [33mdisabled[39m=[32m""[39m
+              [33mtype[39m=[32m"submit"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-send size-5"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m21.854 2.147-10.94 10.939"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</form>[39m
+      [36m</footer>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+[90m [2m❯[22m Object.getElementError node_modules/@testing-library/dom/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m76:38[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m52:17[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m95:19[22m[39m
+[36m [2m❯[22m src/pages/QueryPage.mvp.test.tsx:[2m20:25[22m[39m
+    [90m 18|[39m
+    [90m 19|[39m     [35mconst[39m exampleText [33m=[39m [36m/For the female client who was born in 1976/i[39m
+    [90m 20|[39m     [35mconst[39m card [33m=[39m screen[33m.[39m[34mgetByText[39m(exampleText)
+    [90m   |[39m                         [31m^[39m
+    [90m 21|[39m     const input = screen.getByPlaceholderText(/Ask your data anything/…
+    [90m 22|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m6 passed[39m[22m[90m (9)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m32 passed[39m[22m[90m (36)[39m
+[2m   Start at [22m 19:29:49
+[2m   Duration [22m 2.16s[2m (transform 655ms, setup 468ms, import 3.41s, tests 2.96s, environment 4.17s)[22m
+

@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react"
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { vi, describe, it, expect, beforeEach } from "vitest"
 import { MonitoringPage } from "./MonitoringPage"
 
@@ -56,7 +57,7 @@ describe("MonitoringPage", () => {
     await waitFor(() => {
       expect(screen.getByText(/System Health & Evaluation/i)).toBeInTheDocument()
       // 0.85 -> 85%
-      expect(screen.getByText("85%")).toBeInTheDocument()
+      expect(screen.getByText("85.00%")).toBeInTheDocument()
       // 14500 -> 14.50s
       expect(screen.getByText("14.50s")).toBeInTheDocument()
     })

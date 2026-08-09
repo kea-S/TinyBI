@@ -1,10 +1,8 @@
-import { useState, useCallback, useEffect, useRef } from "react"
+import React, { useState, useCallback, useEffect, useRef } from "react"
 import {
   ReactFlow,
   Controls,
   Background,
-  applyNodeChanges,
-  applyEdgeChanges,
   ReactFlowProvider,
   useReactFlow,
   type Node,
@@ -14,6 +12,7 @@ import {
   type OnConnect,
   Panel,
   MarkerType,
+  type Connection,
 } from "@xyflow/react"
 import "@xyflow/react/dist/style.css"
 import { motion, AnimatePresence } from "framer-motion"
@@ -27,7 +26,7 @@ import {
   Braces,
   Layout
 } from "lucide-react"
-import ELK, { type ElkNode } from "elkjs/lib/elk.bundled.js"
+import ELK, { type ElkNode, type ElkExtendedEdge } from "elkjs/lib/elk.bundled.js"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -58,8 +57,6 @@ type VectorIndexBuilderPageProps = {
 
 function VectorIndexBuilderPageInner({ tables, setTables, isVisible }: VectorIndexBuilderPageProps) {
   const { fitView } = useReactFlow()
-  const [nodes, setNodes] = useState<Node<TableNodeData>[]>([])
-  const [edges, setEdges] = useState<Edge[]>([])
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null)
   const [selectedColumnId, setSelectedColumnId] = useState<string | null>(null)
   const [isPeekOpen, setIsPeekOpen] = useState(false)
@@ -90,6 +87,7 @@ function VectorIndexBuilderPageInner({ tables, setTables, isVisible }: VectorInd
         }, 150)
       })
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isVisible, tables, syncedEntries, fitView])
 
   // Global Delete key handler for edge deletion — uses refs to avoid re-registration
@@ -116,9 +114,9 @@ function VectorIndexBuilderPageInner({ tables, setTables, isVisible }: VectorInd
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [])
 
-  // Map tables to React Flow nodes/edges
-  useEffect(() => {
-    const newNodes: Node<TableNodeData>[] = tables.map((t) => ({
+  // Derived state prototype
+  const nodes = React.useMemo<Node<TableNodeData>[]>(() => {
+    return tables.map((t) => ({
       id: t.id,
       type: "table",
       position: { x: t.x ?? 0, y: t.y ?? 0 },
@@ -128,8 +126,9 @@ function VectorIndexBuilderPageInner({ tables, setTables, isVisible }: VectorInd
         isSelected: selectedTableId === t.id,
       },
     }))
-    setNodes(newNodes)
+  }, [tables, selectedTableId])
 
+  const edges = React.useMemo<Edge[]>(() => {
     const newEdges: Edge[] = []
     tables.forEach((t) => {
       t.columns.forEach((c) => {
@@ -193,13 +192,15 @@ function VectorIndexBuilderPageInner({ tables, setTables, isVisible }: VectorInd
         }
       })
     })
-    setEdges(newEdges)
-    edgesRef.current = newEdges
-  }, [tables, selectedTableId, syncedEntries, selectedEdgeId, pendingDeletions])
+    return newEdges
+  }, [tables, syncedEntries, selectedEdgeId, pendingDeletions])
+
+  useEffect(() => {
+    edgesRef.current = edges
+  }, [edges])
 
   const onNodesChange: OnNodesChange<Node<TableNodeData>> = useCallback(
     (changes) => {
-      setNodes((nds) => applyNodeChanges(changes, nds))
       changes.forEach((change) => {
         if (change.type === "position" && change.position) {
           setTables((current) =>
@@ -214,7 +215,9 @@ function VectorIndexBuilderPageInner({ tables, setTables, isVisible }: VectorInd
   )
 
   const onEdgesChange: OnEdgesChange = useCallback(
-    (changes) => setEdges((eds) => applyEdgeChanges(changes, eds)),
+    () => {
+      // no-op, handled by derived state
+    },
     []
   )
 
@@ -249,7 +252,7 @@ function VectorIndexBuilderPageInner({ tables, setTables, isVisible }: VectorInd
   )
 
   const onReconnect = useCallback(
-    (oldEdge: Edge, newConnection: any) => {
+    (oldEdge: Edge, newConnection: Connection) => {
       const newSourceTable = tables.find((t) => t.id === newConnection.source)
       const newTargetTable = tables.find((t) => t.id === newConnection.target)
 
@@ -370,7 +373,7 @@ function VectorIndexBuilderPageInner({ tables, setTables, isVisible }: VectorInd
   const selectedTable = tables.find((t) => t.id === selectedTableId)
   const selectedColumn = selectedTable?.columns.find((c) => c.id === selectedColumnId)
 
-  const handleUpdateColumn = (field: keyof ColumnDraft, value: any) => {
+  const handleUpdateColumn = (field: keyof ColumnDraft, value: string) => {
     if (!selectedTableId || !selectedColumnId) return
     setTables((current) =>
       current.map((t) => {
@@ -442,14 +445,14 @@ function VectorIndexBuilderPageInner({ tables, setTables, isVisible }: VectorInd
     )
   }
 
-  const handleAutoLayout = useCallback(async (targetTables: TableDraft[]) => {
+  async function handleAutoLayout(targetTables: TableDraft[]) {
     const elkNodes: ElkNode[] = targetTables.map((t) => ({
       id: t.id,
       width: 250,
       height: 100 + (t.columns.length * 40),
     }))
 
-    const elkEdges: any[] = []
+    const elkEdges: ElkExtendedEdge[] = []
     targetTables.forEach((t) => {
       t.columns.forEach((c) => {
         if (c.references) {
@@ -490,7 +493,7 @@ function VectorIndexBuilderPageInner({ tables, setTables, isVisible }: VectorInd
         return next
       })
     }
-  }, [setTables])
+  }
 
   const handleSaveIndex = async () => {
     setIsSubmitting(true)

@@ -96,36 +96,7 @@ function MainApp() {
   const [tables, setTables] = useState<TableDraft[]>([createEmptyTable()])
   const [config, setConfig] = useState({ llm: "Loading...", embedding: "Loading..." })
 
-  const loadConfig = () => {
-    fetchEngineConfig().then((data) => {
-      if (typeof data === "string") {
-        console.error("Expected ConfigResponse, got string", data);
-        setIsConfigLoaded(true);
-        return;
-      }
-      if (!data.configured) {
-        setActiveTab("setup")
-      } else if (data.config) {
-        const activeLLM = data.config.active_llm
-        setConfig({
-          llm: activeLLM === "local" ? data.config.local_llm.model : data.config.remote_llm.model,
-          embedding: data.config.embedding.model
-        })
-        if (activeTab === "setup") {
-          setActiveTab("query")
-        }
-      }
-      setIsConfigLoaded(true)
-    }).catch((err) => {
-      console.error(err)
-      setIsConfigLoaded(true)
-    })
-  }
-
-  // Initial data load
-  useEffect(() => {
-    const timer = setTimeout(() => setShowSplash(false), 1200)
-    
+  const loadTables = () => {
     fetchCurrentVectorIndexEntries().then((result) => {
       if (typeof result !== "string" && result.length > 0) {
         // Simple mapping from API to draft state
@@ -172,11 +143,48 @@ function MainApp() {
           setTables(Array.from(tablesByName.values()))
         }
       }
+    }).catch((err) => {
+      console.error("Failed to fetch vector index entries", err)
     })
+  }
 
+  const loadConfig = () => {
+    fetchEngineConfig().then((data) => {
+      if (typeof data === "string") {
+        console.error("Expected ConfigResponse, got string", data);
+        setIsConfigLoaded(true);
+        return;
+      }
+      if (!data.configured) {
+        setActiveTab("setup")
+      } else if (data.config) {
+        const activeLLM = data.config.active_llm
+        setConfig({
+          llm: activeLLM === "local" ? data.config.local_llm.model : data.config.remote_llm.model,
+          embedding: data.config.embedding.model
+        })
+        if (activeTab === "setup") {
+          setActiveTab("query")
+        }
+        // Refresh tables on successful configuration setup/load
+        loadTables()
+      }
+      setIsConfigLoaded(true)
+    }).catch((err) => {
+      console.error(err)
+      setIsConfigLoaded(true)
+    })
+  }
+
+  // Initial data load
+  useEffect(() => {
+    const timer = setTimeout(() => setShowSplash(false), 1200)
+    
+    loadTables()
     loadConfig()
 
     return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
@@ -222,7 +230,7 @@ function MainApp() {
 
       <div className="flex h-full w-full flex-col">
         {/* Top Navigation */}
-        {activeTab !== "setup" && (
+        {isConfigLoaded && activeTab !== "setup" && (
           <header className="z-40 flex h-16 w-full shrink-0 items-center justify-between border-b border-border bg-card px-6 shadow-sm">
           <div className="flex items-center gap-8">
             <button 

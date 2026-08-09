@@ -7,22 +7,22 @@ describe("QueryPage MVP Features", () => {
   it("RED: displays quick-start cards in empty state", () => {
     render(<QueryPage />)
     
-    expect(screen.getByText(/For the female client who was born in 1976/i)).toBeInTheDocument()
-    expect(screen.getByText(/List out the no. of districts that have female average salary/i)).toBeInTheDocument()
-    expect(screen.getByText(/List all the withdrawals in cash transactions/i)).toBeInTheDocument()
+    expect(screen.getByText(/How many accounts who choose issuance after transaction/i)).toBeInTheDocument()
+    expect(screen.getByText(/percentage of loan amount that has been fully paid/i)).toBeInTheDocument()
+    expect(screen.getByText(/percentage of clients who opened their accounts in the district/i)).toBeInTheDocument()
   })
 
   it("RED: clicking a quick-start card populates and focuses the input", async () => {
     const user = userEvent.setup()
     render(<QueryPage />)
     
-    const exampleText = /For the female client who was born in 1976/i
+    const exampleText = /How many accounts who choose issuance after transaction/i
     const card = screen.getByText(exampleText)
     const input = screen.getByPlaceholderText(/Ask your data anything/i)
     
     await user.click(card)
     
-    expect(input).toHaveValue("For the female client who was born in 1976/1/29, which district did she opened her account?")
+    expect(input).toHaveValue("How many accounts who choose issuance after transaction are staying in East Bohemia region?")
     expect(input).toHaveFocus()
   })
 })
