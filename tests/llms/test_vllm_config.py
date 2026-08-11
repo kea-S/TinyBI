@@ -30,10 +30,15 @@ def test_get_local_llm_falls_back_to_ollama_when_vllm_disabled(monkeypatch):
     """
     monkeypatch.delenv("TINYBI_USE_VLLM", raising=False)
     
-    with patch("src.utils.models.ChatOllama") as mock_chat_ollama:
-        get_local_llm("test-model")
-        mock_chat_ollama.assert_called_once_with(
-            model="test-model",
-            base_url="http://127.0.0.1:11434",
-            reasoning=False
-        )
+    mock_resp = MagicMock()
+    mock_resp.status_code = 200
+    mock_resp.text = "Ollama is running"
+
+    with patch("src.utils.models.requests.get", return_value=mock_resp):
+        with patch("src.utils.models.ChatOllama") as mock_chat_ollama:
+            get_local_llm("test-model")
+            mock_chat_ollama.assert_called_once_with(
+                model="test-model",
+                base_url="http://127.0.0.1:11434",
+                reasoning=False
+            )

@@ -1,4 +1,4 @@
-name: Python Tests
+name: CI
 
 on:
   push:
@@ -9,11 +9,14 @@ permissions:
   contents: read
 
 jobs:
-  tests:
+  backend-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
       PYTHONPATH: .
+      OLLAMA_BASE_URL: "http://127.0.0.1:11434"
+      GROQ_API_KEY: "mock-key"
+      JINA_API_KEY: "mock-key"
 
     steps:
       - name: Check out repository
@@ -37,3 +40,30 @@ jobs:
 
       - name: Run test suite
         run: uv run python -m pytest -m "not integration" tests
+
+  frontend-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run typecheck and lint
+        run: npm run check
+
+      - name: Run unit tests
+        run: npm test
