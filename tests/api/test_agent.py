@@ -118,3 +118,15 @@ def test_agent_decision_schema():
     assert decision_query.needs_database_query is True
     assert decision_query.query_parameters is not None
     assert decision_query.query_parameters.subject == "provider"
+
+
+def test_clean_output_message_removes_json_leaks():
+    from src.agent import _clean_output_message
+
+    raw_json = '{\n  "needs_database_query": false,\n  "conversational_response": "The data shows 0 accounts.",\n  "query_parameters": null\n}'
+    cleaned = _clean_output_message(raw_json)
+    assert cleaned == "The data shows 0 accounts."
+
+    raw_markdown_json = '```json\n{\n  "conversational_response": "Hello world"\n}\n```'
+    assert _clean_output_message(raw_markdown_json) == "Hello world"
+

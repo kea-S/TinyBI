@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from src.config import CONFIG_JSON_PATH
 from src.utils.models import test_llm_connection, test_embedding_connection
+from src.utils.rag.vector_controller import VectorController
 
 router = APIRouter(prefix="/config", tags=["config"])
 
@@ -69,6 +70,7 @@ def get_config():
 
 @router.post("")
 def save_config(payload: ConfigPayload):
+    old_cfg = _load_config()
     old_ollama_base = os.getenv("OLLAMA_BASE_URL")
     old_groq_key = os.getenv("GROQ_API_KEY")
     old_local_api_base = os.getenv("LOCAL_API_BASE")
@@ -97,7 +99,11 @@ def save_config(payload: ConfigPayload):
                 errors.append(f"Remote LLM Error: {res['error']}")
 
     if payload.embedding.model:
-        res = test_embedding_connection(payload.embedding.model, base_url=payload.embedding.base_url)
+        res = test_embedding_connection(
+            payload.embedding.model,
+            base_url=payload.embedding.base_url,
+            api_key=payload.embedding.api_key
+        )
         if not res["success"]:
             errors.append(f"Embedding Error: {res['error']}")
 
@@ -114,5 +120,27 @@ def save_config(payload: ConfigPayload):
         json.dump(payload.model_dump(), f, indent=2)
         
     load_config_to_env()
+
+    # Automatically re-embed vector index if embedding model/config changed
+    embedding_changed = False
+    if old_cfg is None:
+        embedding_changed = True
+    else:
+        old_emb = old_cfg.get("embedding", {})
+        if old_emb.get("model") != payload.embedding.model or old_emb.get("base_url") != payload.embedding.base_url:
+            embedding_changed = True
+
+    if embedding_changed and payload.embedding.model:
+        try:
+            controller = VectorController(
+                payload.embedding.model,
+                base_url=payload.embedding.base_url,
+                api_key=payload.embedding.api_key,
+            )
+            entries = controller.get_current_index_entries()
+            if entries:
+                controller.batch_insert_index_entries(entries)
+        except Exception as e:
+            print(f"Auto re-embedding skipped or failed: {e}")
 
     return {"success": True}

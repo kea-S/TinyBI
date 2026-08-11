@@ -16,10 +16,16 @@ from src.config import APP_DATA_PATH
 
 
 class VectorController:
-    def __init__(self, embedding_model: str, vector_index_path: str | Path = APP_DATA_PATH):
+    def __init__(
+        self,
+        embedding_model: str,
+        vector_index_path: str | Path = APP_DATA_PATH,
+        base_url: str | None = None,
+        api_key: str | None = None,
+    ):
         self._vector_index = VectorIndex()
         self._embedding_model_name = embedding_model
-        self._embedding_model = get_embedding_model(embedding_model)
+        self._embedding_model = get_embedding_model(embedding_model, base_url=base_url, api_key=api_key)
         self._vector_index_path = Path(vector_index_path)
 
     def batch_insert_index_entries(

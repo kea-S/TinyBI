@@ -60,10 +60,6 @@ def test_query_schema_accepts_metric_aggregation_and_filters():
     assert q.filters[0].attribute_hint == "country"
     assert q.filters[1].negated is True
 
-
-        QuerySchema(user_question="dummy question", subject="route", metric_hint="")
-
-
 def test_query_schema_accepts_count_distinct_aggregation():
     q = QuerySchema(user_question="dummy question", **_base_kwargs(), aggregation="count_distinct")
     assert q.aggregation == "count_distinct"

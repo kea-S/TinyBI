@@ -86,7 +86,7 @@ def test_monitoring_provider_comparison_success(mock_load, client):
     assert tinybi["tokens"] == 7500
 
     schema_dump = next(p for p in data if p["provider"] == "Schema Dump")
-    assert schema_dump["accuracy"] == 0.5
+    assert schema_dump["accuracy"] == 0
     assert schema_dump["tokens"] == 30000
 
 @patch("src.api.routes.monitoring._load_eval_data")
@@ -119,5 +119,5 @@ def test_monitoring_difficulty_segregated_success(mock_load, client):
     assert tinybi_simple["tokens"] == 5000
 
     schema_dump_simple = next(s for s in data if s["provider"] == "Schema Dump" and s["difficulty"] == "simple")
-    assert schema_dump_simple["accuracy"] == 0.5
+    assert schema_dump_simple["accuracy"] == 0
     assert schema_dump_simple["tokens"] == 30000

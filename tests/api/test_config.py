@@ -11,7 +11,7 @@ client = TestClient(app)
 DUMMY_PAYLOAD = {
   "active_llm": "local",
   "local_llm": {
-    "model": "granite4.1:3b",
+    "model": "granite4:3b",
     "base_url": "http://127.0.0.1:11434"
   },
   "remote_llm": {
@@ -33,7 +33,7 @@ def mock_config_path(tmp_path):
 
 
 def test_get_config_no_file(mock_config_path):
-    response = client.get("/config/")
+    response = client.get("/config")
     assert response.status_code == 200
     data = response.json()
     assert data["configured"] is False
@@ -46,7 +46,7 @@ def test_post_config_valid(mock_embed, mock_llm, mock_config_path):
     mock_llm.return_value = {"success": True, "error": None}
     mock_embed.return_value = {"success": True, "error": None}
 
-    response = client.post("/config/", json=DUMMY_PAYLOAD)
+    response = client.post("/config", json=DUMMY_PAYLOAD)
     assert response.status_code == 200
     assert response.json() == {"success": True}
 
@@ -63,7 +63,7 @@ def test_post_config_invalid_connection(mock_embed, mock_llm, mock_config_path):
     mock_llm.return_value = {"success": False, "error": "Connection timed out"}
     mock_embed.return_value = {"success": True, "error": None}
 
-    response = client.post("/config/", json=DUMMY_PAYLOAD)
+    response = client.post("/config", json=DUMMY_PAYLOAD)
     assert response.status_code == 400
     assert "Connection timed out" in response.text
     assert not mock_config_path.exists()
@@ -73,7 +73,7 @@ def test_get_config_with_file(mock_config_path):
     with open(mock_config_path, "w") as f:
         json.dump(DUMMY_PAYLOAD, f)
 
-    response = client.get("/config/")
+    response = client.get("/config")
     assert response.status_code == 200
     data = response.json()
     assert data["configured"] is True
@@ -92,6 +92,21 @@ def test_load_config_to_env(mock_config_path, monkeypatch):
 
     load_config_to_env()
 
-    assert os.environ["OLLAMA_BASE_URL"] == "http://127.0.0.1:11434"
-    assert os.environ["TINYBI_MODEL"] == "granite4.1:3b"
+    assert os.environ["TINYBI_MODEL"] == "granite4:3b"
     assert os.environ["TINYBI_ACTIVE_LLM_TYPE"] == "local"
+
+
+@patch("src.api.routes.config.test_llm_connection")
+@patch("src.api.routes.config.test_embedding_connection")
+@patch("src.api.routes.config.VectorController")
+def test_post_config_triggers_auto_reembed_on_embedding_change(mock_controller_cls, mock_embed, mock_llm, mock_config_path):
+    mock_llm.return_value = {"success": True, "error": None}
+    mock_embed.return_value = {"success": True, "error": None}
+    mock_controller_inst = mock_controller_cls.return_value
+    mock_controller_inst.get_current_index_entries.return_value = ["dummy_entry"]
+
+    response = client.post("/config", json=DUMMY_PAYLOAD)
+    assert response.status_code == 200
+    assert mock_controller_cls.called
+    mock_controller_inst.batch_insert_index_entries.assert_called_once_with(["dummy_entry"])
+

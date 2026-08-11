@@ -69,6 +69,7 @@ def test_get_current_index_entries_endpoint(monkeypatch):
 
 def test_batch_insert_index_entries_endpoint(monkeypatch):
     monkeypatch.setattr(vector_routes, "VectorController", FakeVectorController)
+    monkeypatch.setattr(vector_routes, "get_active_embedding_model_name", lambda: "qwen3-embedding:0.6b")
     client = TestClient(create_app())
 
     response = client.post(

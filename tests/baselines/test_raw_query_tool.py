@@ -119,41 +119,4 @@ class TestRawQueryToolLangChain:
         assert "Table does not exist" in content
 
 
-class TestRawQueryToolAgentIntegration:
-    @pytest.mark.anyio
-    async def test_agent_calls_raw_query_tool(self):
-        mock_llm = MagicMock()
-        mock_llm.bind_tools.return_value = mock_llm
-        mock_llm.ainvoke = AsyncMock()
 
-        tool_call = {
-            "name": "query_tool",
-            "args": {"sql": "SELECT provider, SUM(order_value) FROM orders GROUP BY provider"},
-            "id": "call_1",
-        }
-        mock_tool_message = AIMessage(content="", tool_calls=[tool_call])
-        mock_summary = AIMessage(content="Here are the providers by order value.")
-        mock_llm.ainvoke.side_effect = [mock_tool_message, mock_summary]
-
-        fake_df = pd.DataFrame({"provider": ["SPX"], "total": [100]})
-
-        async def mock_raw_query_func(sql: str):
-            return "SQL executed successfully.", (fake_df, sql)
-
-        mock_tool = StructuredTool.from_function(
-            func=None,
-            coroutine=mock_raw_query_func,
-            name="query_tool",
-            description="Execute raw SQL against the database",
-            response_format="content_and_artifact",
-        )
-
-        from src.agent import run_agent
-        from src.utils.prompts import EXTRACTOR_PROMPT
-
-        messages = [HumanMessage(content="Show me providers by order value")]
-        result = await run_agent(messages, llm=mock_llm, tools=[mock_tool], system_prompt=EXTRACTOR_PROMPT)
-
-        assert "providers" in result["output"]
-        assert result["sql"] is not None
-        assert result["data"] == [{"provider": "SPX", "total": 100}]

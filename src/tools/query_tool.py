@@ -17,7 +17,7 @@ from src.utils.value_resolution.column_resolver import resolve_columns
 from src.utils.value_resolution.join_resolution import resolve_joins
 from src.utils.value_resolution.db_schema_graph import build_schema_graph
 from src.utils.rag.vector_controller import VectorController
-from src.utils.models import DEFAULT_EMBEDDING_MODEL
+from src.utils.models import get_active_embedding_model_name
 from src.utils.prompts import SQL_GENERATION_PROMPT, format_sql_generation_context
 
 from langchain_core.tools import tool
@@ -50,7 +50,7 @@ def execute_query(structured_query: QuerySchema, llm: Optional[Any] = None):
     if global_database._database is None:
         global_database.setup_database(TABLE_DATA_PATH, SQLITE_DATA_PATH, read_only=True)
 
-    vector_controller = VectorController(DEFAULT_EMBEDDING_MODEL)
+    vector_controller = VectorController(get_active_embedding_model_name())
 
     candidate_entries: CandidateEntries = \
         vector_controller.run(structured_query)

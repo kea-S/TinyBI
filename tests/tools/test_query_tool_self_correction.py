@@ -55,5 +55,6 @@ def test_query_tool_self_correction(monkeypatch):
     
     # Check that the error message was passed in the second prompt
     last_prompt = llm.last_prompt
-    assert isinstance(last_prompt, str)
-    assert "bad syntax error from duckdb" in last_prompt
+    assert isinstance(last_prompt, list)
+    prompt_text = " ".join(getattr(m, "content", "") for m in last_prompt)
+    assert "bad syntax error from duckdb" in prompt_text

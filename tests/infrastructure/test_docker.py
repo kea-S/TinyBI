@@ -165,3 +165,48 @@ def test_dockercompose_mounts_promptfoo_store():
         assert any("promptfoo_store:/root/.promptfoo" in v for v in volumes), (
             f"{svc_name} must mount ./data/promptfoo_store:/root/.promptfoo"
         )
+
+
+def test_dockercompose_app_service_uses_named_volume():
+    compose_file = PROJECT_ROOT / "docker-compose.yml"
+    if not compose_file.exists():
+        pytest.skip("docker-compose.yml not found")
+    content = yaml.safe_load(compose_file.read_text())
+    
+    assert "app" in content["services"], "app service missing in docker-compose.yml"
+    app_service = content["services"]["app"]
+    volumes = app_service.get("volumes", [])
+    
+    has_named_volume = False
+    for v in volumes:
+        v_str = str(v)
+        if "/app/data" in v_str or v_str.endswith(":/app/data"):
+            assert not v_str.startswith("./") and not v_str.startswith("/"), (
+                f"app service mounts a host directory to /app/data: {v_str}. It must use a named volume."
+            )
+            assert v_str.startswith("tinybi-data:"), f"Expected named volume tinybi-data, got {v_str}"
+            has_named_volume = True
+            
+    assert has_named_volume, "app service must mount to /app/data using a named volume"
+
+
+def test_dockercompose_has_tinybi_data_volume_declared():
+    compose_file = PROJECT_ROOT / "docker-compose.yml"
+    if not compose_file.exists():
+        pytest.skip("docker-compose.yml not found")
+    content = yaml.safe_load(compose_file.read_text())
+    
+    assert "volumes" in content, "volumes section missing in docker-compose.yml"
+    assert "tinybi-data" in content["volumes"], "tinybi-data named volume not declared"
+
+
+def test_dockerfile_app_copies_data_directory():
+    dockerfile = PROJECT_ROOT / "Dockerfile.app"
+    if not dockerfile.exists():
+        pytest.skip("Dockerfile.app not found")
+    content = dockerfile.read_text()
+    
+    assert "COPY data/" in content or "COPY ./data" in content, (
+        "Dockerfile.app must copy the data/ folder to seed the container"
+    )
+

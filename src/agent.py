@@ -1,4 +1,6 @@
 import logging
+import json
+import re
 from typing import Dict, List, Any, Optional
 
 from langchain_core.messages import BaseMessage, SystemMessage
@@ -67,6 +69,8 @@ async def run_agent(messages: List[BaseMessage], llm: Any, tools: list, system_p
         # Conversational response
         output_message = decision.conversational_response or "I don't have a response for that."
 
+    output_message = _clean_output_message(output_message)
+
     return {
         "output": output_message,
         "sql": sql,
@@ -78,6 +82,34 @@ async def run_agent(messages: List[BaseMessage], llm: Any, tools: list, system_p
             "num_requests": 1,
         }
     }
+
+
+def _clean_output_message(text: str) -> str:
+    if not text or not isinstance(text, str):
+        return text or ""
+
+    trimmed = text.strip()
+
+    # Extract JSON inside markdown blocks if present
+    json_code_block_match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", trimmed, re.DOTALL)
+    if json_code_block_match:
+        trimmed = json_code_block_match.group(1).strip()
+
+    # If the text is a JSON object, parse and extract conversational field
+    if trimmed.startswith("{") and trimmed.endswith("}"):
+        try:
+            parsed = json.loads(trimmed)
+            if isinstance(parsed, dict):
+                conv_resp = parsed.get("conversational_response")
+                if conv_resp and isinstance(conv_resp, str) and conv_resp.strip():
+                    return _clean_output_message(conv_resp)
+                out_resp = parsed.get("output") or parsed.get("message")
+                if out_resp and isinstance(out_resp, str) and out_resp.strip():
+                    return _clean_output_message(out_resp)
+        except Exception:
+            pass
+
+    return text
 
 
 

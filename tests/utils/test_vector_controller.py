@@ -28,7 +28,7 @@ def test_batch_insert_index_entries_builds_and_persists_index(monkeypatch, tmp_p
     monkeypatch.setattr(
         vector_controller_module,
         "get_embedding_model",
-        lambda _: fake_embedding_model,
+        lambda *args, **kwargs: fake_embedding_model,
     )
 
     entries = [
@@ -67,7 +67,7 @@ def test_batch_insert_index_entries_requires_non_empty_entries(monkeypatch, tmp_
     monkeypatch.setattr(
         vector_controller_module,
         "get_embedding_model",
-        lambda _: FakeEmbeddingModel(),
+        lambda *args, **kwargs: FakeEmbeddingModel(),
     )
 
     controller = VectorController("fake-embedding-model", vector_index_path=tmp_path / "columns")
@@ -85,7 +85,7 @@ def test_get_current_index_entries_returns_persisted_entries(monkeypatch, tmp_pa
     monkeypatch.setattr(
         vector_controller_module,
         "get_embedding_model",
-        lambda _: fake_embedding_model,
+        lambda *args, **kwargs: fake_embedding_model,
     )
 
     entries = [
@@ -120,7 +120,7 @@ def test_get_current_index_entries_returns_empty_list_when_index_is_missing(monk
     monkeypatch.setattr(
         vector_controller_module,
         "get_embedding_model",
-        lambda _: FakeEmbeddingModel(),
+        lambda *args, **kwargs: FakeEmbeddingModel(),
     )
 
     controller = VectorController("fake-embedding-model", vector_index_path=tmp_path / "missing")
@@ -189,7 +189,7 @@ class TestRunReturnsDictBasedFilterEntries:
         monkeypatch.setattr(
             vector_controller_module,
             "get_embedding_model",
-            lambda _: fake_embedding,
+            lambda *args, **kwargs: fake_embedding,
         )
         monkeypatch.setattr(
             vector_controller_module,
@@ -242,7 +242,7 @@ class TestRunReturnsDictBasedFilterEntries:
         ])
 
         fake_embedding = FakeEmbeddingModel()
-        monkeypatch.setattr(vector_controller_module, "get_embedding_model", lambda _: fake_embedding)
+        monkeypatch.setattr(vector_controller_module, "get_embedding_model", lambda *args, **kwargs: fake_embedding)
         monkeypatch.setattr(vector_controller_module, "VectorIndex", lambda: fake_index)
         monkeypatch.setattr(vector_controller_module, "can_resolve_value", lambda *_: True)
 
@@ -275,7 +275,7 @@ class TestRunReturnsDictBasedFilterEntries:
         ])
 
         fake_embedding = FakeEmbeddingModel()
-        monkeypatch.setattr(vector_controller_module, "get_embedding_model", lambda _: fake_embedding)
+        monkeypatch.setattr(vector_controller_module, "get_embedding_model", lambda *args, **kwargs: fake_embedding)
         monkeypatch.setattr(vector_controller_module, "VectorIndex", lambda: fake_index)
 
         controller = VectorController("fake-model", vector_index_path=tmp_path / "idx")
@@ -312,7 +312,7 @@ class TestRunReturnsDictBasedFilterEntries:
             return entry.column_name == "provider"
 
         fake_embedding = FakeEmbeddingModel()
-        monkeypatch.setattr(vector_controller_module, "get_embedding_model", lambda _: fake_embedding)
+        monkeypatch.setattr(vector_controller_module, "get_embedding_model", lambda *args, **kwargs: fake_embedding)
         monkeypatch.setattr(vector_controller_module, "VectorIndex", lambda: fake_index)
         monkeypatch.setattr(vector_controller_module, "can_resolve_value", fake_can_resolve)
 

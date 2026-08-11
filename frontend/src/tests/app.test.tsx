@@ -94,3 +94,29 @@ test("re-fetches vector index entries after setup is completed", async () => {
   })
 })
 
+test("populates SetupPage fields with saved backend configuration", async () => {
+  const fetchConfigMock = vi.mocked(fetchEngineConfig)
+  fetchConfigMock.mockResolvedValue({
+    configured: true,
+    config: {
+      active_llm: "local",
+      local_llm: { model: "custom-ollama-model", base_url: "http://custom-host:11434" },
+      remote_llm: { model: "llama-3.1-8b-instant", api_key: "gsk_custom" },
+      embedding: { model: "jina-embeddings-v5-text-small", base_url: "https://api.jina.ai/v1", api_key: "jina_custom_key" }
+    }
+  })
+
+  render(<App />)
+
+  // Switch to setup tab
+  const vectorBadge = await screen.findByText(/Vector: jina-embeddings-v5-text-small/i)
+  act(() => {
+    vectorBadge.click()
+  })
+
+  expect(await screen.findByDisplayValue("custom-ollama-model")).toBeInTheDocument()
+  expect(await screen.findByDisplayValue("jina-embeddings-v5-text-small")).toBeInTheDocument()
+  expect(await screen.findByDisplayValue("jina_custom_key")).toBeInTheDocument()
+})
+
+

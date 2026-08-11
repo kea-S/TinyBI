@@ -19,9 +19,118 @@ User question (natural language)
 Interface: a **FastAPI backend** serving a **React/Vite frontend**.
 ```
 
-## Quick Start
+## Prerequisites
 
-Requires **Python ≥ 3.13** and **Node.js ≥ 18**.
+Before starting, ensure you have the following installed and running based on your preferred deployment method:
+
+- **Docker Desktop**: Required if you plan to use the Docker Quick Start.
+- **Python ≥ 3.13** and **Node.js ≥ 18**: Required if you plan to run the services natively for development.
+- **Ollama**: Required if you are using local LLMs. It must be installed and running on your host machine.
+- **Cloud / Remote API Keys**: Optional. Required if you use cloud services instead of local Ollama (e.g. Groq for chat LLMs or Jina AI for vector embeddings).
+
+---
+
+## Quick Start (Docker)
+
+The easiest way to run TinyBI is using Docker, which packages both the FastAPI backend and React frontend into a single container.
+
+1. **Build and start the application:**
+```bash
+docker compose up --build -d app
+```
+
+2. **Access the web interface:**
+Open [http://localhost:4510](http://localhost:4510) in your browser.
+
+> **Note:** If you are using local LLMs, ensure you have pulled the required models via Ollama on your host machine (e.g., `ollama pull nomic-embed-text` and `ollama pull granite4:3b`). See the *Local Development Setup* section for a full list of supported models.
+
+---
+
+## Ollama Integration & Setup (Local LLMs)
+
+TinyBI tightly integrates with [Ollama](https://ollama.com/) to provide a 100% local, privacy-first analytics pipeline. If you aren't using remote APIs (like OpenAI or Groq), Ollama **must** be running on your host machine.
+
+### 1. Install and Start Ollama
+
+**macOS / Linux:**
+
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+ollama serve
+```
+
+**Windows:**
+
+Download and run the installer from [ollama.com/download/windows](https://ollama.com/download/windows). Ollama starts automatically as a system tray service (no manual `serve` command needed).
+
+### 2. Networking (Docker vs. Local)
+
+- **Running Natively (Local Dev):** TinyBI expects Ollama at `http://127.0.0.1:11434`.
+- **Running via Docker:** TinyBI automatically resolves `localhost` to `host.docker.internal` so the Docker container can reach Ollama on your host machine. You do not need to configure this manually.
+- **Custom Endpoint:** If you host Ollama on a different machine or port, set the `OLLAMA_BASE_URL` environment variable (e.g., `OLLAMA_BASE_URL="http://192.168.1.100:11434"`).
+
+### 3. Pull Required Models
+
+TinyBI requires two types of models to function: an **embedding model** (for vector search) and a **chat model** (for text-to-SQL extraction).
+
+```bash
+# 1. Embedding Model (Required for vector search and indexing)
+ollama pull qwen3-embedding:0.6b
+
+# 2. Chat Model (Required for text-to-SQL extraction)
+ollama pull granite4:3b
+```
+
+### Recommended Chat Models
+
+Because TinyBI delegates directly to Ollama, **you can use any model available in the Ollama library**. The models below are simply the ones we've tested and recommend for SQL generation. 
+
+By default, the backend falls back to `ibm/granite4:3b` if no model is specified. You can use a different model by passing its name in the `model` field of the JSON payload when calling the `/query` API.
+
+| Model | Size | Notes |
+|---|---|---|
+| `ibm/granite4.1:3b` | 2 GB | **Default.** Good balance of speed and SQL quality |
+| `gemma3:4b` | 2.5 GB | Google's lightweight model |
+| `llama3.2:3b` | 2 GB | Meta's compact model |
+| `phi4-mini:3.8b` | 2.4 GB | Microsoft's small model |
+| `qwen2.5:7b` | 4.7 GB | Highest quality local option (slower) |
+
+### Supported Embedding Models
+
+By default, TinyBI uses `qwen3-embedding:0.6b`. If you change the embedding model, you **must rebuild the vector index** using the Vector Index Builder UI (done automatically via the config menu).
+
+| Model | Source | Notes |
+|---|---|---|
+| `qwen3-embedding:0.6b`| Ollama | **Default.** Fast and lightweight |
+| `nomic-embed-text` | Ollama | 768-dim alternative |
+| `bge-m3:567m` | Ollama | Multilingual support |
+| `jina-embeddings-v5-text-small` | Jina AI | Fast cloud embeddings — requires Jina API key |
+| `text-embedding-3-small`| OpenAI | Remote — requires `OPENAI_API_KEY` |
+
+---
+
+## Cloud Setup (Groq & Jina AI)
+
+If you do not want to run local models with Ollama, you can use cloud providers for both LLMs and vector embeddings.
+
+### 1. Get Free API Keys
+- **Groq (Chat LLM):** Create an account at [console.groq.com/home](https://console.groq.com/home) and generate an API key.
+- **Jina AI (Vector Embeddings):** Create an account at [jina.ai](https://jina.ai/) and generate an API key.
+
+### 2. Configure via the Setup Page (Web UI)
+1. Start the application (`docker compose up -d app`) and open [http://localhost:4510](http://localhost:4510) in your browser.
+2. Click the **Setup** tab in the top navigation.
+3. Select **Remote LLM** and paste your Groq API key (`gsk_...`).
+4. Select a model, `llama-3.1-8b-instant` is recommended
+5. Select **Jina AI** under Embeddings, set `base_url` to `https://api.jina.ai/v1`, and paste your Jina API key.
+6. Select an embedding model, `jina-embeddings-v3` is recommended
+7. Click **Save & Connect**. The backend tests the connection and automatically re-embeds the vector index.
+
+---
+
+## Local Development Setup
+
+If you prefer to run the services natively for development (Requires **Python ≥ 3.13** and **Node.js ≥ 18**):
 
 ### 1. Install Python dependencies
 
@@ -38,63 +147,10 @@ cd frontend && npm install && cd ..
 
 ### 3. Set up API keys (remote models only)
 
-Create a `.env` file in the project root if you want to use OpenAI instead of local Ollama:
-
+Create a `.env` file in the project root. e.g.
 ```env
 OPENAI_API_KEY=sk-...
 ```
-
-### 4. Install and start Ollama
-
-**macOS / Linux:**
-
-```bash
-curl -fsSL https://ollama.com/install.sh | sh
-ollama serve
-```
-
-**Windows:**
-
-Download and run the installer from [ollama.com/download/windows](https://ollama.com/download/windows). Ollama starts automatically as a system tray service — no manual `serve` command needed.
-
-### 5. Pull the required models
-
-```bash
-# Embedding model (used for vector search and index building)
-ollama pull nomic-embed-text
-
-# At least one chat model for extraction
-ollama pull granite4:3b       # 3B — fastest, decent quality
-# or
-ollama pull llama3.2:3b       # alternative lightweight model
-# or
-ollama pull qwen2.5:7b        # larger, better quality
-```
-
-### 6. Set environment variables (optional)
-
-The web app defaults to `granite4:3b` in local mode. To change the model or switch to remote, edit the `get_extractor` call in `src/api/routes/query.py`.
-
-### Supported local models
-
-| Model | Size | Notes |
-|---|---|---|
-| `granite4:3b` | 2 GB | Good balance of speed / quality |
-| `gemma3:4b` | 2.5 GB | Google's lightweight model |
-| `llama3.2:3b` | 2 GB | Meta's compact model |
-| `phi4-mini:3.8b` | 2.4 GB | Microsoft's small model |
-| `qwen2.5:7b` | 4.7 GB | Highest quality local option |
-
-### Supported embedding models
-
-| Model | Source | Notes |
-|---|---|---|
-| `nomic-embed-text` | Ollama | Default — 768-dim, fast |
-| `qwen3-embedding:0.6b` | Ollama | Lightweight alternative |
-| `bge-m3:567m` | Ollama | Multilingual |
-| `text-embedding-3-small` | OpenAI | Remote — requires API key |
-
-To change the embedding model, edit `DEFAULT_EMBEDDING_MODEL` in `src/utils/models.py:33`.
 
 ## Start the servers
 
@@ -120,7 +176,7 @@ To rebuild it (e.g. after changing the database schema or the embedding model):
 
 ### Rebuild via the frontend
 
-Use the **frontend's Vector Index Builder** — navigate to `/vector-index`, load the 41 columns from `data/app_data/columns.json`, verify them, and click "Submit Index Batch".
+Use the **frontend's Vector Index Builder** — navigate to `/vector-index`, load the columns from `data/app_data/columns.json`, verify them, and click "Submit Index Batch".
 
 ### Rebuild via the API
 
@@ -172,7 +228,8 @@ uv run python scripts/prepare_db.py \
 
 This runs the promptfoo insight eval (TinyBI vs Schema Dump) in Docker, scoring
 answers with RAGAS FactualCorrectness against pre-computed `reference_answer`
-fields in `src/eval/tests.yaml`.
+fields in `src/eval/tests.yaml`. Note that it is recommended to only do this on
+machines with GPUs, or evaluation would take a long time.
 
 ### 4. Inspect results
 
@@ -196,8 +253,8 @@ docker compose down
 .
 ├── data/
 │   ├── app_data/                  # FAISS vector index + column metadata
-│   │   ├── columns.faiss          # 41 pre-built column embeddings
-│   │   └── columns.json           # 41 column entries (descriptions, FK refs, etc.)
+│   │   ├── columns.faiss          # pre-built column embeddings
+│   │   └── columns.json           # column entries (descriptions, FK refs, etc.)
 │   ├── intermediate/              # Cleaned datasets
 │   └── minidev_raw/               # Raw database files
 │       ├── financial/             # The financial database (SQLite + DuckDB + CSVs)
@@ -215,6 +272,7 @@ docker compose down
 │
 ├── src/                           # Python backend
 │   ├── main.py                    # Application entry point
+│   ├── agent.py                   # LangGraph agent (multi-turn NLP → SQL orchestrator)
 │   ├── config.py                  # Path configuration
 │   ├── api/
 │   │   ├── main.py                # FastAPI app (lifespan, health, routers)
@@ -268,7 +326,9 @@ GET /health  →  {"status": "ok"}
 | Env variable | Default | Description |
 |---|---|---|
 | `OPENAI_API_KEY` | — | Required for remote extraction with GPT-4o |
-| `GROQ_API_KEY` | — | Alternative remote provider (Groq) |
+| `GROQ_API_KEY` | — | Groq cloud provider API key |
+| `JINA_API_KEY` | — | Jina AI embeddings API key |
+| `LOCAL_API_BASE` | — | Base URL for custom or cloud embedding API |
 | `VITE_BACKEND_URL` | `http://127.0.0.1:8000` | Backend URL for the frontend proxy |
 
 Database paths are configured in `src/config.py`.

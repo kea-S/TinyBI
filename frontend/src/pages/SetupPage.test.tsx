@@ -5,6 +5,7 @@ import * as api from "@/lib/api"
 
 vi.mock("@/lib/api", () => ({
   saveEngineConfig: vi.fn(),
+  fetchEngineConfig: vi.fn().mockResolvedValue({ configured: false, config: null }),
 }))
 
 describe("SetupPage", () => {

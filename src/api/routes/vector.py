@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 
 from src.utils.models import (
-    DEFAULT_EMBEDDING_MODEL,
+    get_active_embedding_model_name,
     get_embedding_model_name_from_key,
 )
 from src.utils.pydantic_models import (
@@ -26,7 +26,7 @@ def _build_index(
 
 
 def _get_controller() -> VectorController:
-    return VectorController(DEFAULT_EMBEDDING_MODEL)
+    return VectorController(get_active_embedding_model_name())
 
 
 @router.get(
@@ -49,7 +49,7 @@ def get_current_index_entries() -> list[ColumnVectorIndexEntry]:
 def batch_insert_index_entries_default(
     request: BatchColumnVectorIndexEntriesRequest,
 ) -> BatchColumnVectorIndexResponse:
-    return _build_index(request, DEFAULT_EMBEDDING_MODEL)
+    return _build_index(request, get_active_embedding_model_name())
 
 
 @router.post(

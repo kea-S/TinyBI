@@ -34,5 +34,6 @@ def test_get_local_llm_falls_back_to_ollama_when_vllm_disabled(monkeypatch):
         get_local_llm("test-model")
         mock_chat_ollama.assert_called_once_with(
             model="test-model",
+            base_url="http://127.0.0.1:11434",
             reasoning=False
         )

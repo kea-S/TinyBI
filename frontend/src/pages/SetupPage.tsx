@@ -1,6 +1,6 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Server, Globe, Database, AlertCircle, CheckCircle2, X } from "lucide-react"
-import { type ConfigPayload, saveEngineConfig } from "@/lib/api"
+import { type ConfigPayload, saveEngineConfig, fetchEngineConfig } from "@/lib/api"
 import { motion } from "framer-motion"
 
 export function SetupPage({ onComplete, onCancel, canCancel = false }: { onComplete: () => void, onCancel?: () => void, canCancel?: boolean }) {
@@ -10,6 +10,31 @@ export function SetupPage({ onComplete, onCancel, canCancel = false }: { onCompl
     remote_llm: { model: "llama-3.1-8b-instant", api_key: "" },
     embedding: { model: "qwen3-embedding:0.6b", base_url: "http://127.0.0.1:11434", api_key: "" },
   })
+
+  useEffect(() => {
+    fetchEngineConfig().then((data) => {
+      if (typeof data !== "string" && data.configured && data.config) {
+        setConfig({
+          active_llm: data.config.active_llm || "local",
+          local_llm: {
+            model: data.config.local_llm?.model || "granite4:3b",
+            base_url: data.config.local_llm?.base_url || "http://127.0.0.1:11434",
+          },
+          remote_llm: {
+            model: data.config.remote_llm?.model || "llama-3.1-8b-instant",
+            api_key: data.config.remote_llm?.api_key || "",
+          },
+          embedding: {
+            model: data.config.embedding?.model || "qwen3-embedding:0.6b",
+            base_url: data.config.embedding?.base_url || "http://127.0.0.1:11434",
+            api_key: data.config.embedding?.api_key || "",
+          },
+        })
+      }
+    }).catch((err) => {
+      console.error("Failed to load saved engine config in SetupPage", err)
+    })
+  }, [])
 
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)

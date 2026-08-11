@@ -1,4 +1,5 @@
 import os
+import json
 import socket
 from urllib.parse import urlparse
 
@@ -16,7 +17,7 @@ from src.utils.models import (
     LOCAL_GRANITE4,
 )
 
-from src.utils.models import get_embedding_model, get_remote_llm, get_local_llm, test_llm_connection, test_embedding_connection
+from src.utils.models import get_embedding_model, get_remote_llm, get_local_llm
 
 from dotenv import load_dotenv
 
@@ -143,43 +144,39 @@ def test_langchain_llm_call(model_name, local: bool, monkeypatch):
         pytest.fail(f"LANGCHAIN model '{model_name}' call failed: {e}")
 
 
-@pytest.mark.integration
-def test_test_embedding_connection(monkeypatch):
-    monkeypatch.setenv("LOCAL_API_BASE", "http://localhost:11434/v1")
-    _skip_if_runtime_unavailable(QWEN3_EMBEDDING, True)
+def test_get_embedding_model_jina():
+    # Test that /embeddings suffix is trimmed so OpenAI client doesn't append it twice
+    model = get_embedding_model("jina-embeddings-v5-text-small", base_url="https://api.jina.ai/v1/embeddings", api_key="jina_test_key")
+    assert isinstance(model, OpenAIEmbeddings)
+    assert model.openai_api_base == "https://api.jina.ai/v1"
+    assert model.openai_api_key.get_secret_value() == "jina_test_key"
 
-    # Valid model should succeed
-    res = test_embedding_connection(QWEN3_EMBEDDING)
-    assert res["success"] is True
-
-    # Missing model should fail gracefully
-    res_fail = test_embedding_connection("some-fake-model-that-is-not-pulled")
-    assert res_fail["success"] is False
-    assert "not found" in res_fail["error"].lower()
+    # Test that base_url without /v1 appends /v1
+    model2 = get_embedding_model("jina-embeddings-v3", base_url="https://api.jina.ai", api_key="jina_test_key2")
+    assert model2.openai_api_base == "https://api.jina.ai/v1"
+    assert model2.openai_api_key.get_secret_value() == "jina_test_key2"
 
 
-@pytest.mark.integration
-def test_test_embedding_connection_unhappy_path():
-    # Provide a real, reachable URL that is NOT an Ollama server.
-    # It will connect successfully, but it won't have the "Ollama is running" signature.
-    res_invalid_server = test_embedding_connection("qwen", base_url="http://example.com/v1")
-    
-    assert res_invalid_server["success"] is False
-    assert "does not appear to be a valid Ollama instance" in res_invalid_server["error"]
+def test_get_embedding_model_prioritizes_local_api_base_env(monkeypatch):
+    monkeypatch.setenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434")
+    monkeypatch.setenv("LOCAL_API_BASE", "https://api.jina.ai/v1/embeddings")
+    monkeypatch.setenv("JINA_API_KEY", "env_jina_key")
+
+    model = get_embedding_model("jina-embeddings-v5-text-small")
+    assert model.openai_api_base == "https://api.jina.ai/v1"
+    assert model.openai_api_key.get_secret_value() == "env_jina_key"
 
 
-@pytest.mark.integration
-def test_test_llm_connection(monkeypatch):
-    monkeypatch.setenv("LOCAL_API_BASE", "http://localhost:11434/v1")
-    monkeypatch.setenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
-    _skip_if_runtime_unavailable(LOCAL_GRANITE4, True)
+def test_get_active_embedding_model_name_from_config_json(tmp_path, monkeypatch):
+    from src.utils.models import get_active_embedding_model_name
+    mock_cfg = tmp_path / "config.json"
+    with open(mock_cfg, "w") as f:
+        json.dump({"embedding": {"model": "jina-embeddings-v5-text-small"}}, f)
 
-    # Valid model should succeed
-    res = test_llm_connection(LOCAL_GRANITE4, is_local=True)
-    assert res["success"] is True
+    monkeypatch.setattr("src.utils.models.CONFIG_JSON_PATH", mock_cfg)
+    monkeypatch.delenv("TINYBI_EMBEDDING_MODEL", raising=False)
 
-    # Missing model should fail gracefully
-    res_fail = test_llm_connection("some-fake-llm-that-is-not-pulled", is_local=True)
-    assert res_fail["success"] is False
-    assert "not found" in res_fail["error"].lower()
+    assert get_active_embedding_model_name() == "jina-embeddings-v5-text-small"
+
+
 

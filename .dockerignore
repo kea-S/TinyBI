@@ -28,3 +28,6 @@ docker-compose.yml
 HANDOFF.md
 MEMORY.md
 *.md
+.env
+.env.*
+.env.local

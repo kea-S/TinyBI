@@ -31,6 +31,9 @@ RUN uv venv && uv pip install -r requirements.txt
 # Copy backend source code
 COPY src/ ./src/
 
+# Copy seed database and vector index files
+COPY data/ ./data/
+
 # Copy the built React assets from the frontend builder stage
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
