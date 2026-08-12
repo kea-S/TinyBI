@@ -214,15 +214,17 @@ cd frontend && npm test
 
 ## LLM Evaluation (promptfoo)
 
-promptfoo runs in a **Docker container** to avoid dependency issues on the host machine.
+Promptfoo runs in a Docker container to prevent dependency conflicts on the host machine.
 
-### 1. Build the image
+> **Note:** The repository includes a pre-seeded evaluation database (`data/promptfoo_store/promptfoo.db`) with the 2 most recent runs. You do not need to run new evaluations to view the dashboard unless you want to generate fresh benchmark data.
+
+### 1. Build the evaluation image
 
 ```bash
-docker compose build
+docker compose build promptfoo-eval
 ```
 
-### 2. Prepare the database (on host)
+### 2. Prepare the database
 
 ```bash
 uv run python scripts/prepare_db.py \
@@ -236,25 +238,36 @@ uv run python scripts/prepare_db.py \
 ./scripts/run_insight_eval.sh
 ```
 
-This runs the promptfoo insight eval (TinyBI vs Schema Dump) in Docker, scoring
-answers with RAGAS FactualCorrectness against pre-computed `reference_answer`
-fields in `src/eval/tests.yaml`. Note that it is recommended to only do this on
-machines with GPUs, or evaluation would take a long time.
+This script executes the Promptfoo evaluation in Docker. It scores pipeline responses using RAGAS FactualCorrectness against reference answers in `src/eval/tests.yaml`. Execute this evaluation on machines with dedicated GPUs for faster inference.
 
-### 4. Inspect results
+### 4. Prune the evaluation database
+
+After running evaluations, run the pruning script to keep the database size small (~18 MB) before committing changes:
 
 ```bash
-# Start the web UI (runs in background)
-docker compose up promptfoo-view -d
-
-# Open the dashboard
-open http://localhost:15500
+uv run python scripts/prune_promptfoo_db.py
 ```
 
-To stop the web UI:
+### 5. Inspect evaluation results
+
+You can inspect the evaluation results in two ways:
+
+**Option A: Via the TinyBI Web UI**
+1. Open the **System Health & Evaluation** page at `http://localhost:4510`.
+2. Click the **Promptfoo Dashboard** button.
+3. Follow the modal instructions to start the viewer container.
+
+**Option B: Via Terminal**
+1. Start the viewer container:
+```bash
+docker compose up promptfoo-view -d
+```
+2. Open `http://localhost:15500` in your web browser.
+
+To stop the viewer container:
 
 ```bash
-docker compose down
+docker compose stop promptfoo-view
 ```
 
 ## Project structure
