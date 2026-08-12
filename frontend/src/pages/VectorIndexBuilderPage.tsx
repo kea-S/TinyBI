@@ -19,6 +19,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { 
   Plus, 
   Save, 
+  Loader2,
   Trash2, 
   X, 
   Search, 
@@ -590,7 +591,7 @@ function VectorIndexBuilderPageInner({ tables, setTables, isVisible }: VectorInd
             disabled={isSubmitting}
             className="shadow-lg shadow-primary/20"
           >
-            {isSubmitting ? <Save className="mr-2 size-4 animate-spin" /> : <Save className="mr-2 size-4" />}
+            {isSubmitting ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Save className="mr-2 size-4" />}
             Save Index
           </Button>
           <Button 

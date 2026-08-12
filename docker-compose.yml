@@ -40,7 +40,7 @@ services:
       dockerfile: Dockerfile.app
     image: tinybi-app:v1.0.0
     ports:
-      - "4510:8000"
+      - "${PORT:-4510}:8000"
     environment:
       - OLLAMA_BASE_URL=http://host.docker.internal:11434
       - TINYBI_USE_VLLM=${TINYBI_USE_VLLM:-false}
@@ -50,6 +50,7 @@ services:
       - "host.docker.internal:host-gateway"
     volumes:
       - tinybi-data:/app/data
+      - ./data/app_data/insight_results.json:/app/data/app_data/insight_results.json
     healthcheck:
       test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""]
       interval: 10s

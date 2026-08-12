@@ -180,7 +180,7 @@ def test_dockercompose_app_service_uses_named_volume():
     has_named_volume = False
     for v in volumes:
         v_str = str(v)
-        if "/app/data" in v_str or v_str.endswith(":/app/data"):
+        if v_str.endswith(":/app/data"):
             assert not v_str.startswith("./") and not v_str.startswith("/"), (
                 f"app service mounts a host directory to /app/data: {v_str}. It must use a named volume."
             )

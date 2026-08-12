@@ -23,6 +23,14 @@ import {
   type ProviderComparisonStats,
 } from "@/lib/api"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 export function MonitoringPage() {
   const [overview, setOverview] = useState<OverviewStats | null>(null)
@@ -92,12 +100,37 @@ export function MonitoringPage() {
             <h1 className="text-2xl font-bold tracking-tight">System Health & Evaluation</h1>
             <p className="text-sm text-muted-foreground">Monitoring accuracy, latency, and tokens across the agent pipeline.</p>
           </div>
-          <Button variant="outline" className="gap-2" asChild>
-            <a href="http://localhost:15500" target="_blank" rel="noopener noreferrer">
-              <ExternalLink className="size-4" />
-              Promptfoo Dashboard
-            </a>
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <ExternalLink className="size-4" />
+                Promptfoo Dashboard
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Advanced Evaluation Viewer</DialogTitle>
+                <DialogDescription>
+                  The Promptfoo dashboard runs in an isolated container to keep your main application lightweight.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="py-4 space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  To access the detailed prompt logs and metrics history, ensure the viewer container is running by executing:
+                </p>
+                <pre className="bg-muted p-3 rounded-lg text-sm font-mono overflow-x-auto text-foreground">
+                  docker compose up promptfoo-view -d
+                </pre>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button asChild variant="default">
+                  <a href="http://localhost:15500" target="_blank" rel="noopener noreferrer">
+                    Open Dashboard (localhost:15500)
+                  </a>
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4 text-sm text-muted-foreground flex items-start gap-3">
