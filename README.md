@@ -1,10 +1,20 @@
 # TinyBI
 
-https://github.com/user-attachments/assets/ef863c27-7b77-49b3-8f8c-684482d04a33
+Natural-language-to-SQL analytics pipeline: ask a business question in plain English, get back an SQL query, a result table, and an AI-generated explanation
 
-Natural-language-to-SQL analytics pipeline: ask a business question in plain English, get back an SQL query, a result table, and an AI-generated explanation.
+https://github.com/user-attachments/assets/2e29a39c-f8f4-4e97-b9cb-34f866fa2d62
 
-https://github.com/user-attachments/assets/beb64c96-c296-4536-b1c1-3189945a2dcc
+Model your database relations intuitively, enrich with semantic meaning from documentation
+
+https://github.com/user-attachments/assets/417e2551-b69e-4093-bdce-d34a230b04d4
+
+Monitor performance
+
+<img width="1688" height="1029" alt="Image" src="https://github.com/user-attachments/assets/a8dfa5a7-8124-4644-9278-e57a2342fe5d" />
+
+Change LLM provider configurations
+
+<img width="1687" height="1031" alt="Image" src="https://github.com/user-attachments/assets/2b95f9f1-c621-4133-bad6-e7921eccf7a6" />
 
 ## Architecture
 
